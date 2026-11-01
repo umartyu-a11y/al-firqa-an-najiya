@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { Dispatch, RefObject, SetStateAction } from 'react';
 import {
   BookOpenText,
   ChevronRight,
@@ -11,11 +12,11 @@ import {
   Search,
   SkipBack,
   SkipForward,
-  SunMedium,
-  Sparkles
+  Sparkles,
+  SunMedium
 } from 'lucide-react';
 import { lectureData, cycles } from './data/lectures';
-import { Category, Lecture } from './types';
+import type { Category, Lecture } from './types';
 
 type SortType = 'newest' | 'title' | 'author' | 'duration';
 type Theme = 'light' | 'dark';
@@ -97,7 +98,6 @@ function App() {
   });
 
   const [route, setRoute] = useState<'home' | 'catalog' | 'library' | 'cycle' | 'author' | 'lecture' | 'category'>(() => parseHash());
-
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortType>('newest');
   const [categoryFilter, setCategoryFilter] = useState<Category | 'Все'>('Все');
@@ -109,7 +109,6 @@ function App() {
       return [];
     }
   });
-
   const [history, setHistory] = useState<string[]>(() => {
     try {
       return JSON.parse(localStorage.getItem(storageKeys.history) || '[]');
@@ -117,7 +116,6 @@ function App() {
       return [];
     }
   });
-
   const [currentLectureId, setCurrentLectureId] = useState<string | null>(() => {
     try {
       const saved = localStorage.getItem('affn-current-lecture');
@@ -250,7 +248,7 @@ function App() {
     if (playerState.isPlaying) {
       audio.play().catch(() => {});
     }
-  }, [currentLectureId]);
+  }, [currentLectureId, playerState.isPlaying]);
 
   useEffect(() => {
     if (!audioRef.current) return;
@@ -272,10 +270,7 @@ function App() {
       return;
     }
 
-    setPlayerState((prev) => ({
-      ...prev,
-      isPlaying: !prev.isPlaying
-    }));
+    setPlayerState((prev) => ({ ...prev, isPlaying: !prev.isPlaying }));
   };
 
   const handleSeek = (value: number) => {
@@ -288,9 +283,7 @@ function App() {
   const handleTimeUpdate = () => {
     const audio = audioRef.current;
     if (!audio) return;
-    if (currentLectureId) {
-      saveProgress(currentLectureId, audio.currentTime);
-    }
+    if (currentLectureId) saveProgress(currentLectureId, audio.currentTime);
     setPlayerState((prev) => ({
       ...prev,
       currentTime: audio.currentTime,
@@ -314,10 +307,10 @@ function App() {
 
   const handleEnded = () => {
     const currentIndex = lectureData.findIndex((lecture) => lecture.id === currentLectureId);
-    const nextLecture = lectureData[currentIndex + 1] || lectureData[0];
-    setCurrentLectureId(nextLecture.id);
+    const next = lectureData[currentIndex + 1] || lectureData[0];
+    setCurrentLectureId(next.id);
     setPlayerState((prev) => ({ ...prev, isPlaying: true, currentTime: 0 }));
-    pushHistory(nextLecture.id);
+    pushHistory(next.id);
   };
 
   const prevLecture = () => {
@@ -834,14 +827,7 @@ function CatalogPage({
   );
 }
 
-function CyclePage({
-  cycle,
-  lectures,
-  favorites,
-  onToggleFavorite,
-  onOpenLecture,
-  getProgress
-}: {
+function CyclePage({ cycle, lectures, favorites, onToggleFavorite, onOpenLecture, getProgress }: {
   cycle: { id: string; title: string; author: string; authorId: string; description: string; totalLessons: number; totalDuration: number; coverTone: string };
   lectures: Lecture[];
   favorites: string[];
@@ -892,16 +878,10 @@ function CyclePage({
             </div>
 
             <div className="flex items-center gap-3">
-              <button
-                className="rounded-full border border-black/5 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#101010]"
-                onClick={() => onToggleFavorite(lecture.id)}
-              >
+              <button className="rounded-full border border-black/5 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#101010]" onClick={() => onToggleFavorite(lecture.id)}>
                 {favorites.includes(lecture.id) ? 'В избранном' : 'В избранное'}
               </button>
-              <button
-                onClick={() => onOpenLecture(lecture.id)}
-                className="rounded-full bg-[#111820] px-4 py-2 text-sm text-white dark:bg-[#F5F5F5] dark:text-[#111820]"
-              >
+              <button onClick={() => onOpenLecture(lecture.id)} className="rounded-full bg-[#111820] px-4 py-2 text-sm text-white dark:bg-[#F5F5F5] dark:text-[#111820]">
                 Открыть
               </button>
             </div>
@@ -912,14 +892,7 @@ function CyclePage({
   );
 }
 
-function AuthorPage({
-  author,
-  lectures,
-  favorites,
-  onToggleFavorite,
-  onOpenLecture,
-  getProgress
-}: {
+function AuthorPage({ author, lectures, favorites, onToggleFavorite, onOpenLecture, getProgress }: {
   author: { id: string; name: string; bio: string };
   lectures: Lecture[];
   favorites: string[];
@@ -965,25 +938,7 @@ function AuthorPage({
   );
 }
 
-function LecturePage({
-  lecture,
-  favorites,
-  onToggleFavorite,
-  onOpenLecture,
-  currentLectureId,
-  setCurrentLectureId,
-  playerState,
-  setPlayerState,
-  audioRef,
-  prevLecture,
-  nextLecture,
-  onSeek,
-  onTogglePlay,
-  handleTimeUpdate,
-  handleLoadedMetadata,
-  handleEnded,
-  getProgress
-}: {
+function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, currentLectureId, setCurrentLectureId, playerState, setPlayerState, audioRef, prevLecture, nextLecture, onSeek, onTogglePlay, handleTimeUpdate, handleLoadedMetadata, handleEnded, getProgress }: {
   lecture: Lecture;
   favorites: string[];
   onToggleFavorite: (id: string) => void;
@@ -991,8 +946,8 @@ function LecturePage({
   currentLectureId: string | null;
   setCurrentLectureId: (id: string) => void;
   playerState: { isPlaying: boolean; currentTime: number; duration: number; rate: number; sleepMinutes: number };
-  setPlayerState: React.Dispatch<React.SetStateAction<{ isPlaying: boolean; currentTime: number; duration: number; rate: number; sleepMinutes: number }>>;
-  audioRef: React.RefObject<HTMLAudioElement>;
+  setPlayerState: Dispatch<SetStateAction<{ isPlaying: boolean; currentTime: number; duration: number; rate: number; sleepMinutes: number }>>;
+  audioRef: RefObject<HTMLAudioElement>;
   prevLecture: () => void;
   nextLecture: () => void;
   onSeek: (value: number) => void;
@@ -1023,16 +978,10 @@ function LecturePage({
             </div>
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <button
-                onClick={onTogglePlay}
-                className="rounded-full bg-[#111820] px-5 py-3 text-sm font-medium text-white dark:bg-[#F5F5F5] dark:text-[#111820]"
-              >
+              <button onClick={onTogglePlay} className="rounded-full bg-[#111820] px-5 py-3 text-sm font-medium text-white dark:bg-[#F5F5F5] dark:text-[#111820]">
                 {playerState.isPlaying ? 'Пауза' : 'Слушать'}
               </button>
-              <button
-                onClick={() => onToggleFavorite(lecture.id)}
-                className="rounded-full border border-black/5 bg-white px-5 py-3 text-sm dark:border-white/10 dark:bg-[#101010]"
-              >
+              <button onClick={() => onToggleFavorite(lecture.id)} className="rounded-full border border-black/5 bg-white px-5 py-3 text-sm dark:border-white/10 dark:bg-[#101010]">
                 {favorites.includes(lecture.id) ? 'Удалить из избранного' : 'В избранное'}
               </button>
             </div>
@@ -1047,21 +996,12 @@ function LecturePage({
             <div className="space-y-4">
               <div className="rounded-2xl border border-black/5 bg-white p-3 dark:border-white/10 dark:bg-[#101010]">
                 <div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Позиция</div>
-                <div className="mt-1 font-display text-3xl text-text dark:text-darktext">
-                  {formatDuration(playerState.currentTime)}
-                </div>
+                <div className="mt-1 font-display text-3xl text-text dark:text-darktext">{formatDuration(playerState.currentTime)}</div>
               </div>
 
               <div className="space-y-2">
                 <label className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Позиция воспроизведения</label>
-                <input
-                  type="range"
-                  min={0}
-                  max={playerState.duration || lecture.duration}
-                  value={playerState.currentTime}
-                  onChange={(e) => onSeek(Number(e.target.value))}
-                  className="w-full accent-[#B8874A] dark:accent-[#E0821E]"
-                />
+                <input type="range" min={0} max={playerState.duration || lecture.duration} value={playerState.currentTime} onChange={(e) => onSeek(Number(e.target.value))} className="w-full accent-[#B8874A] dark:accent-[#E0821E]" />
               </div>
             </div>
           </div>
@@ -1080,24 +1020,14 @@ function LecturePage({
 
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
           <div className="flex items-center gap-2">
-            <button onClick={prevLecture} className="icon-button">
-              <SkipBack size={18} />
-            </button>
-            <button onClick={onTogglePlay} className="icon-button bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]">
-              {playerState.isPlaying ? <Pause size={18} /> : <Play size={18} />}
-            </button>
-            <button onClick={nextLecture} className="icon-button">
-              <SkipForward size={18} />
-            </button>
+            <button onClick={prevLecture} className="icon-button"><SkipBack size={18} /></button>
+            <button onClick={onTogglePlay} className="icon-button bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]">{playerState.isPlaying ? <Pause size={18} /> : <Play size={18} />}</button>
+            <button onClick={nextLecture} className="icon-button"><SkipForward size={18} /></button>
           </div>
 
           <div className="flex items-center gap-2">
             {[0.75, 1, 1.25, 1.5, 2].map((rate) => (
-              <button
-                key={rate}
-                onClick={() => setPlayerState((prev) => ({ ...prev, rate }))}
-                className={`rounded-full px-3 py-1.5 text-sm ${playerState.rate === rate ? 'bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]' : 'bg-[#F7F9FC] text-text dark:bg-[#161616] dark:text-darktext'}`}
-              >
+              <button key={rate} onClick={() => setPlayerState((prev) => ({ ...prev, rate }))} className={`rounded-full px-3 py-1.5 text-sm ${playerState.rate === rate ? 'bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]' : 'bg-[#F7F9FC] text-text dark:bg-[#161616] dark:text-darktext'}`}>
                 {rate}x
               </button>
             ))}
@@ -1105,11 +1035,7 @@ function LecturePage({
 
           <div className="flex items-center gap-2">
             {[15, 30, 45, 60].map((minutes) => (
-              <button
-                key={minutes}
-                onClick={() => setPlayerState((prev) => ({ ...prev, sleepMinutes: prev.sleepMinutes === minutes ? 0 : minutes }))}
-                className={`rounded-full px-3 py-1.5 text-sm ${playerState.sleepMinutes === minutes ? 'bg-[#B8874A] text-white dark:bg-[#E0821E]' : 'bg-[#F7F9FC] text-text dark:bg-[#161616] dark:text-darktext'}`}
-              >
+              <button key={minutes} onClick={() => setPlayerState((prev) => ({ ...prev, sleepMinutes: prev.sleepMinutes === minutes ? 0 : minutes }))} className={`rounded-full px-3 py-1.5 text-sm ${playerState.sleepMinutes === minutes ? 'bg-[#B8874A] text-white dark:bg-[#E0821E]' : 'bg-[#F7F9FC] text-text dark:bg-[#161616] dark:text-darktext'}`}>
                 {minutes}м
               </button>
             ))}
@@ -1122,11 +1048,7 @@ function LecturePage({
           <div className="mb-4 text-sm uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Следующие уроки цикла</div>
           <div className="space-y-3">
             {cycleLectures.map((cycleLecture) => (
-              <button
-                key={cycleLecture.id}
-                onClick={() => onOpenLecture(cycleLecture.id)}
-                className={`flex w-full items-center justify-between rounded-2xl border p-3 text-left ${circleCurrentCheck(cycleLecture.id, lecture.id) ? 'border-[#B8874A]/30 bg-[#B8874A]/5 dark:border-[#E0821E]/30 dark:bg-[#E0821E]/5' : 'border-black/5 bg-[#F7F9FC] dark:border-white/10 dark:bg-[#161616]'}`}
-              >
+              <button key={cycleLecture.id} onClick={() => onOpenLecture(cycleLecture.id)} className={`flex w-full items-center justify-between rounded-2xl border p-3 text-left ${circleCurrentCheck(cycleLecture.id, lecture.id) ? 'border-[#B8874A]/30 bg-[#B8874A]/5 dark:border-[#E0821E]/30 dark:bg-[#E0821E]/5' : 'border-black/5 bg-[#F7F9FC] dark:border-white/10 dark:bg-[#161616]'}`}>
                 <div>
                   <div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Урок {cycleLecture.lessonNumber}</div>
                   <div className="mt-1 text-sm font-medium text-text dark:text-darktext">{cycleLecture.title}</div>
@@ -1140,22 +1062,10 @@ function LecturePage({
         <div className="panel p-5">
           <div className="mb-4 text-sm uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Сведения</div>
           <div className="space-y-3 text-sm text-muted dark:text-darkmuted">
-            <div className="flex items-center justify-between">
-              <span>Автор</span>
-              <span className="font-medium text-text dark:text-darktext">{lecture.author}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span>Цикл</span>
-              <span className="font-medium text-text dark:text-darktext">{lecture.cycle}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span>Категория</span>
-              <span className="font-medium text-text dark:text-darktext">{lecture.category}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span>Дата</span>
-              <span className="font-medium text-text dark:text-darktext">{lecture.date}</span>
-            </div>
+            <div className="flex items-center justify-between"><span>Автор</span><span className="font-medium text-text dark:text-darktext">{lecture.author}</span></div>
+            <div className="flex items-center justify-between"><span>Цикл</span><span className="font-medium text-text dark:text-darktext">{lecture.cycle}</span></div>
+            <div className="flex items-center justify-between"><span>Категория</span><span className="font-medium text-text dark:text-darktext">{lecture.category}</span></div>
+            <div className="flex items-center justify-between"><span>Дата</span><span className="font-medium text-text dark:text-darktext">{lecture.date}</span></div>
           </div>
         </div>
       </section>
@@ -1163,14 +1073,7 @@ function LecturePage({
   );
 }
 
-function CategoryPage({
-  category,
-  lectures,
-  favorites,
-  onToggleFavorite,
-  onOpenLecture,
-  getProgress
-}: {
+function CategoryPage({ category, lectures, favorites, onToggleFavorite, onOpenLecture, getProgress }: {
   category: Category;
   lectures: Lecture[];
   favorites: string[];
@@ -1208,15 +1111,7 @@ function CategoryPage({
   );
 }
 
-function LibraryPage({
-  continueLectures,
-  favoriteLectures,
-  recentLectures,
-  onOpenLecture,
-  onToggleFavorite,
-  favorites,
-  getProgress
-}: {
+function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpenLecture, onToggleFavorite, favorites, getProgress }: {
   continueLectures: Lecture[];
   favoriteLectures: Lecture[];
   recentLectures: Lecture[];
@@ -1233,18 +1128,9 @@ function LibraryPage({
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
-        <div className="panel p-5">
-          <div className="text-sm text-muted dark:text-darkmuted">Продолжить прослушивание</div>
-          <div className="mt-3 font-display text-3xl text-text dark:text-darktext">{continueLectures.length}</div>
-        </div>
-        <div className="panel p-5">
-          <div className="text-sm text-muted dark:text-darkmuted">Избранные лекции</div>
-          <div className="mt-3 font-display text-3xl text-text dark:text-darktext">{favoriteLectures.length}</div>
-        </div>
-        <div className="panel p-5">
-          <div className="text-sm text-muted dark:text-darkmuted">Последние открытые</div>
-          <div className="mt-3 font-display text-3xl text-text dark:text-darktext">{recentLectures.length}</div>
-        </div>
+        <div className="panel p-5"><div className="text-sm text-muted dark:text-darkmuted">Продолжить прослушивание</div><div className="mt-3 font-display text-3xl text-text dark:text-darktext">{continueLectures.length}</div></div>
+        <div className="panel p-5"><div className="text-sm text-muted dark:text-darkmuted">Избранные лекции</div><div className="mt-3 font-display text-3xl text-text dark:text-darktext">{favoriteLectures.length}</div></div>
+        <div className="panel p-5"><div className="text-sm text-muted dark:text-darkmuted">Последние открытые</div><div className="mt-3 font-display text-3xl text-text dark:text-darktext">{recentLectures.length}</div></div>
       </section>
 
       <section className="space-y-4">
@@ -1252,14 +1138,7 @@ function LibraryPage({
         {continueLectures.length ? (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {continueLectures.map((lecture) => (
-              <LectureCard
-                key={lecture.id}
-                lecture={lecture}
-                onOpen={() => onOpenLecture(lecture.id)}
-                isFavorite={favorites.includes(lecture.id)}
-                onToggleFavorite={() => onToggleFavorite(lecture.id)}
-                progress={getProgress(lecture.id)}
-              />
+              <LectureCard key={lecture.id} lecture={lecture} onOpen={() => onOpenLecture(lecture.id)} isFavorite={favorites.includes(lecture.id)} onToggleFavorite={() => onToggleFavorite(lecture.id)} progress={getProgress(lecture.id)} />
             ))}
           </div>
         ) : (
@@ -1272,14 +1151,7 @@ function LibraryPage({
         {favoriteLectures.length ? (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {favoriteLectures.map((lecture) => (
-              <LectureCard
-                key={lecture.id}
-                lecture={lecture}
-                onOpen={() => onOpenLecture(lecture.id)}
-                isFavorite={true}
-                onToggleFavorite={() => onToggleFavorite(lecture.id)}
-                progress={getProgress(lecture.id)}
-              />
+              <LectureCard key={lecture.id} lecture={lecture} onOpen={() => onOpenLecture(lecture.id)} isFavorite={true} onToggleFavorite={() => onToggleFavorite(lecture.id)} progress={getProgress(lecture.id)} />
             ))}
           </div>
         ) : (
@@ -1292,14 +1164,7 @@ function LibraryPage({
         {recentLectures.length ? (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {recentLectures.map((lecture) => (
-              <LectureCard
-                key={lecture.id}
-                lecture={lecture}
-                onOpen={() => onOpenLecture(lecture.id)}
-                isFavorite={favorites.includes(lecture.id)}
-                onToggleFavorite={() => onToggleFavorite(lecture.id)}
-                progress={getProgress(lecture.id)}
-              />
+              <LectureCard key={lecture.id} lecture={lecture} onOpen={() => onOpenLecture(lecture.id)} isFavorite={favorites.includes(lecture.id)} onToggleFavorite={() => onToggleFavorite(lecture.id)} progress={getProgress(lecture.id)} />
             ))}
           </div>
         ) : (
@@ -1310,13 +1175,7 @@ function LibraryPage({
   );
 }
 
-function LectureCard({
-  lecture,
-  onOpen,
-  isFavorite,
-  onToggleFavorite,
-  progress
-}: {
+function LectureCard({ lecture, onOpen, isFavorite, onToggleFavorite, progress }: {
   lecture: Lecture;
   onOpen: () => void;
   isFavorite: boolean;
@@ -1332,14 +1191,7 @@ function LectureCard({
             <h3 className="mt-2 font-display text-2xl leading-tight text-text dark:text-darktext">{lecture.title}</h3>
           </div>
 
-          <button
-            className="rounded-full border border-black/5 bg-white p-2 text-sm dark:border-white/10 dark:bg-[#101010]"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleFavorite();
-            }}
-            aria-label="Toggle favorite"
-          >
+          <button className="rounded-full border border-black/5 bg-white p-2 text-sm dark:border-white/10 dark:bg-[#101010]" onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }} aria-label="Toggle favorite">
             <Heart size={15} fill={isFavorite ? '#B8874A' : 'none'} className={isFavorite ? 'text-[#B8874A]' : 'text-muted dark:text-darkmuted'} />
           </button>
         </div>
@@ -1379,20 +1231,7 @@ function LectureCard({
   );
 }
 
-function MiniPlayer({
-  lecture,
-  isPlaying,
-  currentTime,
-  duration,
-  rate,
-  setRate,
-  onTogglePlay,
-  onPrev,
-  onNext,
-  onSeek,
-  sleepMinutes,
-  setSleepMinutes
-}: {
+function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, setRate, onTogglePlay, onPrev, onNext, onSeek, sleepMinutes, setSleepMinutes }: {
   lecture: Lecture | null;
   isPlaying: boolean;
   currentTime: number;
@@ -1427,44 +1266,21 @@ function MiniPlayer({
               <span>{formatDuration(currentTime)}</span>
               <span>{formatDuration(duration)}</span>
             </div>
-            <input
-              type="range"
-              min={0}
-              max={duration || 1}
-              value={currentTime}
-              onChange={(e) => onSeek(Number(e.target.value))}
-              className="w-full accent-[#B8874A] dark:accent-[#E0821E]"
-            />
+            <input type="range" min={0} max={duration || 1} value={currentTime} onChange={(e) => onSeek(Number(e.target.value))} className="w-full accent-[#B8874A] dark:accent-[#E0821E]" />
           </div>
 
           <div className="flex items-center gap-2">
-            <button onClick={onPrev} className="icon-button">
-              <SkipBack size={16} />
-            </button>
-            <button onClick={onTogglePlay} className="icon-button bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]">
-              {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-            </button>
-            <button onClick={onNext} className="icon-button">
-              <SkipForward size={16} />
-            </button>
+            <button onClick={onPrev} className="icon-button"><SkipBack size={16} /></button>
+            <button onClick={onTogglePlay} className="icon-button bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]">{isPlaying ? <Pause size={16} /> : <Play size={16} />}</button>
+            <button onClick={onNext} className="icon-button"><SkipForward size={16} /></button>
 
-            <select
-              value={rate}
-              onChange={(e) => setRate(Number(e.target.value))}
-              className="rounded-full border border-black/5 bg-[#F7F9FC] px-2 py-2 text-xs dark:border-white/10 dark:bg-[#161616]"
-            >
+            <select value={rate} onChange={(e) => setRate(Number(e.target.value))} className="rounded-full border border-black/5 bg-[#F7F9FC] px-2 py-2 text-xs dark:border-white/10 dark:bg-[#161616]">
               {[0.75, 1, 1.25, 1.5, 2].map((value) => (
-                <option key={value} value={value}>
-                  {value}x
-                </option>
+                <option key={value} value={value}>{value}x</option>
               ))}
             </select>
 
-            <select
-              value={sleepMinutes}
-              onChange={(e) => setSleepMinutes(Number(e.target.value))}
-              className="rounded-full border border-black/5 bg-[#F7F9FC] px-2 py-2 text-xs dark:border-white/10 dark:bg-[#161616]"
-            >
+            <select value={sleepMinutes} onChange={(e) => setSleepMinutes(Number(e.target.value))} className="rounded-full border border-black/5 bg-[#F7F9FC] px-2 py-2 text-xs dark:border-white/10 dark:bg-[#161616]">
               <option value={0}>Без таймера</option>
               <option value={15}>15 мин</option>
               <option value={30}>30 мин</option>
