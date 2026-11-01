@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://example.com/</loc>
+  </url>
+  <url>
+    <loc>https://example.com/#/catalog</loc>
+  </url>
+  <url>
+    <loc>https://example.com/#/library</loc>
+  </url>
+  <url>
+    <loc>https://example.com/#/author/abu-yahya-krymskiy</loc>
+  </url>
+  <url>
+    <loc>https://example.com/#/cycle/cycle-tri-osnovy</loc>
+  </url>
+  <url>
+    <loc>https://example.com/#/lecture/l1</loc>
+  </url>
+</urlset>

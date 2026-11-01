@@ -1,0 +1,17 @@
+{
+  "name": "AL-FIRQA AN-NAJIYA",
+  "short_name": "AL-FIRQA",
+  "description": "Premium Digital Lecture Archive",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F2F6FA",
+  "theme_color": "#F2F6FA",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
