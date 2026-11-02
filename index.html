@@ -71,6 +71,7 @@
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./drive-lectures.js"></script>
 </head>
 
 <body class="bg-[#F2F6FA] dark:bg-[#000000] text-[#111820] dark:text-[#F5F5F5] font-inter min-h-screen selection:bg-[#B8874A]/20 dark:selection:bg-[#E0821E]/30">
@@ -142,7 +143,8 @@
         lessonsCount: 2,
         totalDuration: '1 ч 38 мин',
         accentNum: '04'
-      }
+      },
+      ...(window.DRIVE_CYCLES_DATA || [])
     ];
 
     const LECTURES_DATA = [
@@ -271,7 +273,8 @@
         dateAdded: '2024-03-25',
         audioUrl: 'https://cdn.archive.org/download/audio-test-sample-al-firqa/sample3.mp3',
         description: 'Как праведные предшественники ценили каждый час своей жизни и избегали пустых собраний.'
-      }
+      },
+      ...(window.DRIVE_LECTURES_DATA || [])
     ];
 
     const formatSeconds = (sec) => {
@@ -926,7 +929,7 @@
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-xs font-mono px-3 py-1 rounded-full border border-[#E2E8F0] dark:border-[#1F1F1F] bg-[#FFFFFF] dark:bg-[#101010] text-[#697481] dark:text-[#969696]">
-                  247 лекций
+                  Записей в каталоге: {LECTURES_DATA.length}
                 </span>
                 <span className="text-xs font-mono px-3 py-1 rounded-full border border-[#E2E8F0] dark:border-[#1F1F1F] bg-[#FFFFFF] dark:bg-[#101010] text-[#B8874A] dark:text-[#E0821E]">
                   Абу Яхья Крымский
