@@ -290,6 +290,8 @@
       const audioRef = useRef(new Audio());
       const [currentLecture, setCurrentLecture] = useState(null);
       const [isPlaying, setIsPlaying] = useState(false);
+      const [playbackError, setPlaybackError] = useState('');
+      const playbackErrorText = 'Не удалось запустить аудио. Попробуйте встроенный плеер ниже или откройте запись в Google Drive.';
       const [currentTime, setCurrentTime] = useState(0);
       const [duration, setDuration] = useState(0);
       const [playbackRate, setPlaybackRate] = useState(1);
@@ -330,30 +332,70 @@
           nextLesson();
         };
 
+        const onPlay = () => {
+          setIsPlaying(true);
+          setPlaybackError('');
+        };
+        const onPause = () => setIsPlaying(false);
+        const onError = () => {
+          setIsPlaying(false);
+          setPlaybackError(playbackErrorText);
+        };
+
         audio.addEventListener('timeupdate', onTimeUpdate);
         audio.addEventListener('loadedmetadata', onLoadedMeta);
         audio.addEventListener('ended', onEnded);
-
-        try {
-          const lastSaved = localStorage.getItem('alfirqa_last_played');
-          if (lastSaved) {
-            const parsed = JSON.parse(lastSaved);
-            const found = LECTURES_DATA.find(l => l.id === parsed.id);
-            if (found) {
-              setCurrentLecture(found);
-              audio.src = found.audioUrl;
-              audio.currentTime = parsed.time || 0;
-              setCurrentTime(parsed.time || 0);
-            }
-          }
-        } catch(e) {}
+        audio.addEventListener('play', onPlay);
+        audio.addEventListener('pause', onPause);
+        audio.addEventListener('error', onError);
 
         return () => {
           audio.removeEventListener('timeupdate', onTimeUpdate);
           audio.removeEventListener('loadedmetadata', onLoadedMeta);
           audio.removeEventListener('ended', onEnded);
+          audio.removeEventListener('play', onPlay);
+          audio.removeEventListener('pause', onPause);
+          audio.removeEventListener('error', onError);
         };
       }, [currentLecture]);
+
+      useEffect(() => {
+        const audio = audioRef.current;
+        let restorePosition = null;
+        try {
+          const lastSaved = localStorage.getItem('alfirqa_last_played');
+          if (!lastSaved) return;
+          const parsed = JSON.parse(lastSaved);
+          const found = LECTURES_DATA.find(l => l.id === parsed.id);
+          if (!found) return;
+
+          const savedTime = Math.max(0, Number(parsed.time) || 0);
+          setCurrentLecture(found);
+          setCurrentTime(savedTime);
+          restorePosition = () => {
+            if (audio.src !== found.audioUrl) return;
+            const mediaDuration = Number.isFinite(audio.duration) ? audio.duration : 0;
+            setDuration(mediaDuration);
+            if (savedTime > 0) {
+              try {
+                const position = mediaDuration > 0 ? Math.min(savedTime, Math.max(0, mediaDuration - 0.25)) : savedTime;
+                audio.currentTime = position;
+                setCurrentTime(position);
+              } catch (error) {
+                console.warn('Не удалось восстановить позицию аудио', error);
+              }
+            }
+          };
+          audio.addEventListener('loadedmetadata', restorePosition, { once: true });
+          audio.src = found.audioUrl;
+        } catch (error) {
+          console.warn('Не удалось восстановить последнюю лекцию', error);
+        }
+
+        return () => {
+          if (restorePosition) audio.removeEventListener('loadedmetadata', restorePosition);
+        };
+      }, []);
 
       useEffect(() => {
         if (!sleepTimer) return;
@@ -391,6 +433,29 @@
         }));
       };
 
+      const startPlayback = (audio) => {
+        setPlaybackError('');
+        try {
+          const playRequest = audio.play();
+          if (playRequest && typeof playRequest.then === 'function') {
+            playRequest.then(() => {
+              setIsPlaying(true);
+              setPlaybackError('');
+            }).catch((error) => {
+              console.warn('Не удалось запустить аудио', error);
+              setIsPlaying(false);
+              setPlaybackError(playbackErrorText);
+            });
+          } else {
+            setIsPlaying(true);
+          }
+        } catch (error) {
+          console.warn('Не удалось запустить аудио', error);
+          setIsPlaying(false);
+          setPlaybackError(playbackErrorText);
+        }
+      };
+
       const playLecture = (lecture) => {
         const audio = audioRef.current;
         if (currentLecture?.id === lecture.id) {
@@ -398,23 +463,37 @@
             audio.pause();
             setIsPlaying(false);
           } else {
-            audio.play().then(() => setIsPlaying(true)).catch(() => {});
+            startPlayback(audio);
           }
           return;
         }
 
+        audio.pause();
+        setPlaybackError('');
         setCurrentLecture(lecture);
-        audio.src = lecture.audioUrl;
         audio.playbackRate = playbackRate;
 
         const hist = library.history[lecture.id];
-        const startPos = (hist && !hist.completed) ? hist.lastPos : 0;
-        audio.currentTime = startPos;
+        const startPos = Math.max(0, Number((hist && !hist.completed) ? hist.lastPos : 0) || 0);
+        setDuration(0);
         setCurrentTime(startPos);
+        if (startPos > 0) {
+          const restorePosition = () => {
+            if (audio.src !== lecture.audioUrl) return;
+            try {
+              const mediaDuration = Number.isFinite(audio.duration) ? audio.duration : 0;
+              const position = mediaDuration > 0 ? Math.min(startPos, Math.max(0, mediaDuration - 0.25)) : startPos;
+              audio.currentTime = position;
+              setCurrentTime(position);
+            } catch (error) {
+              console.warn('Не удалось восстановить позицию аудио', error);
+            }
+          };
+          audio.addEventListener('loadedmetadata', restorePosition, { once: true });
+        }
+        audio.src = lecture.audioUrl;
 
-        audio.play().then(() => setIsPlaying(true)).catch(e => {
-          console.warn('Автовоспроизведение ожидает взаимодействия', e);
-        });
+        startPlayback(audio);
       };
 
       const togglePlay = () => {
@@ -423,7 +502,7 @@
           audioRef.current.pause();
           setIsPlaying(false);
         } else {
-          audioRef.current.play().then(() => setIsPlaying(true));
+          startPlayback(audioRef.current);
         }
       };
 
@@ -469,6 +548,7 @@
         <AudioContext.Provider value={{
           currentLecture,
           isPlaying,
+          playbackError,
           currentTime,
           duration,
           playbackRate,
@@ -595,6 +675,7 @@
         currentTime,
         duration,
         playbackRate,
+        playbackError,
         seek,
         togglePlay,
         nextLesson,
@@ -733,6 +814,23 @@
               </button>
             </div>
           </div>
+          {playbackError && (
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-2 text-xs text-red-700 dark:text-red-300 flex flex-col items-start gap-2" role="status" aria-live="polite">
+              <span>{playbackError}</span>
+              <audio
+                controls
+                preload="none"
+                src={currentLecture.audioUrl}
+                aria-label={`Резервное воспроизведение: ${currentLecture.title}`}
+                className="h-10 w-full max-w-sm"
+              />
+              {currentLecture.sourceUrl && (
+                <a href={currentLecture.sourceUrl} target="_blank" rel="noopener noreferrer" className="font-medium underline underline-offset-2">
+                  Открыть запись в Google Drive
+                </a>
+              )}
+            </div>
+          )}
         </div>
       );
     };
