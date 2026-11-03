@@ -40,3 +40,8 @@ The player uses the Media Session API to publish the current lecture to supporte
 ## Cloud playback progress
 
 Listening position is stored in `user_lecture_progress` per user and lecture. During playback it is uploaded at most once every five seconds, and it is flushed immediately on seek, pause and end. The local progress map remains available as an offline fallback and is merged with newer cloud timestamps after authentication.
+
+
+## Player bookmarks and notes
+
+On any lecture page, use `Закладка` to save the current timestamp. Each saved marker can be opened to seek back to that point, annotated with a note up to 500 characters, or removed. Notes are automatically stored in localStorage and remain available offline. Cross-device synchronization for these notes is kept as a separate follow-up Supabase task.

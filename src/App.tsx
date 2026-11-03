@@ -27,7 +27,7 @@ import type { Session } from '@supabase/supabase-js';
 type SortType = 'newest' | 'title' | 'author' | 'duration';
 type Theme = 'light' | 'dark';
 type ResourceType = 'books' | 'texts' | 'dictionary' | 'courses';
-type BookmarkItem = { id: string; lectureId: string; time: number; createdAt: string };
+type BookmarkItem = { id: string; lectureId: string; time: number; createdAt: string; note?: string };
 
 const storageKeys = {
   theme: 'affn-theme',
@@ -487,7 +487,11 @@ function App() {
     if (!currentLectureId || playerState.currentTime <= 0) return;
     const time = Math.floor(playerState.currentTime);
     const id = `${currentLectureId}-${time}`;
-    setBookmarks((prev) => [{ id, lectureId: currentLectureId, time, createdAt: new Date().toISOString() }, ...prev.filter((item) => item.id !== id)].slice(0, 100));
+    setBookmarks((prev) => [{ id, lectureId: currentLectureId, time, createdAt: new Date().toISOString(), note: prev.find((item) => item.id === id)?.note || '' }, ...prev.filter((item) => item.id !== id)].slice(0, 100));
+  };
+
+  const updateBookmarkNote = (id: string, note: string) => {
+    setBookmarks((prev) => prev.map((item) => item.id === id ? { ...item, note } : item));
   };
 
   const removeBookmark = (id: string) => setBookmarks((prev) => prev.filter((item) => item.id !== id));
@@ -702,6 +706,7 @@ function App() {
           bookmarks={bookmarks.filter((item) => item.lectureId === lecture.id)}
           onAddBookmark={addBookmark}
           onRemoveBookmark={removeBookmark}
+          onUpdateBookmarkNote={updateBookmarkNote}
           repeatSegment={repeatSegment}
           onSetRepeatPoint={setRepeatPoint}
           onClearRepeat={clearRepeat}
@@ -1287,7 +1292,7 @@ function AuthorPage({ author, lectures, favorites, onToggleFavorite, onOpenLectu
   );
 }
 
-function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, currentLectureId, setCurrentLectureId, playerState, setPlayerState, audioRef, prevLecture, nextLecture, onSeek, onTogglePlay, handleTimeUpdate, handleLoadedMetadata, handleEnded, getProgress, bookmarks, onAddBookmark, onRemoveBookmark, repeatSegment, onSetRepeatPoint, onClearRepeat, repeatLesson, onToggleRepeatLesson }: {
+function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, currentLectureId, setCurrentLectureId, playerState, setPlayerState, audioRef, prevLecture, nextLecture, onSeek, onTogglePlay, handleTimeUpdate, handleLoadedMetadata, handleEnded, getProgress, bookmarks, onAddBookmark, onRemoveBookmark, onUpdateBookmarkNote, repeatSegment, onSetRepeatPoint, onClearRepeat, repeatLesson, onToggleRepeatLesson }: {
   lecture: Lecture;
   favorites: string[];
   onToggleFavorite: (id: string) => void;
@@ -1308,6 +1313,7 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
   bookmarks: BookmarkItem[];
   onAddBookmark: () => void;
   onRemoveBookmark: (id: string) => void;
+  onUpdateBookmarkNote: (id: string, note: string) => void;
   repeatSegment: { start: number | null; end: number | null; active: boolean };
   onSetRepeatPoint: () => void;
   onClearRepeat: () => void;
@@ -1415,11 +1421,14 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
         {bookmarks.length > 0 && (
           <div className="mt-4 rounded-2xl border border-black/5 bg-[#F7F9FC] p-4 dark:border-white/10 dark:bg-[#161616]">
             <div className="mb-3 text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Закладки этой лекции</div>
-            <div className="flex flex-wrap gap-2">
+            <div className="space-y-3">
               {bookmarks.map((item) => (
-                <div key={item.id} className="inline-flex items-center gap-1 rounded-full border border-black/5 bg-white pl-3 text-sm dark:border-white/10 dark:bg-[#101010]">
-                  <button onClick={() => onSeek(item.time)} className="py-2 text-text dark:text-darktext">{formatDuration(item.time)}</button>
-                  <button onClick={() => onRemoveBookmark(item.id)} aria-label={`Удалить закладку ${formatDuration(item.time)}`} className="px-2 py-2 text-muted dark:text-darkmuted">×</button>
+                <div key={item.id} className="rounded-2xl border border-black/5 bg-white p-3 dark:border-white/10 dark:bg-[#101010]">
+                  <div className="flex items-center justify-between gap-3">
+                    <button onClick={() => onSeek(item.time)} className="font-medium text-text underline decoration-[#B8874A]/50 underline-offset-4 dark:text-darktext">{formatDuration(item.time)}</button>
+                    <button onClick={() => onRemoveBookmark(item.id)} aria-label={`Удалить закладку ${formatDuration(item.time)}`} className="text-sm text-muted dark:text-darkmuted">Удалить</button>
+                  </div>
+                  <textarea value={item.note || ''} onChange={(event) => onUpdateBookmarkNote(item.id, event.target.value)} maxLength={500} rows={2} placeholder="Добавить заметку к этому фрагменту…" aria-label={`Заметка к закладке ${formatDuration(item.time)}`} className="mt-2 w-full resize-y rounded-xl border border-black/5 bg-[#F7F9FC] px-3 py-2 text-sm text-text outline-none placeholder:text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darktext dark:placeholder:text-darkmuted" />
                 </div>
               ))}
             </div>
