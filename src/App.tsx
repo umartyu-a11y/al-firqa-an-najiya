@@ -203,6 +203,7 @@ function App() {
     sleepMinutes: 0,
     volume: Number(localStorage.getItem('affn-volume') ?? 1)
   });
+  const [audioStatus, setAudioStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
   const [repeatSegment, setRepeatSegment] = useState<{ start: number | null; end: number | null; active: boolean }>({ start: null, end: null, active: false });
   const [repeatLesson, setRepeatLesson] = useState(false);
 
@@ -483,6 +484,7 @@ function App() {
 
     const audio = audioRef.current;
     restoringPosition.current = true;
+    setAudioStatus('loading');
     audio.src = lecture.audioUrl;
     audio.load();
   }, [currentLectureId]);
@@ -492,7 +494,10 @@ function App() {
     const audio = audioRef.current;
     audio.playbackRate = playerState.rate;
     if (playerState.isPlaying && currentLectureId) {
-      audio.play().catch(() => {});
+      audio.play().catch(() => {
+        setPlayerState((prev) => ({ ...prev, isPlaying: false }));
+        setAudioStatus('error');
+      });
     } else {
       audio.pause();
     }
@@ -508,6 +513,18 @@ function App() {
     }
 
     setPlayerState((prev) => ({ ...prev, isPlaying: !prev.isPlaying }));
+  };
+
+  const retryAudio = () => {
+    const audio = audioRef.current;
+    if (!audio || !currentLectureId) return;
+    setAudioStatus('loading');
+    setPlayerState((prev) => ({ ...prev, isPlaying: true }));
+    audio.load();
+    audio.play().catch(() => {
+      setPlayerState((prev) => ({ ...prev, isPlaying: false }));
+      setAudioStatus('error');
+    });
   };
 
   const handleSeek = (value: number) => {
@@ -1105,6 +1122,9 @@ function App() {
         currentTime={playerState.currentTime}
         duration={playerState.duration || currentLecture?.duration || 0}
         rate={playerState.rate}
+        audioStatus={audioStatus}
+        isOnline={isOnline}
+        onRetry={retryAudio}
         setRate={(newRate) => setPlayerState((prev) => ({ ...prev, rate: newRate }))}
         volume={playerState.volume}
         setVolume={(volume) => setPlayerState((prev) => ({ ...prev, volume }))}
@@ -1135,6 +1155,8 @@ function App() {
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={handleEnded}
+        onLoadStart={() => setAudioStatus('loading')}
+        onCanPlay={() => setAudioStatus('ready')}
         onPause={() => {
           const audio = audioRef.current;
           if (handlingTrackEnd.current || restoringPosition.current) return;
@@ -1154,6 +1176,7 @@ function App() {
         onError={() => {
           handlingTrackEnd.current = false;
           restoringPosition.current = false;
+          setAudioStatus('error');
           setPlayerState((prev) => ({ ...prev, isPlaying: false }));
         }}
       />
@@ -2002,12 +2025,15 @@ function LectureCard({ lecture, onOpen, isFavorite, onToggleFavorite, progress, 
   );
 }
 
-function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, setRate, volume, setVolume, onTogglePlay, onPrev, onNext, onSeek, sleepMinutes, setSleepMinutes }: {
+function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, audioStatus, isOnline, onRetry, setRate, volume, setVolume, onTogglePlay, onPrev, onNext, onSeek, sleepMinutes, setSleepMinutes }: {
   lecture: Lecture | null;
   isPlaying: boolean;
   currentTime: number;
   duration: number;
   rate: number;
+  audioStatus: 'idle' | 'loading' | 'ready' | 'error';
+  isOnline: boolean;
+  onRetry: () => void;
   setRate: (value: number) => void;
   volume: number;
   setVolume: (value: number) => void;
@@ -2072,7 +2098,7 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, setRate, 
             </div>
             <div className="min-w-0">
               <div className="truncate text-sm font-medium text-text dark:text-darktext">{lecture.title}</div>
-              <div className="flex items-center gap-2 truncate text-xs text-muted dark:text-darkmuted"><span>{lecture.author}</span><span aria-live="polite">{isPlaying ? 'Воспроизводится' : 'Пауза'}</span></div>
+              <div className="flex items-center gap-2 truncate text-xs text-muted dark:text-darkmuted"><span>{lecture.author}</span><span aria-live="polite">{audioStatus === 'loading' ? 'Загрузка аудио…' : audioStatus === 'error' ? 'Ошибка загрузки' : isPlaying ? 'Воспроизводится' : 'Пауза'}</span></div>
             </div>
             <button onClick={() => setCollapsed(true)} aria-label="Свернуть аудиоплеер" title="Свернуть аудиоплеер" className="ml-auto inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/5 bg-[#F7F9FC] text-text transition hover:-translate-y-0.5 dark:border-white/10 dark:bg-[#161616] dark:text-darktext">
               <ChevronDown size={17} aria-hidden="true" />
@@ -2080,6 +2106,12 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, setRate, 
           </div>
 
           <div className="flex flex-1 flex-col gap-2 lg:max-w-[640px]">
+            {audioStatus === 'error' && (
+              <div className="flex items-center justify-between gap-3 text-xs text-[#9B3D32] dark:text-[#F3A89F]" role="status" aria-live="polite">
+                <span>{isOnline ? 'Не удалось загрузить запись. Попробуйте ещё раз.' : 'Нет подключения к интернету. Проверьте соединение и повторите попытку.'}</span>
+                <button type="button" onClick={onRetry} className="shrink-0 rounded-full border border-current px-3 py-1.5 font-medium underline-offset-2 hover:underline">Повторить</button>
+              </div>
+            )}
             <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.12em] text-muted dark:text-darkmuted">
               <span>{formatDuration(currentTime)}</span>
               <span>{formatDuration(duration)}</span>
