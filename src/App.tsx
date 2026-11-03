@@ -22,6 +22,7 @@ import type { Category, Lecture } from './types';
 
 type SortType = 'newest' | 'title' | 'author' | 'duration';
 type Theme = 'light' | 'dark';
+type ResourceType = 'books' | 'texts' | 'dictionary' | 'courses';
 type BookmarkItem = { id: string; lectureId: string; time: number; createdAt: string };
 
 const storageKeys = {
@@ -69,6 +70,7 @@ const parseHash = () => {
   if (hash.startsWith('/lecture/')) return 'lecture';
   if (hash.startsWith('/category/')) return 'category';
   if (hash.startsWith('/about')) return 'about';
+  if (hash.startsWith('/books') || hash.startsWith('/texts') || hash.startsWith('/dictionary') || hash.startsWith('/courses')) return 'resource';
   return 'home';
 };
 
@@ -103,7 +105,7 @@ function App() {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
 
-  const [route, setRoute] = useState<'home' | 'catalog' | 'library' | 'cycle' | 'author' | 'lecture' | 'category' | 'about'>(() => parseHash());
+  const [route, setRoute] = useState<'home' | 'catalog' | 'library' | 'cycle' | 'author' | 'lecture' | 'category' | 'about' | 'resource'>(() => parseHash());
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortType>('newest');
   const [categoryFilter, setCategoryFilter] = useState<Category | 'Все'>('Все');
@@ -547,6 +549,11 @@ function App() {
 
     if (route === 'about') return <AboutPage />;
 
+    if (route === 'resource') {
+      const resource = window.location.hash.replace(/^#\//, '').split('/')[0] as ResourceType;
+      return <ResourcePage resource={resource} onOpenCatalog={() => navigate('/catalog')} />;
+    }
+
     return (
       <HomePage
         onOpenLecture={handleOpenLecture}
@@ -586,6 +593,9 @@ function App() {
               </button>
               <button className="text-sm text-text/80 transition hover:text-text dark:text-darktext/80 dark:hover:text-darktext" onClick={() => navigate('/author/abu-yahya-krymskiy')}>
                 Авторы
+              </button>
+              <button className="text-sm text-text/80 transition hover:text-text dark:text-darktext/80 dark:hover:text-darktext" onClick={() => navigate('/books')}>
+                Книги
               </button>
               <button className="text-sm text-text/80 transition hover:text-text dark:text-darktext/80 dark:hover:text-darktext" onClick={() => navigate('/about')}>
                 О проекте
@@ -644,6 +654,11 @@ function App() {
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="font-medium tracking-[0.08em] text-text dark:text-darktext">AL-FIRQA AN-NAJIYA</div>
             <div>Исламские лекции и архив знаний</div>
+          </div>
+          <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs">
+            {[['Книги', '/books'], ['Тексты', '/texts'], ['Словарь', '/dictionary'], ['Курсы', '/courses'], ['О проекте', '/about']].map(([label, path]) => (
+              <button key={path} onClick={() => navigate(path)} className="text-muted underline-offset-4 transition hover:text-text hover:underline dark:text-darkmuted dark:hover:text-darktext">{label}</button>
+            ))}
           </div>
         </footer>
       </div>
@@ -1467,6 +1482,29 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, setRate, 
         </div>
       </div>
     </div>
+  );
+}
+
+function ResourcePage({ resource, onOpenCatalog }: { resource: ResourceType; onOpenCatalog: () => void }) {
+  const content: Record<ResourceType, { eyebrow: string; title: string; description: string; note: string }> = {
+    books: { eyebrow: 'Библиотека книг', title: 'Книги появятся после проверки прав на распространение.', description: 'Этот раздел подготовлен для PDF-книг, авторов, обложек и истории чтения.', note: 'Пока здесь нет опубликованных книг. Мы не добавляем файлы без подтверждённого разрешения.' },
+    texts: { eyebrow: 'Тексты и переводы', title: 'Тексты требуют подтверждённых оригиналов и атрибуции.', description: 'Здесь будут полные тексты, переводы, временные метки и синхронизация с аудио.', note: 'Расшифровки и переводы ещё не опубликованы, поэтому мы не создаём их автоматически без проверки.' },
+    dictionary: { eyebrow: 'Терминологический словарь', title: 'Словарь будет связан с реальными материалами архива.', description: 'Для каждой записи будут доступны арабское написание, огласовки, транслитерация, перевод и ссылки.', note: 'В текущем каталоге нет редакционно проверенных словарных записей.' },
+    courses: { eyebrow: 'Учебные курсы', title: 'Академия начнётся с проверенных циклов и конспектов.', description: 'Этот раздел станет основой для учебных планов, прогресса, повторения и тестов.', note: 'Тесты и учебные планы не создаются до появления подтверждённых конспектов.' }
+  };
+  const item = content[resource] || content.books;
+  return (
+    <main className="space-y-6">
+      <section className="panel p-7 sm:p-10">
+        <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">{item.eyebrow}</div>
+        <h1 className="mt-3 max-w-3xl font-display text-5xl leading-none tracking-[-0.04em] text-text dark:text-darktext">{item.title}</h1>
+        <p className="mt-6 max-w-2xl text-base leading-7 text-muted dark:text-darkmuted">{item.description}</p>
+      </section>
+      <section className="panel flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between">
+        <div><div className="text-sm font-medium text-text dark:text-darktext">Раздел ещё не опубликован</div><p className="mt-2 max-w-2xl text-sm leading-6 text-muted dark:text-darkmuted">{item.note}</p></div>
+        <button onClick={onOpenCatalog} className="shrink-0 rounded-full bg-[#111820] px-5 py-3 text-sm font-medium text-white dark:bg-[#F5F5F5] dark:text-[#111820]">Слушать лекции</button>
+      </section>
+    </main>
   );
 }
 
