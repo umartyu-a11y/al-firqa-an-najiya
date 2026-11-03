@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { lectureData, cycles } from './data/lectures';
 import type { Category, Lecture } from './types';
+import { isSupabaseConfigured } from './lib/supabase';
+import { loadCloudLibrary, saveCloudLibrary } from './lib/cloudLibrary';
 
 type SortType = 'newest' | 'title' | 'author' | 'duration';
 type Theme = 'light' | 'dark';
@@ -140,6 +142,8 @@ function App() {
     }
   });
 
+  const [cloudReady, setCloudReady] = useState(false);
+
   const [playerState, setPlayerState] = useState({
     isPlaying: false,
     currentTime: 0,
@@ -188,6 +192,36 @@ function App() {
       localStorage.removeItem('affn-current-lecture');
     }
   }, [currentLectureId]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const syncFromCloud = async () => {
+      if (!isSupabaseConfigured) {
+        setCloudReady(true);
+        return;
+      }
+
+      const remote = await loadCloudLibrary();
+      if (cancelled) return;
+
+      if (remote) {
+        setFavorites((local) => Array.from(new Set([...remote.favorites, ...local])));
+        setHistory((local) => Array.from(new Set([...remote.history, ...local])).slice(0, 12));
+      }
+      setCloudReady(true);
+    };
+
+    void syncFromCloud();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!cloudReady || !isSupabaseConfigured) return;
+    void saveCloudLibrary({ favorites, history });
+  }, [cloudReady, favorites, history]);
 
   useEffect(() => {
     if (!playerState.sleepMinutes || !playerState.isPlaying) return;
@@ -426,6 +460,8 @@ function App() {
           onToggleFavorite={toggleFavorite}
           favorites={favorites}
           getProgress={getAudioProgress}
+          cloudReady={cloudReady}
+          cloudEnabled={isSupabaseConfigured}
         />
       );
     }
@@ -1291,7 +1327,7 @@ function CategoryPage({ category, lectures, favorites, onToggleFavorite, onOpenL
   );
 }
 
-function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpenLecture, onToggleFavorite, favorites, getProgress }: {
+function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpenLecture, onToggleFavorite, favorites, getProgress, cloudReady, cloudEnabled }: {
   continueLectures: Lecture[];
   favoriteLectures: Lecture[];
   recentLectures: Lecture[];
@@ -1299,12 +1335,17 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
   onToggleFavorite: (id: string) => void;
   favorites: string[];
   getProgress: (id: string) => number;
+  cloudReady: boolean;
+  cloudEnabled: boolean;
 }) {
   return (
     <main className="space-y-6">
       <section className="panel p-6">
         <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Личный раздел</div>
-        <h1 className="mt-2 font-display text-4xl tracking-[-0.04em] text-text dark:text-darktext">Моя библиотека</h1>
+        <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <h1 className="font-display text-4xl tracking-[-0.04em] text-text dark:text-darktext">Моя библиотека</h1>
+          <span className="inline-flex w-fit items-center rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-1.5 text-xs text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darkmuted">{cloudEnabled && cloudReady ? 'Синхронизация включена' : 'Сохранение на устройстве'}</span>
+        </div>
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
