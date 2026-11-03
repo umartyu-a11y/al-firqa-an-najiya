@@ -43,6 +43,7 @@ const categories: Category[] = [
   'Хадисы',
   'Коран и тафсир',
   'Нравственность',
+  'Основы знания',
   'Разное'
 ];
 
@@ -162,6 +163,21 @@ function App() {
     }
   }, [currentLectureId]);
 
+  useEffect(() => {
+    if (!playerState.sleepMinutes || !playerState.isPlaying) return;
+
+    const timer = window.setInterval(() => {
+      setPlayerState((prev) => {
+        if (prev.sleepMinutes <= 1) {
+          return { ...prev, sleepMinutes: 0, isPlaying: false };
+        }
+        return { ...prev, sleepMinutes: prev.sleepMinutes - 1 };
+      });
+    }, 60_000);
+
+    return () => window.clearInterval(timer);
+  }, [playerState.sleepMinutes, playerState.isPlaying]);
+
   const lectureMap = useMemo(() => {
     const result: Record<string, Lecture> = {};
     lectureData.forEach((lecture) => (result[lecture.id] = lecture));
@@ -180,7 +196,6 @@ function App() {
     window.location.hash = path;
   };
 
-  const featuredLectures = lectureData.slice(0, 3);
   const uniqueAuthors = ['Все', ...new Set(lectureData.map((lecture) => lecture.author))];
 
   const visibleLectures = useMemo(() => {
@@ -466,7 +481,15 @@ function App() {
       );
     }
 
-    return <HomePage onOpenLecture={handleOpenLecture} />;
+    return (
+      <HomePage
+        onOpenLecture={handleOpenLecture}
+        favorites={favorites}
+        onToggleFavorite={toggleFavorite}
+        getProgress={getAudioProgress}
+        continueLectures={continueLectures}
+      />
+    );
   };
 
   const currentView = route === 'home' ? 'home' : route;
@@ -538,6 +561,19 @@ function App() {
 
         {renderRoute()}
 
+        <nav aria-label="Быстрая навигация" className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-4 gap-1 rounded-2xl border border-black/5 bg-white/90 p-2 shadow-[0_18px_60px_rgba(17,24,32,0.14)] backdrop-blur-xl md:hidden dark:border-white/10 dark:bg-[#101010]/90">
+          {[
+            { label: 'Главная', icon: <Sparkles size={16} />, path: '/' },
+            { label: 'Лекции', icon: <BookOpenText size={16} />, path: '/catalog' },
+            { label: 'Библиотека', icon: <Heart size={16} />, path: '/library' },
+            { label: 'Автор', icon: <Headphones size={16} />, path: '/author/abu-yahya-krymskiy' }
+          ].map((item) => (
+            <button key={item.path} onClick={() => navigate(item.path)} className="flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-medium text-muted transition hover:bg-black/5 hover:text-text dark:text-darkmuted dark:hover:bg-white/10 dark:hover:text-darktext">
+              {item.icon}<span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+
         <footer className="mt-24 border-t border-black/5 pt-8 text-sm text-muted dark:border-white/10 dark:text-darkmuted">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="font-medium tracking-[0.08em] text-text dark:text-darktext">AL-FIRQA AN-NAJIYA</div>
@@ -574,7 +610,18 @@ function App() {
   );
 }
 
-function HomePage({ onOpenLecture }: { onOpenLecture: (id: string) => void }) {
+function HomePage({ onOpenLecture, favorites, onToggleFavorite, getProgress, continueLectures }: {
+  onOpenLecture: (id: string) => void;
+  favorites: string[];
+  onToggleFavorite: (id: string) => void;
+  getProgress: (id: string) => number;
+  continueLectures: Lecture[];
+}) {
+  const categoryStats = categories
+    .map((label) => ({ label, count: lectureData.filter((lecture) => lecture.category === label).length }))
+    .filter((item) => item.count > 0);
+  const latestLectures = lectureData.slice(0, 3);
+
   return (
     <main className="space-y-10">
       <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
@@ -595,7 +642,7 @@ function HomePage({ onOpenLecture }: { onOpenLecture: (id: string) => void }) {
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2 rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 text-sm text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darkmuted">
               <Headphones size={16} />
-              <span>247 лекций</span>
+              <span>{lectureData.length} лекций в архиве</span>
             </div>
           </div>
 
@@ -621,14 +668,7 @@ function HomePage({ onOpenLecture }: { onOpenLecture: (id: string) => void }) {
           </div>
 
           <div className="mt-6 space-y-3">
-            {[
-              { label: 'Акыда', count: 42 },
-              { label: 'Таухид', count: 38 },
-              { label: 'Фикх', count: 56 },
-              { label: 'Хадисы', count: 31 },
-              { label: 'Коран и тафсир', count: 49 },
-              { label: 'Нравственность', count: 27 }
-            ].map((item) => (
+            {categoryStats.map((item) => (
               <button
                 key={item.label}
                 onClick={() => window.location.hash = `#/category/${encodeURIComponent(item.label)}`}
@@ -644,9 +684,9 @@ function HomePage({ onOpenLecture }: { onOpenLecture: (id: string) => void }) {
 
       <section className="grid gap-4 md:grid-cols-3">
         {[
-          { label: 'Последние обновления', value: '12 новых' },
-          { label: 'Учебные циклы', value: '24' },
-          { label: 'Слушатели продолжают', value: '86%' }
+          { label: 'Записей в архиве', value: String(lectureData.length) },
+          { label: 'Учебных циклов', value: String(cycles.length) },
+          { label: 'Категорий знания', value: String(categoryStats.length) }
         ].map((stat) => (
           <div key={stat.label} className="panel p-5">
             <div className="text-sm text-muted dark:text-darkmuted">{stat.label}</div>
@@ -664,17 +704,39 @@ function HomePage({ onOpenLecture }: { onOpenLecture: (id: string) => void }) {
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          {featuredLectures.map((lecture) => (
+          {latestLectures.map((lecture) => (
             <LectureCard
               key={lecture.id}
               lecture={lecture}
               onOpen={() => onOpenLecture(lecture.id)}
-              isFavorite={false}
-              onToggleFavorite={() => {}}
-              progress={getAudioProgress(lecture.id)}
+              isFavorite={favorites.includes(lecture.id)}
+              onToggleFavorite={() => onToggleFavorite(lecture.id)}
+              progress={getProgress(lecture.id)}
             />
           ))}
         </div>
+      </section>
+
+      <section>
+        <div className="mb-5 flex items-center justify-between">
+          <div>
+            <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Личная полка</div>
+            <h2 className="mt-1 font-display text-3xl tracking-[-0.04em] text-text dark:text-darktext">Продолжить прослушивание</h2>
+          </div>
+          <button onClick={() => window.location.hash = '#/library'} className="text-sm font-medium text-accent dark:text-darkaccent">Открыть библиотеку</button>
+        </div>
+        {continueLectures.length ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            {continueLectures.slice(0, 2).map((lecture) => (
+              <LectureCard key={lecture.id} lecture={lecture} onOpen={() => onOpenLecture(lecture.id)} isFavorite={favorites.includes(lecture.id)} onToggleFavorite={() => onToggleFavorite(lecture.id)} progress={getProgress(lecture.id)} />
+            ))}
+          </div>
+        ) : (
+          <div className="panel flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted dark:text-darkmuted">Начните слушать любую лекцию — архив запомнит позицию и вернёт вас сюда.</p>
+            <button onClick={() => window.location.hash = '#/catalog'} className="shrink-0 rounded-full bg-[#111820] px-4 py-2 text-sm font-medium text-white dark:bg-[#F5F5F5] dark:text-[#111820]">Открыть каталог</button>
+          </div>
+        )}
       </section>
 
       <section>
@@ -984,6 +1046,11 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
               <button onClick={() => onToggleFavorite(lecture.id)} className="rounded-full border border-black/5 bg-white px-5 py-3 text-sm dark:border-white/10 dark:bg-[#101010]">
                 {favorites.includes(lecture.id) ? 'Удалить из избранного' : 'В избранное'}
               </button>
+              {lecture.sourceUrl && (
+                <a href={lecture.sourceUrl} target="_blank" rel="noreferrer" className="rounded-full border border-black/5 bg-white px-5 py-3 text-sm dark:border-white/10 dark:bg-[#101010]">
+                  Открыть источник
+                </a>
+              )}
             </div>
           </div>
 
@@ -1026,7 +1093,7 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
           </div>
 
           <div className="flex items-center gap-2">
-            {[0.75, 1, 1.25, 1.5, 2].map((rate) => (
+            {[0.5, 0.75, 1, 1.25, 1.5, 2].map((rate) => (
               <button key={rate} onClick={() => setPlayerState((prev) => ({ ...prev, rate }))} className={`rounded-full px-3 py-1.5 text-sm ${playerState.rate === rate ? 'bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]' : 'bg-[#F7F9FC] text-text dark:bg-[#161616] dark:text-darktext'}`}>
                 {rate}x
               </button>
@@ -1222,7 +1289,7 @@ function LectureCard({ lecture, onOpen, isFavorite, onToggleFavorite, progress }
 
         <div className="mt-4 flex items-center justify-between">
           <span className="text-xs text-muted dark:text-darkmuted">{lecture.date}</span>
-          <button className="inline-flex items-center gap-2 rounded-full bg-[#111820] px-3 py-2 text-sm text-white dark:bg-[#F5F5F5] dark:text-[#111820]">
+          <button onClick={(event) => { event.stopPropagation(); onOpen(); }} className="inline-flex items-center gap-2 rounded-full bg-[#111820] px-3 py-2 text-sm text-white dark:bg-[#F5F5F5] dark:text-[#111820]">
             Открыть <ChevronRight size={15} />
           </button>
         </div>
@@ -1275,7 +1342,7 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, setRate, 
             <button onClick={onNext} className="icon-button"><SkipForward size={16} /></button>
 
             <select value={rate} onChange={(e) => setRate(Number(e.target.value))} className="rounded-full border border-black/5 bg-[#F7F9FC] px-2 py-2 text-xs dark:border-white/10 dark:bg-[#161616]">
-              {[0.75, 1, 1.25, 1.5, 2].map((value) => (
+              {[0.5, 0.75, 1, 1.25, 1.5, 2].map((value) => (
                 <option key={value} value={value}>{value}x</option>
               ))}
             </select>

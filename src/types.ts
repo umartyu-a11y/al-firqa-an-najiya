@@ -5,6 +5,7 @@ export type Category =
   | 'Хадисы'
   | 'Коран и тафсир'
   | 'Нравственность'
+  | 'Основы знания'
   | 'Разное';
 
 export interface Lecture {
@@ -15,12 +16,14 @@ export interface Lecture {
   category: Category;
   cycle: string;
   cycleId: string;
-  lessonNumber: number;
+  lessonNumber: number | string;
   duration: number;
   description: string;
   audioUrl: string;
   date: string;
   tags: string[];
+  sourceUrl?: string;
+  sourceFileName?: string;
 }
 
 export interface Cycle {

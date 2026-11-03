@@ -1,0 +1,9 @@
+{
+  "routes": [
+    { "path": "/", "title": "AL-FIRQA AN-NAJIYA" },
+    { "path": "/#/catalog", "title": "Каталог лекций" },
+    { "path": "/#/library", "title": "Моя библиотека" },
+    { "path": "/#/author/abu-yahya-krymskiy", "title": "Автор" },
+    { "path": "/#/cycle/necessary-questions-for-everyone", "title": "Учебный цикл" }
+  ]
+}

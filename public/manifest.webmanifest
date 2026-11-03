@@ -1,14 +1,15 @@
 {
   "name": "AL-FIRQA AN-NAJIYA",
   "short_name": "AL-FIRQA",
-  "description": "Premium Digital Lecture Archive",
-  "start_url": "/",
+  "description": "Цифровой архив исламских лекций и учебных циклов",
+  "start_url": "/al-firqa-an-najiya/",
+  "scope": "/al-firqa-an-najiya/",
   "display": "standalone",
   "background_color": "#F2F6FA",
   "theme_color": "#F2F6FA",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "/al-firqa-an-najiya/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
