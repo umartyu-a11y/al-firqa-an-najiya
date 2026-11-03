@@ -20,7 +20,7 @@ import {
 import { lectureData, cycles } from './data/lectures';
 import type { Category, Lecture } from './types';
 import { isSupabaseConfigured } from './lib/supabase';
-import { loadCloudLibrary, saveCloudLibrary } from './lib/cloudLibrary';
+import { loadCloudLibrary, loadCloudProgress, saveCloudLibrary, saveCloudProgress } from './lib/cloudLibrary';
 import { getAuthSession, requestPersistentAccess, signOutUser, subscribeToAuth } from './lib/auth';
 import type { Session } from '@supabase/supabase-js';
 
@@ -90,12 +90,26 @@ const getAudioProgress = (id: string) => {
   }
 };
 
-const saveProgress = (id: string, currentTime: number) => {
+const saveProgress = (id: string, currentTime: number, duration = 0) => {
   try {
     const raw = localStorage.getItem(storageKeys.progress);
     const map = raw ? JSON.parse(raw) : {};
-    map[id] = { currentTime, updatedAt: new Date().toISOString() };
+    map[id] = { currentTime, duration, updatedAt: new Date().toISOString() };
     localStorage.setItem(storageKeys.progress, JSON.stringify(map));
+  } catch {
+    // ignore localStorage issues
+  }
+};
+
+const mergeCloudProgress = (remote: Record<string, { currentTime: number; duration: number; updatedAt: string }>) => {
+  try {
+    const local = JSON.parse(localStorage.getItem(storageKeys.progress) || '{}');
+    Object.entries(remote).forEach(([id, value]) => {
+      if (!local[id] || new Date(value.updatedAt).getTime() > new Date(local[id].updatedAt || 0).getTime()) {
+        local[id] = value;
+      }
+    });
+    localStorage.setItem(storageKeys.progress, JSON.stringify(local));
   } catch {
     // ignore localStorage issues
   }
@@ -146,6 +160,7 @@ function App() {
 
   const [cloudReady, setCloudReady] = useState(false);
   const [isOnline, setIsOnline] = useState(() => navigator.onLine);
+  const lastCloudProgressSave = useRef<Record<string, number>>({});
   const [authSession, setAuthSession] = useState<Session | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [authEmail, setAuthEmail] = useState('');
@@ -221,13 +236,14 @@ function App() {
         return;
       }
 
-      const remote = await loadCloudLibrary();
+      const [remote, remoteProgress] = await Promise.all([loadCloudLibrary(), loadCloudProgress()]);
       if (cancelled) return;
 
       if (remote) {
         setFavorites((local) => Array.from(new Set([...remote.favorites, ...local])));
         setHistory((local) => Array.from(new Set([...remote.history, ...local])).slice(0, 12));
       }
+      if (remoteProgress) mergeCloudProgress(remoteProgress);
       setCloudReady(true);
     };
 
@@ -251,10 +267,13 @@ function App() {
     const unsubscribe = subscribeToAuth((_event, session) => {
       setAuthSession(session);
       if (!session) return;
-      void loadCloudLibrary().then((remote) => {
-        if (!remote || cancelled) return;
-        setFavorites((local) => Array.from(new Set([...remote.favorites, ...local])));
-        setHistory((local) => Array.from(new Set([...remote.history, ...local])).slice(0, 12));
+      void Promise.all([loadCloudLibrary(), loadCloudProgress()]).then(([remote, remoteProgress]) => {
+        if (cancelled) return;
+        if (remote) {
+          setFavorites((local) => Array.from(new Set([...remote.favorites, ...local])));
+          setHistory((local) => Array.from(new Set([...remote.history, ...local])).slice(0, 12));
+        }
+        if (remoteProgress) mergeCloudProgress(remoteProgress);
         setCloudReady(true);
       });
     });
@@ -420,7 +439,18 @@ function App() {
     if (!audioRef.current) return;
     audioRef.current.currentTime = value;
     setPlayerState((prev) => ({ ...prev, currentTime: value }));
-    if (currentLectureId) saveProgress(currentLectureId, value);
+    persistPlaybackProgress(currentLectureId, value, audioRef.current.duration || playerState.duration, true);
+  };
+
+  const persistPlaybackProgress = (lectureId: string | null, currentTime: number, duration: number, force = false) => {
+    if (!lectureId) return;
+    saveProgress(lectureId, currentTime, duration);
+    if (!cloudReady || !isSupabaseConfigured) return;
+    const now = Date.now();
+    const last = lastCloudProgressSave.current[lectureId] || 0;
+    if (!force && now - last < 5000) return;
+    lastCloudProgressSave.current[lectureId] = now;
+    void saveCloudProgress(lectureId, currentTime, duration);
   };
 
   const handleTimeUpdate = () => {
@@ -429,7 +459,7 @@ function App() {
     if (repeatSegment.active && repeatSegment.start !== null && repeatSegment.end !== null && audio.currentTime >= repeatSegment.end) {
       audio.currentTime = repeatSegment.start;
     }
-    if (currentLectureId) saveProgress(currentLectureId, audio.currentTime);
+    persistPlaybackProgress(currentLectureId, audio.currentTime, audio.duration || playerState.duration);
     updateMediaSessionPosition(audio);
     setPlayerState((prev) => ({
       ...prev,
@@ -474,6 +504,7 @@ function App() {
   const clearRepeat = () => setRepeatSegment({ start: null, end: null, active: false });
 
   const handleEnded = () => {
+    persistPlaybackProgress(currentLectureId, audioRef.current?.currentTime || playerState.currentTime, audioRef.current?.duration || playerState.duration, true);
     if (repeatLesson && audioRef.current) {
       audioRef.current.currentTime = 0;
       setPlayerState((prev) => ({ ...prev, currentTime: 0, isPlaying: true }));
@@ -849,7 +880,7 @@ function App() {
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={handleEnded}
-        onPause={() => { navigator.mediaSession && (navigator.mediaSession.playbackState = 'paused'); setPlayerState((prev) => ({ ...prev, isPlaying: false })); }}
+        onPause={() => { navigator.mediaSession && (navigator.mediaSession.playbackState = 'paused'); persistPlaybackProgress(currentLectureId, audioRef.current?.currentTime || playerState.currentTime, audioRef.current?.duration || playerState.duration, true); setPlayerState((prev) => ({ ...prev, isPlaying: false })); }}
         onPlay={() => { navigator.mediaSession && (navigator.mediaSession.playbackState = 'playing'); setPlayerState((prev) => ({ ...prev, isPlaying: true })); }}
       />
     </div>

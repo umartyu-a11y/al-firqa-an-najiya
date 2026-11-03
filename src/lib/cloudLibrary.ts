@@ -5,6 +5,8 @@ export type CloudLibraryState = {
   history: string[];
 };
 
+export type CloudProgressState = Record<string, { currentTime: number; duration: number; updatedAt: string }>;
+
 async function ensureSession() {
   if (!supabase || !isSupabaseConfigured) return null;
 
@@ -56,4 +58,43 @@ export async function saveCloudLibrary(state: CloudLibraryState) {
   );
 
   if (error) console.warn('Supabase library save failed; local storage remains active.', error.message);
+}
+
+export async function loadCloudProgress(): Promise<CloudProgressState | null> {
+  const session = await ensureSession();
+  if (!session || !supabase) return null;
+
+  const { data, error } = await supabase
+    .from('user_lecture_progress')
+    .select('lecture_id, current_time, duration, updated_at')
+    .eq('user_id', session.user.id);
+
+  if (error) {
+    console.warn('Supabase progress load failed; local progress remains active.', error.message);
+    return null;
+  }
+
+  return Object.fromEntries((data ?? []).map((row) => [row.lecture_id, {
+    currentTime: Number(row.current_time) || 0,
+    duration: Number(row.duration) || 0,
+    updatedAt: row.updated_at
+  }]));
+}
+
+export async function saveCloudProgress(lectureId: string, currentTime: number, duration: number) {
+  const session = await ensureSession();
+  if (!session || !supabase) return;
+
+  const { error } = await supabase.from('user_lecture_progress').upsert(
+    {
+      user_id: session.user.id,
+      lecture_id: lectureId,
+      current_time: Math.max(0, currentTime),
+      duration: Math.max(0, duration),
+      updated_at: new Date().toISOString()
+    },
+    { onConflict: 'user_id,lecture_id' }
+  );
+
+  if (error) console.warn('Supabase progress save failed; local progress remains active.', error.message);
 }

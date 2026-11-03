@@ -35,3 +35,8 @@ The production build registers `public/sw.js`. It caches the application shell, 
 ## Background audio
 
 The player uses the Media Session API to publish the current lecture to supported mobile browsers and installed PWAs. Lock-screen and headset controls support play/pause, previous/next lecture, ±10-second seeking, direct seek position and stop. Playback remains owned by the root audio element while routes change. Browser support and background playback policies still depend on the device and browser; playback must first be started by a user gesture.
+
+
+## Cloud playback progress
+
+Listening position is stored in `user_lecture_progress` per user and lecture. During playback it is uploaded at most once every five seconds, and it is flushed immediately on seek, pause and end. The local progress map remains available as an offline fallback and is merged with newer cloud timestamps after authentication.

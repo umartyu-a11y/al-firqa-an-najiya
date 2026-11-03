@@ -61,3 +61,12 @@
 - [x] Синхронизировать playback state и position state с HTMLAudioElement.
 - [x] Сохранить корневой audio element при смене маршрута и добавить playsInline.
 - [ ] Проверить поведение Media Session на реальном iPhone/Safari и Android/Chrome.
+
+
+## Cloud playback progress
+
+- [x] Добавить таблицу `user_lecture_progress` с RLS.
+- [x] Загружать прогресс после anonymous/persistent auth и объединять его с localStorage по `updated_at`.
+- [x] Сохранять позицию не чаще одного раза в пять секунд.
+- [x] Принудительно сохранять позицию при seek, pause и завершении лекции.
+- [ ] Проверить upsert и восстановление прогресса в конкретном Supabase-проекте.
