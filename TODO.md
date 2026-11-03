@@ -17,9 +17,11 @@
 - [ ] Keep each result linked to its source and related materials and distinguish drafts from published content.
 
 ## 2. Lecture Notes System
-- [ ] Every lecture can have a short summary and a structured detailed outline, key points, terms, referenced evidence, original Arabic where verified, Russian translation where verified, editor notes, conclusions, and linked materials.
-- [ ] Each note section records source/provenance, editorial status, reviewer and revision date; unsupported religious evidence, quotations, translations, attribution, or lecture statements are not invented or published.
-- [ ] Unavailable notes show an honest not-yet-published state rather than fabricated content.
+- [x] The reusable lecture-note model and view support a short summary, structured outline, key points, terms, referenced evidence, verified Arabic text, attributed Russian translation, editor notes, conclusions, and related materials.
+- [x] Sections link to their audio timestamp and relevant evidence; each note records provenance, editorial status, reviewer field and revision date. Unverified claims and working hadith translations are explicitly qualified rather than presented as established publication.
+- [x] Unavailable notes show an honest not-yet-published state rather than fabricated content.
+- [x] Lesson 1 of «Необходимые вопросы для каждого» now has a sourced draft. It is visibly marked as awaiting review; no note content was fabricated for other lessons.
+- [ ] Complete human scholarly/editorial review of Lesson 1 and verify the transcript wording/timestamps against the recording before changing its status to reviewed.
 
 ## 3. Advanced Audio Player
 - [x] Retain the single global audio element, Media Session integration, speed control, sleep timer, seek, position persistence, A–B repeat, repeat lesson, previous/next controls, and ordered cycle playback.

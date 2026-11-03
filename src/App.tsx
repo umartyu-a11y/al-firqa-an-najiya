@@ -25,6 +25,7 @@ import { bookData } from './data/books';
 import { cycleArchives } from './data/cycle-archives';
 import { cycles, lectureData, orderedCycleLectures } from './data/catalog';
 import { BooksPage, CoursesPage } from './CollectionPages';
+import { LectureNotes } from './LectureNotes';
 import type { BookmarkItem, Category, Lecture, LectureProgressEntry, QuizQuestion } from './types';
 import { isSupabaseConfigured } from './lib/supabase';
 import { loadCloudLibrary, loadCloudProgress, saveCloudLibrary, saveCloudProgress } from './lib/cloudLibrary';
@@ -1719,6 +1720,8 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
           </div>
         )}
       </section>
+
+      <LectureNotes lectureId={lecture.id} onSeek={onSeek} />
 
       <section className="panel p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
