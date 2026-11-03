@@ -3,7 +3,9 @@ import type { Dispatch, RefObject, SetStateAction } from 'react';
 import {
   BookOpenText,
   Bookmark,
+  ChevronDown,
   ChevronRight,
+  ChevronUp,
   Clock3,
   Download,
   Headphones,
@@ -1851,10 +1853,39 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, setRate, 
   sleepMinutes: number;
   setSleepMinutes: (value: number) => void;
 }) {
+  const [collapsed, setCollapsed] = useState(false);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
   if (!lecture) return null;
 
+  if (collapsed) {
+    return (
+      <div className="fixed bottom-32 right-3 z-50 md:bottom-3 md:right-5">
+        <button onClick={() => setCollapsed(false)} aria-label="Показать аудиоплеер" title="Показать аудиоплеер" className="inline-flex min-h-12 items-center gap-2 rounded-full border border-black/5 bg-white/95 px-4 py-3 text-sm font-medium text-text shadow-[0_12px_40px_rgba(17,24,32,0.2)] backdrop-blur-xl transition hover:-translate-y-0.5 dark:border-white/10 dark:bg-[#101010]/95 dark:text-darktext">
+          <ChevronUp size={17} aria-hidden="true" />
+          Плеер
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 px-3 pb-3 sm:px-5">
+    <div
+      className="fixed inset-x-0 bottom-0 z-50 px-3 pb-3 sm:px-5"
+      onTouchStart={(event) => {
+        const touch = event.touches[0];
+        touchStart.current = touch ? { x: touch.clientX, y: touch.clientY } : null;
+      }}
+      onTouchEnd={(event) => {
+        const start = touchStart.current;
+        const touch = event.changedTouches[0];
+        touchStart.current = null;
+        if (!start || !touch) return;
+        const deltaY = touch.clientY - start.y;
+        const deltaX = touch.clientX - start.x;
+        if (deltaY > 64 && deltaY > Math.abs(deltaX) * 1.2) setCollapsed(true);
+      }}
+      onTouchCancel={() => { touchStart.current = null; }}
+    >
       <div className="mx-auto max-w-[1360px] rounded-[28px] border border-black/5 bg-white/90 p-3 shadow-[0_18px_60px_rgba(17,24,32,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-[#101010]/90">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex min-w-0 items-center gap-3">
@@ -1869,6 +1900,9 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, setRate, 
               <div className="truncate text-sm font-medium text-text dark:text-darktext">{lecture.title}</div>
               <div className="flex items-center gap-2 truncate text-xs text-muted dark:text-darkmuted"><span>{lecture.author}</span><span aria-live="polite">{isPlaying ? 'Воспроизводится' : 'Пауза'}</span></div>
             </div>
+            <button onClick={() => setCollapsed(true)} aria-label="Свернуть аудиоплеер" title="Свернуть аудиоплеер" className="ml-auto inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/5 bg-[#F7F9FC] text-text transition hover:-translate-y-0.5 dark:border-white/10 dark:bg-[#161616] dark:text-darktext">
+              <ChevronDown size={17} aria-hidden="true" />
+            </button>
           </div>
 
           <div className="flex flex-1 flex-col gap-2 lg:max-w-[640px]">
