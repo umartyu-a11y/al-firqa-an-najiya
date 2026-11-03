@@ -65,3 +65,8 @@ The Library page now exports all locally stored bookmarks and notes from every l
 ## Note and bookmark filters
 
 Library search results can be filtered to all records, note-bearing records or plain bookmarks. They can also be sorted by creation date in newest-first or oldest-first order. Each result displays its detected type and creation position context.
+
+
+## Bookmark tags
+
+Each bookmark can have up to eight comma-separated tags. Tags are normalized, displayed as chips, included in library search and can be selected as a grouping filter. They are also included in TXT/PDF exports.
