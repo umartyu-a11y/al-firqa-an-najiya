@@ -55,3 +55,8 @@ The lecture player can export its bookmarks and notes as a UTF-8 `.txt` file. Th
 ## Full library export
 
 The Library page now exports all locally stored bookmarks and notes from every lecture as one UTF-8 `.txt` file or one print-ready document for “Save as PDF”. Entries include the lecture title, author, timestamp and note text. Empty export buttons remain disabled until at least one bookmark exists.
+
+
+## Library search
+
+“My Library” includes a local search over saved bookmarks and notes. It matches lecture title, author, cycle, timestamp and note text, highlights matching fragments, shows the result count and opens the related lecture from a result.

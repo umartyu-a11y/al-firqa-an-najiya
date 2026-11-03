@@ -129,6 +129,7 @@ function App() {
 
   const [route, setRoute] = useState<'home' | 'catalog' | 'library' | 'cycle' | 'author' | 'lecture' | 'category' | 'about' | 'resource'>(() => parseHash());
   const [search, setSearch] = useState('');
+  const [librarySearch, setLibrarySearch] = useState('');
   const [sort, setSort] = useState<SortType>('newest');
   const [categoryFilter, setCategoryFilter] = useState<Category | 'Все'>('Все');
   const [authorFilter, setAuthorFilter] = useState<string>('Все');
@@ -670,6 +671,8 @@ function App() {
           bookmarks={bookmarks}
           onExportAllText={exportAllBookmarksText}
           onExportAllPdf={exportAllBookmarksPdf}
+          librarySearch={librarySearch}
+          setLibrarySearch={setLibrarySearch}
         />
       );
     }
@@ -1575,7 +1578,7 @@ function CategoryPage({ category, lectures, favorites, onToggleFavorite, onOpenL
   );
 }
 
-function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpenLecture, onToggleFavorite, favorites, getProgress, cloudReady, cloudEnabled, authSession, onOpenAuth, onSignOut, bookmarks, onExportAllText, onExportAllPdf }: {
+function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpenLecture, onToggleFavorite, favorites, getProgress, cloudReady, cloudEnabled, authSession, onOpenAuth, onSignOut, bookmarks, onExportAllText, onExportAllPdf, librarySearch, setLibrarySearch }: {
   continueLectures: Lecture[];
   favoriteLectures: Lecture[];
   recentLectures: Lecture[];
@@ -1591,7 +1594,15 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
   bookmarks: BookmarkItem[];
   onExportAllText: () => void;
   onExportAllPdf: () => void;
+  librarySearch: string;
+  setLibrarySearch: (value: string) => void;
 }) {
+  const normalizedSearch = librarySearch.trim().toLowerCase();
+  const matchingBookmarks = bookmarks.map((item) => ({ item, lecture: getLectureById(item.lectureId) })).filter((entry): entry is { item: BookmarkItem; lecture: Lecture } => Boolean(entry.lecture)).filter(({ item, lecture }) => {
+    const haystack = [lecture.title, lecture.author, lecture.cycle, formatDuration(item.time), item.note || ''].join(' ').toLowerCase();
+    return !normalizedSearch || haystack.includes(normalizedSearch);
+  });
+
   return (
     <main className="space-y-6">
       <section className="panel p-6">
@@ -1614,6 +1625,11 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
       <section className="panel flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div><div className="text-sm font-medium text-text dark:text-darktext">Экспорт библиотеки</div><p className="mt-1 text-sm text-muted dark:text-darkmuted">Все закладки и заметки со всех лекций: {bookmarks.length}</p></div>
         <div className="flex shrink-0 gap-2"><button disabled={!bookmarks.length} onClick={onExportAllText} className="inline-flex items-center gap-1 rounded-full border border-black/5 px-3 py-2 text-xs text-muted disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:text-darkmuted">TXT</button><button disabled={!bookmarks.length} onClick={onExportAllPdf} className="inline-flex items-center gap-1 rounded-full border border-black/5 px-3 py-2 text-xs text-muted disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:text-darkmuted">PDF</button></div>
+      </section>
+
+      <section className="panel p-5">
+        <div className="flex items-center gap-2 rounded-2xl border border-black/5 bg-[#F7F9FC] px-4 py-3 dark:border-white/10 dark:bg-[#161616]"><Search size={16} className="text-muted dark:text-darkmuted" /><input value={librarySearch} onChange={(event) => setLibrarySearch(event.target.value)} placeholder="Найти в заметках и закладках…" aria-label="Поиск по сохранённым заметкам и закладкам" className="w-full bg-transparent text-sm text-text outline-none placeholder:text-muted dark:text-darktext dark:placeholder:text-darkmuted" /></div>
+        {normalizedSearch && <div className="mt-4 space-y-3"><div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Найдено: {matchingBookmarks.length}</div>{matchingBookmarks.length ? matchingBookmarks.map(({ item, lecture }) => <button key={item.id} onClick={() => onOpenLecture(lecture.id)} className="block w-full rounded-2xl border border-black/5 bg-[#F7F9FC] p-4 text-left transition hover:border-[#B8874A]/40 dark:border-white/10 dark:bg-[#161616]"><div className="flex items-center justify-between gap-3"><div className="font-medium text-text dark:text-darktext"><HighlightedText text={lecture.title} query={librarySearch} /></div><span className="shrink-0 text-sm text-[#9B6D32] dark:text-[#E0821E]">{formatDuration(item.time)}</span></div><div className="mt-1 text-xs text-muted dark:text-darkmuted"><HighlightedText text={lecture.author} query={librarySearch} /></div>{item.note && <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted dark:text-darkmuted"><HighlightedText text={item.note} query={librarySearch} /></p>}</button>) : <div className="rounded-2xl bg-[#F7F9FC] p-4 text-sm text-muted dark:bg-[#161616] dark:text-darkmuted">В сохранённых заметках и закладках ничего не найдено.</div>}</div>}
       </section>
 
       <section className="space-y-4">
