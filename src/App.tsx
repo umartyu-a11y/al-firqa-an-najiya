@@ -484,6 +484,7 @@ function App() {
           onToggleFavorite={toggleFavorite}
           onOpenLecture={handleOpenLecture}
           getProgress={getAudioProgress}
+          highlightQuery={search}
         />
       );
     }
@@ -899,7 +900,8 @@ function CatalogPage({
   favorites,
   onToggleFavorite,
   onOpenLecture,
-  getProgress
+  getProgress,
+  highlightQuery
 }: {
   lectures: Lecture[];
   search: string;
@@ -916,6 +918,7 @@ function CatalogPage({
   onToggleFavorite: (id: string) => void;
   onOpenLecture: (id: string) => void;
   getProgress: (id: string) => number;
+  highlightQuery: string;
 }) {
   return (
     <main className="space-y-6">
@@ -985,6 +988,13 @@ function CatalogPage({
         </div>
       </section>
 
+      {search.trim() && (
+        <div className="flex flex-col gap-1 text-sm text-muted dark:text-darkmuted sm:flex-row sm:items-center sm:justify-between">
+          <span>Найдено лекций: <strong className="font-medium text-text dark:text-darktext">{lectures.length}</strong></span>
+          <span>Поиск по названию, автору, циклу, описанию, тегам и имени файла</span>
+        </div>
+      )}
+
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {lectures.length ? (
           lectures.map((lecture) => (
@@ -995,6 +1005,7 @@ function CatalogPage({
               isFavorite={favorites.includes(lecture.id)}
               onToggleFavorite={() => onToggleFavorite(lecture.id)}
               progress={getProgress(lecture.id)}
+              highlightQuery={highlightQuery}
             />
           ))
         ) : (
@@ -1396,20 +1407,29 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
   );
 }
 
-function LectureCard({ lecture, onOpen, isFavorite, onToggleFavorite, progress }: {
+function HighlightedText({ text, query }: { text: string; query: string }) {
+  const normalizedQuery = query.trim();
+  if (!normalizedQuery) return <>{text}</>;
+  const escaped = normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const parts = text.split(new RegExp(`(${escaped})`, 'ig'));
+  return <>{parts.map((part, index) => part.toLowerCase() === normalizedQuery.toLowerCase() ? <mark key={`${part}-${index}`} className="search-highlight">{part}</mark> : part)}</>;
+}
+
+function LectureCard({ lecture, onOpen, isFavorite, onToggleFavorite, progress, highlightQuery }: {
   lecture: Lecture;
   onOpen: () => void;
   isFavorite: boolean;
   onToggleFavorite: () => void;
   progress: number;
+  highlightQuery?: string;
 }) {
   return (
     <article className="panel group p-0">
       <div onClick={onOpen} className="cursor-pointer p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="text-[10px] uppercase tracking-[0.12em] text-muted dark:text-darkmuted">{lecture.category}</div>
-            <h3 className="mt-2 font-display text-2xl leading-tight text-text dark:text-darktext">{lecture.title}</h3>
+            <div className="text-[10px] uppercase tracking-[0.12em] text-muted dark:text-darkmuted"><HighlightedText text={lecture.category} query={highlightQuery || ''} /></div>
+            <h3 className="mt-2 font-display text-2xl leading-tight text-text dark:text-darktext"><HighlightedText text={lecture.title} query={highlightQuery || ''} /></h3>
           </div>
 
           <button className="rounded-full border border-black/5 bg-white p-2 text-sm dark:border-white/10 dark:bg-[#101010]" onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }} aria-label="Toggle favorite">
@@ -1418,8 +1438,8 @@ function LectureCard({ lecture, onOpen, isFavorite, onToggleFavorite, progress }
         </div>
 
         <div className="mt-4 flex items-center justify-between text-sm text-muted dark:text-darkmuted">
-          <span>{lecture.author}</span>
-          <span>{lecture.cycle}</span>
+          <span><HighlightedText text={lecture.author} query={highlightQuery || ''} /></span>
+          <span><HighlightedText text={lecture.cycle} query={highlightQuery || ''} /></span>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3 text-xs text-muted dark:text-darkmuted">
@@ -1427,7 +1447,7 @@ function LectureCard({ lecture, onOpen, isFavorite, onToggleFavorite, progress }
           <div className="flex items-center justify-end gap-1"><Clock3 size={13} /> {formatDuration(lecture.duration)}</div>
         </div>
 
-        <p className="mt-4 text-sm text-muted dark:text-darkmuted">{lecture.description}</p>
+        <p className="mt-4 text-sm text-muted dark:text-darkmuted"><HighlightedText text={lecture.description} query={highlightQuery || ''} /></p>
 
         {progress > 0 && (
           <div className="mt-4">
