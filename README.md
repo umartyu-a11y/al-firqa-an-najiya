@@ -60,3 +60,8 @@ The Library page now exports all locally stored bookmarks and notes from every l
 ## Library search
 
 “My Library” includes a local search over saved bookmarks and notes. It matches lecture title, author, cycle, timestamp and note text, highlights matching fragments, shows the result count and opens the related lecture from a result.
+
+
+## Note and bookmark filters
+
+Library search results can be filtered to all records, note-bearing records or plain bookmarks. They can also be sorted by creation date in newest-first or oldest-first order. Each result displays its detected type and creation position context.
