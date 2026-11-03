@@ -1,3 +1,8 @@
+## Automatic next lesson
+- [x] When a lesson reaches its natural end, automatically start the next lesson in the same ordered course.
+- [x] If “Repeat lesson” is enabled, replay the current lesson instead of advancing.
+- [x] At the final lesson, stop and remain paused rather than wrapping automatically to the first lesson.
+
 ## Playback position recovery
 - [x] Save the current lecture and latest playback position locally when the page is hidden or unloaded.
 - [x] After reload, reopen the saved lecture and seek to its saved time only after audio metadata is available.

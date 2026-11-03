@@ -203,6 +203,7 @@ function App() {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const restoringPosition = useRef(false);
+  const handlingTrackEnd = useRef(false);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -556,9 +557,12 @@ function App() {
   const clearRepeat = () => setRepeatSegment({ start: null, end: null, active: false });
 
   const handleEnded = () => {
-    persistPlaybackProgress(currentLectureId, audioRef.current?.currentTime || playerState.currentTime, audioRef.current?.duration || playerState.duration, true);
-    if (repeatLesson && audioRef.current) {
-      audioRef.current.currentTime = 0;
+    const audio = audioRef.current;
+    handlingTrackEnd.current = true;
+    persistPlaybackProgress(currentLectureId, audio?.currentTime || playerState.currentTime, audio?.duration || playerState.duration, true);
+    if (repeatLesson && audio) {
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
       setPlayerState((prev) => ({ ...prev, currentTime: 0, isPlaying: true }));
       return;
     }
@@ -567,7 +571,12 @@ function App() {
     }
     const playlist = currentLecture ? orderedCycleLectures(currentLecture.cycleId) : lectureData;
     const currentIndex = playlist.findIndex((lecture) => lecture.id === currentLectureId);
-    const next = playlist[currentIndex + 1] || playlist[0];
+    const next = playlist[currentIndex + 1];
+    if (!next) {
+      setPlayerState((prev) => ({ ...prev, isPlaying: false, currentTime: audio && Number.isFinite(audio.duration) ? audio.duration : prev.currentTime }));
+      if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+      return;
+    }
     setCurrentLectureId(next.id);
     setPlayerState((prev) => ({ ...prev, isPlaying: true, currentTime: 0 }));
     pushHistory(next.id);
@@ -1006,6 +1015,7 @@ function App() {
         onEnded={handleEnded}
         onPause={() => {
           const audio = audioRef.current;
+          if (handlingTrackEnd.current || restoringPosition.current) return;
           if (!restoringPosition.current) {
             if (audio && audio.readyState >= 1) {
               persistPlaybackProgress(currentLectureId, audio.currentTime, audio.duration || playerState.duration, true);
@@ -1014,8 +1024,13 @@ function App() {
             setPlayerState((prev) => ({ ...prev, isPlaying: false }));
           }
         }}
-        onPlay={() => { navigator.mediaSession && (navigator.mediaSession.playbackState = 'playing'); setPlayerState((prev) => ({ ...prev, isPlaying: true })); }}
+        onPlay={() => {
+          handlingTrackEnd.current = false;
+          navigator.mediaSession && (navigator.mediaSession.playbackState = 'playing');
+          setPlayerState((prev) => ({ ...prev, isPlaying: true }));
+        }}
         onError={() => {
+          handlingTrackEnd.current = false;
           restoringPosition.current = false;
           setPlayerState((prev) => ({ ...prev, isPlaying: false }));
         }}
