@@ -36,3 +36,42 @@ export interface Cycle {
   totalDuration: number;
   coverTone: string;
 }
+
+export interface BookmarkItem {
+  id: string;
+  lectureId: string;
+  time: number;
+  createdAt: string;
+  note?: string;
+  tags?: string[];
+}
+
+export interface QuizQuestion {
+  id: string;
+  prompt: string;
+  options: string[];
+  correctIndex: number;
+}
+
+export interface LectureProgressEntry {
+  currentTime: number;
+  duration: number;
+  updatedAt: string;
+}
+
+export interface LocalLibraryBackup {
+  format: 'al-firqa-an-najiya-local-library';
+  version: 1;
+  exportedAt: string;
+  favorites: string[];
+  history: string[];
+  progress: Record<string, LectureProgressEntry>;
+  bookmarks: BookmarkItem[];
+  quizzes: Record<string, QuizQuestion[]>;
+  preferences: {
+    theme: 'light' | 'dark';
+    volume: number;
+    rate: number;
+    currentLectureId: string | null;
+  };
+}

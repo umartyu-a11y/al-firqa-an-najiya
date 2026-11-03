@@ -56,6 +56,10 @@ The lecture player can export its bookmarks and notes as a UTF-8 `.txt` file. Th
 
 The Library page now exports all locally stored bookmarks and notes from every lecture as one UTF-8 `.txt` file or one print-ready document for “Save as PDF”. Entries include the lecture title, author, timestamp and note text. Empty export buttons remain disabled until at least one bookmark exists.
 
+## Local library backup
+
+The Library page can download a versioned JSON backup of local favorites, listening history and progress, bookmarks/notes, user-created quiz questions and preferences. Restore accepts AL-FIRQA AN-NAJIYA version-1 JSON files up to 5 MiB, validates lecture IDs and record shapes, and merges with existing device data rather than clearing it. Audio files and cloud credentials are never included. Backups are not encrypted and may contain private notes; store the downloaded file securely.
+
 
 ## Library search
 

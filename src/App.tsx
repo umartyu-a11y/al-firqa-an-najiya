@@ -25,10 +25,11 @@ import { bookData } from './data/books';
 import { cycleArchives } from './data/cycle-archives';
 import { cycles, lectureData, orderedCycleLectures } from './data/catalog';
 import { BooksPage, CoursesPage } from './CollectionPages';
-import type { Category, Lecture } from './types';
+import type { BookmarkItem, Category, Lecture, LectureProgressEntry, QuizQuestion } from './types';
 import { isSupabaseConfigured } from './lib/supabase';
 import { loadCloudLibrary, loadCloudProgress, saveCloudLibrary, saveCloudProgress } from './lib/cloudLibrary';
 import { getAuthSession, requestPersistentAccess, signOutUser, subscribeToAuth } from './lib/auth';
+import { createLocalLibraryBackup, MAX_LOCAL_BACKUP_BYTES, parseLocalLibraryBackup } from './lib/localBackup';
 import type { Session } from '@supabase/supabase-js';
 
 type SortType = 'newest' | 'title' | 'author' | 'duration';
@@ -36,9 +37,6 @@ type Theme = 'light' | 'dark';
 type ResourceType = 'books' | 'texts' | 'dictionary' | 'courses';
 type LibrarySearchType = 'all' | 'note' | 'bookmark';
 type LibrarySearchSort = 'newest' | 'oldest';
-type BookmarkItem = { id: string; lectureId: string; time: number; createdAt: string; note?: string; tags?: string[] };
-type QuizQuestion = { id: string; prompt: string; options: string[]; correctIndex: number };
-
 const readQuizQuestions = (lectureId: string): QuizQuestion[] => {
   try {
     const parsed = JSON.parse(localStorage.getItem(`affn-quiz-${lectureId}`) || '[]');
@@ -152,6 +150,7 @@ function App() {
   const [sort, setSort] = useState<SortType>('newest');
   const [categoryFilter, setCategoryFilter] = useState<Category | 'Все'>('Все');
   const [authorFilter, setAuthorFilter] = useState<string>('Все');
+  const [cycleFilter, setCycleFilter] = useState<string>('Все');
   const [favorites, setFavorites] = useState<string[]>(() => {
     try {
       return JSON.parse(localStorage.getItem(storageKeys.favorites) || '[]');
@@ -168,6 +167,9 @@ function App() {
   });
   const [currentLectureId, setCurrentLectureId] = useState<string | null>(() => {
     try {
+      const routeMatch = window.location.hash.match(/^#\/lecture\/(.+)$/);
+      const routeLectureId = routeMatch ? decodeURIComponent(routeMatch[1]) : null;
+      if (routeLectureId && getLectureById(routeLectureId)) return routeLectureId;
       const saved = localStorage.getItem('affn-current-lecture');
       return saved || null;
     } catch {
@@ -190,6 +192,7 @@ function App() {
   const [authEmail, setAuthEmail] = useState('');
   const [authBusy, setAuthBusy] = useState(false);
   const [authMessage, setAuthMessage] = useState('');
+  const [backupMessage, setBackupMessage] = useState('');
 
   const [playerState, setPlayerState] = useState({
     isPlaying: false,
@@ -205,6 +208,7 @@ function App() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const restoringPosition = useRef(false);
   const handlingTrackEnd = useRef(false);
+  const pendingUserLectureNavigation = useRef<string | null>(null);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -217,10 +221,30 @@ function App() {
   }, [playerState.volume]);
 
   useEffect(() => {
-    const handleHashChange = () => setRoute(parseHash());
+    const handleHashChange = () => {
+      const nextRoute = parseHash();
+      if (nextRoute === 'lecture') {
+        const routeMatch = window.location.hash.match(/^#\/lecture\/(.+)$/);
+        let lectureId: string | null = null;
+        try {
+          lectureId = routeMatch ? decodeURIComponent(routeMatch[1]) : null;
+        } catch {
+          lectureId = null;
+        }
+        if (lectureId && getLectureById(lectureId)) {
+          if (pendingUserLectureNavigation.current === lectureId) {
+            pendingUserLectureNavigation.current = null;
+          } else if (lectureId !== currentLectureId) {
+            setCurrentLectureId(lectureId);
+            setPlayerState((prev) => ({ ...prev, isPlaying: false, currentTime: getAudioProgress(lectureId!) }));
+          }
+        }
+      }
+      setRoute(nextRoute);
+    };
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+  }, [currentLectureId]);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -377,6 +401,7 @@ function App() {
   };
 
   const uniqueAuthors = ['Все', ...new Set(lectureData.map((lecture) => lecture.author))];
+  const uniqueCycles = ['Все', ...new Set(lectureData.map((lecture) => lecture.cycle))];
 
   const visibleLectures = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -388,6 +413,10 @@ function App() {
 
     if (authorFilter !== 'Все') {
       list = list.filter((lecture) => lecture.author === authorFilter);
+    }
+
+    if (cycleFilter !== 'Все') {
+      list = list.filter((lecture) => lecture.cycle === cycleFilter);
     }
 
     if (query) {
@@ -423,7 +452,7 @@ function App() {
     });
 
     return list;
-  }, [search, sort, categoryFilter, authorFilter]);
+  }, [search, sort, categoryFilter, authorFilter, cycleFilter]);
 
   const currentLecture = currentLectureId ? lectureMap[currentLectureId] : null;
 
@@ -644,6 +673,8 @@ function App() {
   }, [currentLectureId, currentLecture, playerState.isPlaying]);
 
   const handleOpenLecture = (lectureId: string) => {
+    const targetHash = `#/lecture/${lectureId}`;
+    pendingUserLectureNavigation.current = window.location.hash === targetHash ? null : lectureId;
     setCurrentLectureId(lectureId);
     setPlayerState((prev) => ({ ...prev, isPlaying: true, currentTime: getAudioProgress(lectureId) }));
     pushHistory(lectureId);
@@ -704,6 +735,96 @@ function App() {
     window.setTimeout(() => popup.print(), 250);
   };
 
+  const exportLocalLibraryBackup = () => {
+    let progress: Record<string, LectureProgressEntry> = {};
+    try {
+      const stored = JSON.parse(localStorage.getItem(storageKeys.progress) || '{}');
+      if (stored && typeof stored === 'object' && !Array.isArray(stored)) progress = stored as Record<string, LectureProgressEntry>;
+    } catch {
+      progress = {};
+    }
+
+    const quizzes: Record<string, QuizQuestion[]> = {};
+    lectureData.forEach((lecture) => {
+      try {
+        const raw = localStorage.getItem(`affn-quiz-${lecture.id}`);
+        if (!raw) return;
+        const stored = JSON.parse(raw);
+        if (Array.isArray(stored) && stored.length) quizzes[lecture.id] = stored as QuizQuestion[];
+      } catch {
+        // Skip a damaged per-lecture quiz entry; the rest of the backup remains usable.
+      }
+    });
+
+    const backup = parseLocalLibraryBackup(JSON.stringify(createLocalLibraryBackup({
+      favorites,
+      history,
+      progress,
+      bookmarks,
+      quizzes,
+      preferences: { theme, volume: playerState.volume, rate: playerState.rate, currentLectureId }
+    })));
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `al-firqa-an-najiya-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setBackupMessage(`Резервная копия подготовлена: ${backup.favorites.length} избранных, ${backup.progress ? Object.keys(backup.progress).length : 0} позиций, ${backup.bookmarks.length} заметок/закладок и ${Object.keys(backup.quizzes).length} наборов тестов.`);
+  };
+
+  const importLocalLibraryBackup = async (file: File) => {
+    if (file.size > MAX_LOCAL_BACKUP_BYTES) {
+      setBackupMessage('Файл больше допустимых 5 MiB. Выберите резервную копию AL-FIRQA AN-NAJIYA меньшего размера.');
+      return;
+    }
+    try {
+      const backup = parseLocalLibraryBackup(await file.text());
+
+      let mergedProgress: Record<string, LectureProgressEntry> = {};
+      try {
+        const stored = JSON.parse(localStorage.getItem(storageKeys.progress) || '{}');
+        if (stored && typeof stored === 'object' && !Array.isArray(stored)) mergedProgress = stored as Record<string, LectureProgressEntry>;
+      } catch {
+        mergedProgress = {};
+      }
+      Object.entries(backup.progress).forEach(([id, incoming]) => {
+        const existingDate = Date.parse(mergedProgress[id]?.updatedAt || '') || 0;
+        if (!mergedProgress[id] || Date.parse(incoming.updatedAt) > existingDate) mergedProgress[id] = incoming;
+      });
+      localStorage.setItem(storageKeys.progress, JSON.stringify(mergedProgress));
+
+      Object.entries(backup.quizzes).forEach(([lectureId, incoming]) => {
+        const local = readQuizQuestions(lectureId);
+        const merged = new Map(incoming.map((question) => [question.id, question]));
+        local.forEach((question) => merged.set(question.id, question));
+        localStorage.setItem(`affn-quiz-${lectureId}`, JSON.stringify(Array.from(merged.values()).slice(0, 500)));
+      });
+
+      setFavorites((local) => Array.from(new Set([...backup.favorites, ...local])));
+      setHistory((local) => Array.from(new Set([...backup.history, ...local])).slice(0, 12));
+      setBookmarks((local) => {
+        const merged = new Map(backup.bookmarks.map((item) => [item.id, item]));
+        local.forEach((item) => merged.set(item.id, item));
+        return Array.from(merged.values()).slice(-100);
+      });
+
+      setTheme(backup.preferences.theme);
+      const canRestoreSelectedLecture = route !== 'lecture' && !playerState.isPlaying && backup.preferences.currentLectureId;
+      if (canRestoreSelectedLecture) {
+        setCurrentLectureId(backup.preferences.currentLectureId);
+        setPlayerState((local) => ({ ...local, isPlaying: false, currentTime: getAudioProgress(backup.preferences.currentLectureId!), volume: backup.preferences.volume, rate: backup.preferences.rate }));
+      } else {
+        setPlayerState((local) => ({ ...local, volume: backup.preferences.volume, rate: backup.preferences.rate }));
+      }
+
+      setBackupMessage(`Копия от ${new Date(backup.exportedAt).toLocaleString('ru-RU')} объединена с этой библиотекой. Совпадающие локальные закладки и тесты сохранены; текущий экран и воспроизведение не запускаются автоматически.`);
+    } catch (error) {
+      setBackupMessage(error instanceof Error ? error.message : 'Не удалось прочитать файл резервной копии.');
+    }
+  };
+
   const favoriteLectures = lectureData.filter((lecture) => favorites.includes(lecture.id));
   const continueLectures = lectureData.filter((lecture) => getAudioProgress(lecture.id) > 15);
   const recentLectures = history.map((id) => getLectureById(id)).filter(Boolean) as Lecture[];
@@ -727,6 +848,9 @@ function App() {
           bookmarks={bookmarks}
           onExportAllText={exportAllBookmarksText}
           onExportAllPdf={exportAllBookmarksPdf}
+          onExportBackup={exportLocalLibraryBackup}
+          onImportBackup={importLocalLibraryBackup}
+          backupMessage={backupMessage}
           librarySearch={librarySearch}
           setLibrarySearch={setLibrarySearch}
           librarySearchType={librarySearchType}
@@ -749,7 +873,10 @@ function App() {
           setCategoryFilter={setCategoryFilter}
           authorFilter={authorFilter}
           setAuthorFilter={setAuthorFilter}
+          cycleFilter={cycleFilter}
+          setCycleFilter={setCycleFilter}
           uniqueAuthors={uniqueAuthors}
+          uniqueCycles={uniqueCycles}
           categories={categories}
           favorites={favorites}
           onToggleFavorite={toggleFavorite}
@@ -891,7 +1018,7 @@ function App() {
               </div>
             </button>
 
-            <nav className="hidden items-center gap-8 md:flex">
+            <nav className="hidden items-center gap-8 lg:flex">
               <button className="text-sm text-text/80 transition hover:text-text dark:text-darktext/80 dark:hover:text-darktext" onClick={() => navigate('/catalog')}>
                 Лекции
               </button>
@@ -910,10 +1037,11 @@ function App() {
             </nav>
 
             <div className="flex items-center gap-2">
-              <div className="hidden items-center gap-2 rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 text-sm text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darkmuted md:flex">
+              <div className="hidden items-center gap-2 rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 text-sm text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darkmuted lg:flex">
                 <Search size={15} />
                 <input
                   value={search}
+                  aria-label="Поиск по каталогу лекций"
                   onChange={(e) => {
                     setSearch(e.target.value);
                     if (currentView !== 'catalog') navigate('/catalog');
@@ -944,7 +1072,7 @@ function App() {
 
         {renderRoute()}
 
-        <nav aria-label="Быстрая навигация" className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-4 gap-1 rounded-2xl border border-black/5 bg-white/90 p-2 shadow-[0_18px_60px_rgba(17,24,32,0.14)] backdrop-blur-xl md:hidden dark:border-white/10 dark:bg-[#101010]/90">
+        <nav aria-label="Быстрая навигация" className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-4 gap-1 rounded-2xl border border-black/5 bg-white/90 p-2 shadow-[0_18px_60px_rgba(17,24,32,0.14)] backdrop-blur-xl lg:hidden dark:border-white/10 dark:bg-[#101010]/90">
           {[
             { label: 'Главная', icon: <Sparkles size={16} />, path: '/' },
             { label: 'Лекции', icon: <BookOpenText size={16} />, path: '/catalog' },
@@ -1139,7 +1267,10 @@ function CatalogPage({
   setCategoryFilter,
   authorFilter,
   setAuthorFilter,
+  cycleFilter,
+  setCycleFilter,
   uniqueAuthors,
+  uniqueCycles,
   categories,
   favorites,
   onToggleFavorite,
@@ -1156,7 +1287,10 @@ function CatalogPage({
   setCategoryFilter: (value: Category | 'Все') => void;
   authorFilter: string;
   setAuthorFilter: (value: string) => void;
+  cycleFilter: string;
+  setCycleFilter: (value: string) => void;
   uniqueAuthors: string[];
+  uniqueCycles: string[];
   categories: Category[];
   favorites: string[];
   onToggleFavorite: (id: string) => void;
@@ -1164,6 +1298,8 @@ function CatalogPage({
   getProgress: (id: string) => number;
   highlightQuery: string;
 }) {
+  const hasActiveFilters = Boolean(search.trim()) || categoryFilter !== 'Все' || authorFilter !== 'Все' || cycleFilter !== 'Все' || sort !== 'newest';
+
   return (
     <main className="space-y-6">
       <section className="panel p-5">
@@ -1177,6 +1313,7 @@ function CatalogPage({
             <Search size={16} />
             <input
               value={search}
+              aria-label="Поиск по лекциям"
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Найти лекцию, шейха или тему…"
               className="w-full bg-transparent outline-none placeholder:text-muted dark:placeholder:text-darkmuted md:w-72"
@@ -1184,10 +1321,11 @@ function CatalogPage({
           </div>
         </div>
 
-        <div className="mt-5 grid gap-3 md:grid-cols-3">
+        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-2xl border border-black/5 bg-[#F7F9FC] p-3 dark:border-white/10 dark:bg-[#161616]">
-            <div className="mb-2 text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Категория</div>
+            <label htmlFor="catalog-category" className="mb-2 block text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Категория</label>
             <select
+              id="catalog-category"
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value as Category | 'Все')}
               className="w-full bg-transparent text-sm text-text outline-none dark:text-darktext"
@@ -1202,8 +1340,9 @@ function CatalogPage({
           </div>
 
           <div className="rounded-2xl border border-black/5 bg-[#F7F9FC] p-3 dark:border-white/10 dark:bg-[#161616]">
-            <div className="mb-2 text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Автор</div>
+            <label htmlFor="catalog-author" className="mb-2 block text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Автор</label>
             <select
+              id="catalog-author"
               value={authorFilter}
               onChange={(e) => setAuthorFilter(e.target.value)}
               className="w-full bg-transparent text-sm text-text outline-none dark:text-darktext"
@@ -1217,8 +1356,21 @@ function CatalogPage({
           </div>
 
           <div className="rounded-2xl border border-black/5 bg-[#F7F9FC] p-3 dark:border-white/10 dark:bg-[#161616]">
-            <div className="mb-2 text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Сортировка</div>
+            <label htmlFor="catalog-cycle" className="mb-2 block text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Учебный цикл</label>
             <select
+              id="catalog-cycle"
+              value={cycleFilter}
+              onChange={(e) => setCycleFilter(e.target.value)}
+              className="w-full bg-transparent text-sm text-text outline-none dark:text-darktext"
+            >
+              {uniqueCycles.map((cycle) => <option key={cycle} value={cycle}>{cycle === 'Все' ? 'Все циклы' : cycle}</option>)}
+            </select>
+          </div>
+
+          <div className="rounded-2xl border border-black/5 bg-[#F7F9FC] p-3 dark:border-white/10 dark:bg-[#161616]">
+            <label htmlFor="catalog-sort" className="mb-2 block text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Сортировка</label>
+            <select
+              id="catalog-sort"
               value={sort}
               onChange={(e) => setSort(e.target.value as SortType)}
               className="w-full bg-transparent text-sm text-text outline-none dark:text-darktext"
@@ -1230,14 +1382,19 @@ function CatalogPage({
             </select>
           </div>
         </div>
+        {hasActiveFilters && (
+          <div className="mt-4 flex justify-end">
+            <button type="button" onClick={() => { setSearch(''); setCategoryFilter('Все'); setAuthorFilter('Все'); setCycleFilter('Все'); setSort('newest'); }} className="rounded-full border border-black/10 px-3 py-2 text-sm text-muted transition hover:bg-black/5 dark:border-white/10 dark:text-darkmuted dark:hover:bg-white/10">
+              Сбросить поиск и фильтры
+            </button>
+          </div>
+        )}
       </section>
 
-      {search.trim() && (
-        <div className="flex flex-col gap-1 text-sm text-muted dark:text-darkmuted sm:flex-row sm:items-center sm:justify-between">
-          <span>Найдено лекций: <strong className="font-medium text-text dark:text-darktext">{lectures.length}</strong></span>
-          <span>Поиск по названию, автору, циклу, описанию, тегам и имени файла</span>
-        </div>
-      )}
+      <div role="status" aria-live="polite" className="flex flex-col gap-1 text-sm text-muted dark:text-darkmuted sm:flex-row sm:items-center sm:justify-between">
+        <span>Найдено лекций: <strong className="font-medium text-text dark:text-darktext">{lectures.length}</strong></span>
+        <span>Поиск по метаданным и описаниям; аудиотранскрипты пока не индексированы.</span>
+      </div>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {lectures.length ? (
@@ -1487,8 +1644,8 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Позиция воспроизведения</label>
-                <input type="range" min={0} max={playerState.duration || lecture.duration} value={playerState.currentTime} onChange={(e) => onSeek(Number(e.target.value))} className="w-full accent-[#B8874A] dark:accent-[#E0821E]" />
+                <label htmlFor="lecture-seek" className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Позиция воспроизведения</label>
+                <input id="lecture-seek" type="range" min={0} max={playerState.duration || lecture.duration} value={playerState.currentTime} onChange={(e) => onSeek(Number(e.target.value))} className="w-full accent-[#B8874A] dark:accent-[#E0821E]" />
               </div>
             </div>
           </div>
@@ -1650,7 +1807,7 @@ function CategoryPage({ category, lectures, favorites, onToggleFavorite, onOpenL
   );
 }
 
-function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpenLecture, onToggleFavorite, favorites, getProgress, cloudReady, cloudEnabled, authSession, onOpenAuth, onSignOut, bookmarks, onExportAllText, onExportAllPdf, librarySearch, setLibrarySearch, librarySearchType, setLibrarySearchType, librarySearchSort, setLibrarySearchSort }: {
+function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpenLecture, onToggleFavorite, favorites, getProgress, cloudReady, cloudEnabled, authSession, onOpenAuth, onSignOut, bookmarks, onExportAllText, onExportAllPdf, onExportBackup, onImportBackup, backupMessage, librarySearch, setLibrarySearch, librarySearchType, setLibrarySearchType, librarySearchSort, setLibrarySearchSort }: {
   continueLectures: Lecture[];
   favoriteLectures: Lecture[];
   recentLectures: Lecture[];
@@ -1666,6 +1823,9 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
   bookmarks: BookmarkItem[];
   onExportAllText: () => void;
   onExportAllPdf: () => void;
+  onExportBackup: () => void;
+  onImportBackup: (file: File) => Promise<void>;
+  backupMessage: string;
   librarySearch: string;
   setLibrarySearch: (value: string) => void;
   librarySearchType: LibrarySearchType;
@@ -1675,6 +1835,7 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
 }) {
   const normalizedSearch = librarySearch.trim().toLowerCase();
   const [selectedTag, setSelectedTag] = useState('all');
+  const backupFileRef = useRef<HTMLInputElement>(null);
   const availableTags = Array.from(new Set(bookmarks.flatMap((item) => item.tags || []))).sort((a, b) => a.localeCompare(b, 'ru'));
   const matchingBookmarks = bookmarks.map((item) => ({ item, lecture: getLectureById(item.lectureId) })).filter((entry): entry is { item: BookmarkItem; lecture: Lecture } => Boolean(entry.lecture)).filter(({ item, lecture }) => {
     const haystack = [lecture.title, lecture.author, lecture.cycle, formatDuration(item.time), item.note || '', ...(item.tags || [])].join(' ').toLowerCase();
@@ -1705,8 +1866,24 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
         <div className="panel p-5"><div className="text-sm text-muted dark:text-darkmuted">Последние открытые</div><div className="mt-3 font-display text-3xl text-text dark:text-darktext">{recentLectures.length}</div></div>
       </section>
 
+      <section className="panel space-y-5 p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 className="text-sm font-medium text-text dark:text-darktext">Резервная копия на устройстве</h2>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-muted dark:text-darkmuted">JSON включает избранное, историю, позиции, заметки/закладки, локальные тесты и настройки. Импорт объединяет данные, не заменяя совпадающие записи на этом устройстве; аудиофайлы и облачные ключи не включаются.</p>
+            <p className="mt-2 text-xs leading-5 text-muted dark:text-darkmuted">Файл содержит личные заметки в незашифрованном виде — храните его приватно. Максимальный размер импорта: 5 MiB.</p>
+          </div>
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <button type="button" onClick={onExportBackup} className="rounded-full bg-[#111820] px-4 py-2.5 text-sm text-white dark:bg-[#F5F5F5] dark:text-[#111820]">Скачать JSON</button>
+            <button type="button" onClick={() => backupFileRef.current?.click()} className="rounded-full border border-black/10 px-4 py-2.5 text-sm text-muted transition hover:bg-black/5 dark:border-white/10 dark:text-darkmuted dark:hover:bg-white/10">Восстановить JSON</button>
+            <input ref={backupFileRef} type="file" accept=".json,application/json" aria-label="Выбрать файл резервной копии JSON" className="sr-only" onChange={async (event) => { const input = event.currentTarget; const file = input.files?.[0]; input.value = ''; if (file) await onImportBackup(file); }} />
+          </div>
+        </div>
+        {backupMessage && <p role="status" aria-live="polite" className="rounded-2xl bg-[#F7F9FC] p-3 text-sm leading-6 text-muted dark:bg-[#161616] dark:text-darkmuted">{backupMessage}</p>}
+      </section>
+
       <section className="panel flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-        <div><div className="text-sm font-medium text-text dark:text-darktext">Экспорт библиотеки</div><p className="mt-1 text-sm text-muted dark:text-darkmuted">Все закладки и заметки со всех лекций: {bookmarks.length}</p></div>
+        <div><div className="text-sm font-medium text-text dark:text-darktext">Экспорт заметок для чтения</div><p className="mt-1 text-sm text-muted dark:text-darkmuted">Все закладки и заметки со всех лекций: {bookmarks.length}</p></div>
         <div className="flex shrink-0 gap-2"><button disabled={!bookmarks.length} onClick={onExportAllText} className="inline-flex items-center gap-1 rounded-full border border-black/5 px-3 py-2 text-xs text-muted disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:text-darkmuted">TXT</button><button disabled={!bookmarks.length} onClick={onExportAllPdf} className="inline-flex items-center gap-1 rounded-full border border-black/5 px-3 py-2 text-xs text-muted disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:text-darkmuted">PDF</button></div>
       </section>
 
@@ -1775,14 +1952,14 @@ function LectureCard({ lecture, onOpen, isFavorite, onToggleFavorite, progress, 
 }) {
   return (
     <article className="panel group p-0">
-      <div onClick={onOpen} className="cursor-pointer p-4">
+      <div className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="text-[10px] uppercase tracking-[0.12em] text-muted dark:text-darkmuted"><HighlightedText text={lecture.category} query={highlightQuery || ''} /></div>
-            <h3 className="mt-2 font-display text-2xl leading-tight text-text dark:text-darktext"><HighlightedText text={lecture.title} query={highlightQuery || ''} /></h3>
+            <h3 className="mt-2 font-display text-2xl leading-tight text-text dark:text-darktext"><button type="button" onClick={onOpen} className="text-left"><HighlightedText text={lecture.title} query={highlightQuery || ''} /></button></h3>
           </div>
 
-          <button className="rounded-full border border-black/5 bg-white p-2 text-sm dark:border-white/10 dark:bg-[#101010]" onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }} aria-label="Toggle favorite">
+          <button type="button" className="rounded-full border border-black/5 bg-white p-2 text-sm dark:border-white/10 dark:bg-[#101010]" onClick={onToggleFavorite} aria-label={isFavorite ? `Убрать из избранного: ${lecture.title}` : `Добавить в избранное: ${lecture.title}`}>
             <Heart size={15} fill={isFavorite ? '#B8874A' : 'none'} className={isFavorite ? 'text-[#B8874A]' : 'text-muted dark:text-darkmuted'} />
           </button>
         </div>
@@ -1805,7 +1982,7 @@ function LectureCard({ lecture, onOpen, isFavorite, onToggleFavorite, progress, 
               <span>Прогресс</span>
               <span>{Math.round((progress / lecture.duration) * 100)}%</span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-[#E6EBF2] dark:bg-[#202020]">
+            <div role="progressbar" aria-label={`Прогресс прослушивания: ${lecture.title}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.min(100, Math.round((progress / lecture.duration) * 100))} className="h-2 overflow-hidden rounded-full bg-[#E6EBF2] dark:bg-[#202020]">
               <div className="h-full rounded-full bg-[#B8874A] dark:bg-[#E0821E]" style={{ width: `${Math.min(100, (progress / lecture.duration) * 100)}%` }} />
             </div>
           </div>
@@ -1813,7 +1990,7 @@ function LectureCard({ lecture, onOpen, isFavorite, onToggleFavorite, progress, 
 
         <div className="mt-4 flex items-center justify-between">
           <span className="text-xs text-muted dark:text-darkmuted">{lecture.date}</span>
-          <button onClick={(event) => { event.stopPropagation(); onOpen(); }} className="inline-flex items-center gap-2 rounded-full bg-[#111820] px-3 py-2 text-sm text-white dark:bg-[#F5F5F5] dark:text-[#111820]">
+          <button type="button" onClick={onOpen} className="inline-flex items-center gap-2 rounded-full bg-[#111820] px-3 py-2 text-sm text-white dark:bg-[#F5F5F5] dark:text-[#111820]">
             Открыть <ChevronRight size={15} />
           </button>
         </div>
@@ -1904,7 +2081,7 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, setRate, 
               <span>{formatDuration(currentTime)}</span>
               <span>{formatDuration(duration)}</span>
             </div>
-            <input type="range" min={0} max={duration || 1} value={currentTime} onChange={(e) => onSeek(Number(e.target.value))} className="w-full accent-[#B8874A] dark:accent-[#E0821E]" />
+            <input type="range" aria-label={`Позиция воспроизведения: ${lecture.title}`} min={0} max={duration || 1} value={currentTime} onChange={(e) => onSeek(Number(e.target.value))} className="w-full accent-[#B8874A] dark:accent-[#E0821E]" />
           </div>
 
           <div className="flex flex-wrap items-center justify-end gap-2">
@@ -1961,13 +2138,54 @@ function ResourcePage({ resource, onOpenCatalog }: { resource: ResourceType; onO
 }
 
 function AuthDialog({ email, setEmail, busy, message, onSubmit, onClose }: { email: string; setEmail: (value: string) => void; busy: boolean; message: string; onSubmit: () => void; onClose: () => void }) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const getFocusable = () => Array.from(dialog.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'));
+    getFocusable()[0]?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onCloseRef.current();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = getFocusable();
+      if (!focusable.length) {
+        event.preventDefault();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      previousFocus?.focus();
+    };
+  }, []);
+
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[#111820]/35 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+    <div ref={dialogRef} className="fixed inset-0 z-[60] flex items-center justify-center bg-[#111820]/35 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="auth-title" aria-describedby="auth-description">
       <div className="w-full max-w-md rounded-[28px] border border-black/5 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-[#101010]">
-        <div className="flex items-start justify-between gap-4"><div><div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Постоянный доступ</div><h2 id="auth-title" className="mt-2 font-display text-3xl text-text dark:text-darktext">Сохранить библиотеку</h2></div><button onClick={onClose} aria-label="Закрыть" className="text-2xl text-muted dark:text-darkmuted">×</button></div>
-        <p className="mt-4 text-sm leading-6 text-muted dark:text-darkmuted">Укажите email — мы отправим безопасную ссылку входа. Избранное и история сохранятся в постоянном аккаунте.</p>
-        <form onSubmit={(event) => { event.preventDefault(); onSubmit(); }} className="mt-5 space-y-3"><label className="block text-sm font-medium text-text dark:text-darktext">Email<input autoFocus type="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" className="mt-2 w-full rounded-2xl border border-black/10 bg-[#F7F9FC] px-4 py-3 outline-none dark:border-white/10 dark:bg-[#161616] dark:text-darktext" /></label><button disabled={busy} className="w-full rounded-full bg-[#111820] px-4 py-3 text-sm font-medium text-white disabled:opacity-50 dark:bg-[#F5F5F5] dark:text-[#111820]">{busy ? 'Отправляем…' : 'Отправить ссылку входа'}</button></form>
-        {message && <p className="mt-4 rounded-2xl bg-[#F7F9FC] p-3 text-sm leading-6 text-muted dark:bg-[#161616] dark:text-darkmuted">{message}</p>}
+        <div className="flex items-start justify-between gap-4"><div><div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Постоянный доступ</div><h2 id="auth-title" className="mt-2 font-display text-3xl text-text dark:text-darktext">Сохранить библиотеку</h2></div><button type="button" onClick={onClose} aria-label="Закрыть диалог" className="text-2xl text-muted dark:text-darkmuted">×</button></div>
+        <p id="auth-description" className="mt-4 text-sm leading-6 text-muted dark:text-darkmuted">Укажите email — мы отправим безопасную ссылку входа. Избранное и история сохранятся в постоянном аккаунте.</p>
+        <form onSubmit={(event) => { event.preventDefault(); onSubmit(); }} className="mt-5 space-y-3"><label className="block text-sm font-medium text-text dark:text-darktext">Email<input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" className="mt-2 w-full rounded-2xl border border-black/10 bg-[#F7F9FC] px-4 py-3 outline-none dark:border-white/10 dark:bg-[#161616] dark:text-darktext" /></label><button type="submit" disabled={busy} className="w-full rounded-full bg-[#111820] px-4 py-3 text-sm font-medium text-white disabled:opacity-50 dark:bg-[#F5F5F5] dark:text-[#111820]">{busy ? 'Отправляем…' : 'Отправить ссылку входа'}</button></form>
+        {message && <p role="status" aria-live="polite" className="mt-4 rounded-2xl bg-[#F7F9FC] p-3 text-sm leading-6 text-muted dark:bg-[#161616] dark:text-darkmuted">{message}</p>}
       </div>
     </div>
   );
