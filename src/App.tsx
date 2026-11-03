@@ -867,15 +867,7 @@ function App() {
       return <ResourcePage resource={resource} onOpenCatalog={() => navigate('/catalog')} />;
     }
 
-    return (
-      <HomePage
-        onOpenLecture={handleOpenLecture}
-        favorites={favorites}
-        onToggleFavorite={toggleFavorite}
-        getProgress={getAudioProgress}
-        continueLectures={continueLectures}
-      />
-    );
+    return <HomePage />;
   };
 
   const currentView = route === 'home' ? 'home' : route;
@@ -1039,157 +1031,99 @@ function App() {
   );
 }
 
-function HomePage({ onOpenLecture, favorites, onToggleFavorite, getProgress, continueLectures }: {
-  onOpenLecture: (id: string) => void;
-  favorites: string[];
-  onToggleFavorite: (id: string) => void;
-  getProgress: (id: string) => number;
-  continueLectures: Lecture[];
-}) {
-  const categoryStats = categories
-    .map((label) => ({ label, count: lectureData.filter((lecture) => lecture.category === label).length }))
-    .filter((item) => item.count > 0);
-  const latestLectures = lectureData.slice(0, 3);
+function HomePage() {
+  const bookCycles = bookData.flatMap((book) => {
+    const cycle = cycles.find((item) => item.id === book.cycleId);
+    return cycle ? [{ book, cycle }] : [];
+  });
+  const audioCycles = cycles.filter((cycle) => !bookCycles.some((item) => item.cycle.id === cycle.id));
+  const totalLessons = cycles.reduce((total, cycle) => total + cycle.totalLessons, 0);
 
   return (
     <main className="space-y-10">
-      <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="panel p-7 sm:p-8">
-          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#B8874A]/15 bg-[#B8874A]/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-[#8C5B22] dark:border-[#E0821E]/20 dark:bg-[#E0821E]/10 dark:text-[#F3B76B]">
-            <Sparkles size={14} />
-            Premium Digital Lecture Archive
-          </div>
-
-          <h1 className="font-display text-5xl leading-none tracking-[-0.04em] text-text dark:text-darktext sm:text-6xl">
-            Лекции
-          </h1>
-
-          <p className="mt-5 max-w-xl text-lg text-muted dark:text-darkmuted">
-            Аудиоархив исламских знаний.
-          </p>
-
-          <div className="mt-8 flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2 rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 text-sm text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darkmuted">
-              <Headphones size={16} />
-              <span>{lectureData.length} лекций в архиве</span>
-            </div>
-          </div>
-
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <button
-              onClick={() => window.location.hash = '#/catalog'}
-              className="rounded-full bg-[#111820] px-5 py-3 text-sm font-medium text-white transition hover:-translate-y-0.5 dark:bg-[#F5F5F5] dark:text-[#111820]"
-            >
-              Перейти в каталог
-            </button>
-            <button
-              onClick={() => window.location.hash = '#/library'}
-              className="rounded-full border border-black/5 bg-white px-5 py-3 text-sm font-medium text-text transition hover:-translate-y-0.5 dark:border-white/10 dark:bg-[#101010] dark:text-darktext"
-            >
-              Моя библиотека
-            </button>
-          </div>
+      <section className="panel p-7 sm:p-9">
+        <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#B8874A]/15 bg-[#B8874A]/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-[#8C5B22] dark:border-[#E0821E]/20 dark:bg-[#E0821E]/10 dark:text-[#F3B76B]">
+          <Sparkles size={14} />
+          Книги и учебные циклы
         </div>
-
-        <div className="panel p-6">
-          <div className="flex items-center justify-between">
-            <div className="text-sm uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Популярные темы</div>
-          </div>
-
-          <div className="mt-6 space-y-3">
-            {categoryStats.map((item) => (
-              <button
-                key={item.label}
-                onClick={() => window.location.hash = `#/category/${encodeURIComponent(item.label)}`}
-                className="flex w-full items-center justify-between rounded-2xl border border-black/5 bg-[#F7F9FC] p-3 text-left transition hover:translate-x-0.5 dark:border-white/10 dark:bg-[#161616]"
-              >
-                <span className="text-sm font-medium text-text dark:text-darktext">{item.label}</span>
-                <span className="text-xs text-muted dark:text-darkmuted">{item.count}</span>
-              </button>
-            ))}
-          </div>
+        <h1 className="font-display text-5xl leading-none tracking-[-0.04em] text-text dark:text-darktext sm:text-6xl">
+          Циклы по книгам
+        </h1>
+        <p className="mt-5 max-w-2xl text-lg text-muted dark:text-darkmuted">
+          Выберите книгу или аудиокурс — внутри собраны уроки в последовательном порядке.
+        </p>
+        <div className="mt-7 flex flex-wrap gap-3 text-sm text-muted dark:text-darkmuted">
+          <div className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 dark:border-white/10 dark:bg-[#161616]"><BookOpenText size={16} />{bookCycles.length} циклов по книгам</div>
+          <div className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 dark:border-white/10 dark:bg-[#161616]"><Headphones size={16} />{audioCycles.length} аудиоциклов</div>
+          <div className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 dark:border-white/10 dark:bg-[#161616]"><BookOpenText size={16} />{totalLessons} уроков</div>
         </div>
-      </section>
-
-      <section className="grid gap-4 md:grid-cols-3">
-        {[
-          { label: 'Записей в архиве', value: String(lectureData.length) },
-          { label: 'Учебных циклов', value: String(cycles.length) },
-          { label: 'Категорий знания', value: String(categoryStats.length) }
-        ].map((stat) => (
-          <div key={stat.label} className="panel p-5">
-            <div className="text-sm text-muted dark:text-darkmuted">{stat.label}</div>
-            <div className="mt-3 font-display text-3xl tracking-[-0.03em] text-text dark:text-darktext">{stat.value}</div>
-          </div>
-        ))}
-      </section>
-
-      <section>
-        <div className="mb-5 flex items-center justify-between">
-          <h2 className="font-display text-3xl tracking-[-0.04em] text-text dark:text-darktext">Новые лекции</h2>
-          <button onClick={() => window.location.hash = '#/catalog'} className="text-sm font-medium text-accent dark:text-darkaccent">
-            Смотреть все
-          </button>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-3">
-          {latestLectures.map((lecture) => (
-            <LectureCard
-              key={lecture.id}
-              lecture={lecture}
-              onOpen={() => onOpenLecture(lecture.id)}
-              isFavorite={favorites.includes(lecture.id)}
-              onToggleFavorite={() => onToggleFavorite(lecture.id)}
-              progress={getProgress(lecture.id)}
-            />
-          ))}
+        <div className="mt-8 flex flex-wrap gap-3">
+          <button onClick={() => window.location.hash = '#/courses'} className="rounded-full bg-[#111820] px-5 py-3 text-sm font-medium text-white transition hover:-translate-y-0.5 dark:bg-[#F5F5F5] dark:text-[#111820]">Все учебные циклы</button>
+          <button onClick={() => window.location.hash = '#/books'} className="rounded-full border border-black/5 bg-white px-5 py-3 text-sm font-medium text-text transition hover:-translate-y-0.5 dark:border-white/10 dark:bg-[#101010] dark:text-darktext">Все книги</button>
         </div>
       </section>
 
       <section>
-        <div className="mb-5 flex items-center justify-between">
+        <div className="mb-5 flex items-end justify-between gap-4">
           <div>
-            <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Личная полка</div>
-            <h2 className="mt-1 font-display text-3xl tracking-[-0.04em] text-text dark:text-darktext">Продолжить прослушивание</h2>
+            <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Книга и связанный аудиокурс</div>
+            <h2 className="mt-1 font-display text-3xl tracking-[-0.04em] text-text dark:text-darktext">Учебные циклы по книгам</h2>
           </div>
-          <button onClick={() => window.location.hash = '#/library'} className="text-sm font-medium text-accent dark:text-darkaccent">Открыть библиотеку</button>
+          <button onClick={() => window.location.hash = '#/books'} className="shrink-0 text-sm font-medium text-accent dark:text-darkaccent">Все книги</button>
         </div>
-        {continueLectures.length ? (
-          <div className="grid gap-4 md:grid-cols-2">
-            {continueLectures.slice(0, 2).map((lecture) => (
-              <LectureCard key={lecture.id} lecture={lecture} onOpen={() => onOpenLecture(lecture.id)} isFavorite={favorites.includes(lecture.id)} onToggleFavorite={() => onToggleFavorite(lecture.id)} progress={getProgress(lecture.id)} />
+        {bookCycles.length ? (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {bookCycles.map(({ book, cycle }) => (
+              <article key={book.id} className="panel overflow-hidden p-0">
+                <div className={`flex h-28 items-end justify-between bg-gradient-to-br ${cycle.coverTone} p-5 text-white`}>
+                  <BookOpenText size={25} />
+                  <span className="text-xs font-medium uppercase tracking-[0.12em]">{book.subtitle}</span>
+                </div>
+                <div className="p-5">
+                  <div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">{book.author}</div>
+                  <h3 className="mt-3 font-display text-2xl leading-tight text-text dark:text-darktext">{book.title}</h3>
+                  <p className="mt-2 text-sm text-muted dark:text-darkmuted">{book.description}</p>
+                  <div className="mt-4 rounded-2xl border border-black/5 bg-[#F7F9FC] p-3 text-sm dark:border-white/10 dark:bg-[#161616]">
+                    <div className="text-xs uppercase tracking-[0.1em] text-muted dark:text-darkmuted">Аудиоцикл</div>
+                    <div className="mt-1 font-medium text-text dark:text-darktext">{cycle.title} · {cycle.totalLessons} уроков</div>
+                  </div>
+                  <div className="mt-5 flex flex-wrap gap-3">
+                    <button onClick={() => window.location.hash = `#/cycle/${cycle.id}`} className="rounded-full bg-[#111820] px-4 py-2.5 text-sm font-medium text-white dark:bg-[#F5F5F5] dark:text-[#111820]">Открыть цикл</button>
+                    <a href={book.pdfUrl} target="_blank" rel="noreferrer" className="rounded-full border border-black/5 px-4 py-2.5 text-sm font-medium text-text dark:border-white/10 dark:text-darktext">PDF книги</a>
+                  </div>
+                </div>
+              </article>
             ))}
           </div>
         ) : (
-          <div className="panel flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-muted dark:text-darkmuted">Начните слушать любую лекцию — архив запомнит позицию и вернёт вас сюда.</p>
-            <button onClick={() => window.location.hash = '#/catalog'} className="shrink-0 rounded-full bg-[#111820] px-4 py-2 text-sm font-medium text-white dark:bg-[#F5F5F5] dark:text-[#111820]">Открыть каталог</button>
-          </div>
+          <div className="panel p-5 text-sm text-muted dark:text-darkmuted">Связанные с книгами аудиоциклы пока не добавлены.</div>
         )}
       </section>
 
-      <section>
-        <div className="mb-5 flex items-center justify-between">
-          <h2 className="font-display text-3xl tracking-[-0.04em] text-text dark:text-darktext">Учебные циклы</h2>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {cycles.map((cycle) => (
-            <button key={cycle.id} onClick={() => window.location.hash = `#/cycle/${cycle.id}`} className="panel overflow-hidden p-0 text-left">
-              <div className={`h-28 bg-gradient-to-br ${cycle.coverTone}`} />
-              <div className="p-5">
-                <div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">{cycle.author}</div>
-                <h3 className="mt-3 font-display text-2xl leading-tight text-text dark:text-darktext">{cycle.title}</h3>
-                <p className="mt-2 text-sm text-muted dark:text-darkmuted">{cycle.description}</p>
-                <div className="mt-4 flex items-center justify-between text-sm">
-                  <span className="text-text dark:text-darktext">{cycle.totalLessons} уроков</span>
-                  <span className="text-muted dark:text-darkmuted">{formatDuration(cycle.totalDuration)}</span>
+      {audioCycles.length > 0 && (
+        <section>
+          <div className="mb-5">
+            <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Отдельные аудиосерии</div>
+            <h2 className="mt-1 font-display text-3xl tracking-[-0.04em] text-text dark:text-darktext">Аудиоциклы</h2>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {audioCycles.map((cycle) => (
+              <button key={cycle.id} onClick={() => window.location.hash = `#/cycle/${cycle.id}`} className="panel overflow-hidden p-0 text-left">
+                <div className={`h-28 bg-gradient-to-br ${cycle.coverTone}`} />
+                <div className="p-5">
+                  <div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">{cycle.author} · аудиоцикл</div>
+                  <h3 className="mt-3 font-display text-2xl leading-tight text-text dark:text-darktext">{cycle.title}</h3>
+                  <p className="mt-2 text-sm text-muted dark:text-darkmuted">{cycle.description}</p>
+                  <div className="mt-4 flex items-center justify-between text-sm">
+                    <span className="text-text dark:text-darktext">{cycle.totalLessons} уроков</span>
+                    <span className="text-muted dark:text-darkmuted">{formatDuration(cycle.totalDuration)}</span>
+                  </div>
                 </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      </section>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }

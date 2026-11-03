@@ -1,3 +1,8 @@
+## Home page organized around books and cycles
+- [x] The home page does not show cards for individual lessons, recent lectures, or individual progress items.
+- [x] Book-linked study cycles are presented under books, and selecting a card opens that book’s ordered audio cycle.
+- [x] Cycles without a registered book remain available as audio-cycle cards; do not invent book associations.
+
 ## Automatic next lesson
 - [x] When a lesson reaches its natural end, automatically start the next lesson in the same ordered course.
 - [x] If “Repeat lesson” is enabled, replay the current lesson instead of advancing.
