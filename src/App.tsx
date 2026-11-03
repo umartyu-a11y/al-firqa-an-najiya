@@ -145,6 +145,7 @@ function App() {
   });
 
   const [cloudReady, setCloudReady] = useState(false);
+  const [isOnline, setIsOnline] = useState(() => navigator.onLine);
   const [authSession, setAuthSession] = useState<Session | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [authEmail, setAuthEmail] = useState('');
@@ -178,6 +179,17 @@ function App() {
     const handleHashChange = () => setRoute(parseHash());
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
   useEffect(() => {
@@ -652,6 +664,7 @@ function App() {
   return (
     <div className="min-h-screen bg-background text-text transition-colors duration-300 dark:bg-darkbg dark:text-darktext">
       <div className="mx-auto max-w-[1440px] px-4 pb-32 pt-5 sm:px-6 lg:px-8">
+        {!isOnline && <div role="status" className="mb-3 rounded-2xl border border-[#B8874A]/30 bg-[#B8874A]/10 px-4 py-3 text-sm text-text dark:border-[#E0821E]/30 dark:bg-[#E0821E]/10 dark:text-darktext">Офлайн-режим: доступна ранее загруженная оболочка и каталог. Аудио и облачная синхронизация возобновятся после подключения к сети.</div>}
         <header className="sticky top-3 z-40 mb-8">
           <div className="mx-auto flex max-w-[1280px] items-center justify-between rounded-full border border-black/5 bg-white/80 px-4 py-3 shadow-[0_8px_30px_rgba(17,24,32,0.06)] backdrop-blur-xl dark:border-white/10 dark:bg-[#101010]/85">
             <button className="flex items-center gap-3" onClick={() => navigate('/')}>

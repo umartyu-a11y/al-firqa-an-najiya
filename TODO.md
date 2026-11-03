@@ -43,3 +43,12 @@
 - [x] Объединять локальные и облачные избранные лекции и историю после входа.
 - [x] Добавить выход из аккаунта и fallback без Supabase.
 - [ ] Включить Email provider, задать redirect URL и проверить письмо в конкретном Supabase-проекте.
+
+
+## Offline mode
+
+- [x] Добавить Service Worker для production-сборки.
+- [x] Кэшировать оболочку приложения, manifest, hashed assets и bundled catalog/text routes.
+- [x] Использовать network-first navigation с offline fallback на index.html.
+- [x] Не кэшировать аудио и cloud API-запросы, чтобы не расходовать хранилище и не показывать устаревшие данные.
+- [ ] Проверить install/update сценарии Service Worker в реальном браузере на GitHub Pages.

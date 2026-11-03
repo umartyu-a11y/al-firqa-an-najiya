@@ -27,3 +27,7 @@ npm install
 npm run dev
 npm run build
 ```
+
+## Offline mode
+
+The production build registers `public/sw.js`. It caches the application shell, hashed JavaScript/CSS assets, manifest and the bundled lecture catalog. Navigation uses a network-first strategy with an `index.html` fallback, so previously opened catalog and text routes remain available offline. Audio files and cloud API requests are intentionally not cached; audio playback and Supabase synchronization resume when the connection returns.
