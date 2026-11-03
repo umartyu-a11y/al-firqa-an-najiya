@@ -4,6 +4,9 @@
     { "path": "/#/catalog", "title": "Каталог лекций" },
     { "path": "/#/library", "title": "Моя библиотека" },
     { "path": "/#/author/abu-yahya-krymskiy", "title": "Автор" },
-    { "path": "/#/cycle/necessary-questions-for-everyone", "title": "Учебный цикл" }
+    { "path": "/#/books", "title": "Книги и аудиокурсы" },
+    { "path": "/#/courses", "title": "Аудиокурсы" },
+    { "path": "/#/cycle/necessary-questions-for-everyone", "title": "Необходимые вопросы для каждого" },
+    { "path": "/#/cycle/tri-osnovy", "title": "Три основы" }
   ]
 }
