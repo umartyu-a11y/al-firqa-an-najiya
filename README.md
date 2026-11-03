@@ -45,3 +45,8 @@ Listening position is stored in `user_lecture_progress` per user and lecture. Du
 ## Player bookmarks and notes
 
 On any lecture page, use `Закладка` to save the current timestamp. Each saved marker can be opened to seek back to that point, annotated with a note up to 500 characters, or removed. Notes are automatically stored in localStorage and remain available offline. Cross-device synchronization for these notes is kept as a separate follow-up Supabase task.
+
+
+## Exporting notes
+
+The lecture player can export its bookmarks and notes as a UTF-8 `.txt` file. The `PDF` action opens a print-friendly document in a new window; choose “Save as PDF” in the browser or system print dialog. This keeps Cyrillic text readable without embedding a third-party font and works with the current lecture's local notes.

@@ -5,11 +5,13 @@ import {
   Bookmark,
   ChevronRight,
   Clock3,
+  Download,
   Headphones,
   Heart,
   Moon,
   Pause,
   Play,
+  Printer,
   Search,
   SkipBack,
   SkipForward,
@@ -114,6 +116,8 @@ const mergeCloudProgress = (remote: Record<string, { currentTime: number; durati
     // ignore localStorage issues
   }
 };
+
+const escapeHtml = (value: string) => value.replace(/[&<>\"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', "'": '&#039;' }[character] || character));
 
 function App() {
   const [theme, setTheme] = useState<Theme>(() => {
@@ -589,6 +593,34 @@ function App() {
     navigate(`/lecture/${lectureId}`);
   };
 
+  const exportBookmarksText = (lecture: Lecture, items: BookmarkItem[]) => {
+    const lines = [
+      'AL-FIRQA AN-NAJIYA',
+      `Лекция: ${lecture.title}`,
+      `Автор: ${lecture.author}`,
+      `Цикл: ${lecture.cycle}`,
+      '',
+      ...items.flatMap((item, index) => [`${index + 1}. ${formatDuration(item.time)}`, item.note?.trim() || 'Без заметки', ''])
+    ];
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${lecture.title.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '') || 'lecture'}-bookmarks.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportBookmarksPdf = (lecture: Lecture, items: BookmarkItem[]) => {
+    const popup = window.open('', '_blank', 'width=760,height=900');
+    if (!popup) return;
+    const rows = items.map((item) => `<article><h2>${escapeHtml(formatDuration(item.time))}</h2><p>${escapeHtml(item.note?.trim() || 'Без заметки')}</p></article>`).join('');
+    popup.document.write(`<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>${escapeHtml(lecture.title)} — закладки</title><style>body{font-family:Arial,sans-serif;max-width:760px;margin:40px auto;padding:0 24px;color:#111820}h1{font-size:28px;margin-bottom:8px}header{border-bottom:1px solid #ddd;padding-bottom:20px;margin-bottom:24px}article{border:1px solid #ddd;border-radius:14px;padding:16px;margin:12px 0;break-inside:avoid}h2{font-size:18px;margin:0 0 8px;color:#9b6d32}p{white-space:pre-wrap;line-height:1.55;margin:0}@media print{body{margin:0 auto}}</style></head><body><header><h1>Закладки и заметки</h1><div>${escapeHtml(lecture.title)}</div><small>${escapeHtml(lecture.author)} · ${escapeHtml(lecture.cycle)}</small></header>${rows || '<p>Закладок пока нет.</p>'}</body></html>`);
+    popup.document.close();
+    popup.focus();
+    window.setTimeout(() => popup.print(), 250);
+  };
+
   const favoriteLectures = lectureData.filter((lecture) => favorites.includes(lecture.id));
   const continueLectures = lectureData.filter((lecture) => getAudioProgress(lecture.id) > 15);
   const recentLectures = history.map((id) => getLectureById(id)).filter(Boolean) as Lecture[];
@@ -707,6 +739,8 @@ function App() {
           onAddBookmark={addBookmark}
           onRemoveBookmark={removeBookmark}
           onUpdateBookmarkNote={updateBookmarkNote}
+          onExportText={(items) => exportBookmarksText(lecture, items)}
+          onExportPdf={(items) => exportBookmarksPdf(lecture, items)}
           repeatSegment={repeatSegment}
           onSetRepeatPoint={setRepeatPoint}
           onClearRepeat={clearRepeat}
@@ -1292,7 +1326,7 @@ function AuthorPage({ author, lectures, favorites, onToggleFavorite, onOpenLectu
   );
 }
 
-function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, currentLectureId, setCurrentLectureId, playerState, setPlayerState, audioRef, prevLecture, nextLecture, onSeek, onTogglePlay, handleTimeUpdate, handleLoadedMetadata, handleEnded, getProgress, bookmarks, onAddBookmark, onRemoveBookmark, onUpdateBookmarkNote, repeatSegment, onSetRepeatPoint, onClearRepeat, repeatLesson, onToggleRepeatLesson }: {
+function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, currentLectureId, setCurrentLectureId, playerState, setPlayerState, audioRef, prevLecture, nextLecture, onSeek, onTogglePlay, handleTimeUpdate, handleLoadedMetadata, handleEnded, getProgress, bookmarks, onAddBookmark, onRemoveBookmark, onUpdateBookmarkNote, onExportText, onExportPdf, repeatSegment, onSetRepeatPoint, onClearRepeat, repeatLesson, onToggleRepeatLesson }: {
   lecture: Lecture;
   favorites: string[];
   onToggleFavorite: (id: string) => void;
@@ -1314,6 +1348,8 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
   onAddBookmark: () => void;
   onRemoveBookmark: (id: string) => void;
   onUpdateBookmarkNote: (id: string, note: string) => void;
+  onExportText: (items: BookmarkItem[]) => void;
+  onExportPdf: (items: BookmarkItem[]) => void;
   repeatSegment: { start: number | null; end: number | null; active: boolean };
   onSetRepeatPoint: () => void;
   onClearRepeat: () => void;
@@ -1420,7 +1456,13 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
 
         {bookmarks.length > 0 && (
           <div className="mt-4 rounded-2xl border border-black/5 bg-[#F7F9FC] p-4 dark:border-white/10 dark:bg-[#161616]">
-            <div className="mb-3 text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Закладки этой лекции</div>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Закладки этой лекции</div>
+              <div className="flex items-center gap-2">
+                <button onClick={() => onExportText(bookmarks)} className="inline-flex items-center gap-1 rounded-full border border-black/5 px-2.5 py-1.5 text-xs text-muted dark:border-white/10 dark:text-darkmuted"><Download size={13} /> TXT</button>
+                <button onClick={() => onExportPdf(bookmarks)} className="inline-flex items-center gap-1 rounded-full border border-black/5 px-2.5 py-1.5 text-xs text-muted dark:border-white/10 dark:text-darkmuted"><Printer size={13} /> PDF</button>
+              </div>
+            </div>
             <div className="space-y-3">
               {bookmarks.map((item) => (
                 <div key={item.id} className="rounded-2xl border border-black/5 bg-white p-3 dark:border-white/10 dark:bg-[#101010]">
