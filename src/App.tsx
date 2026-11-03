@@ -13,7 +13,8 @@ import {
   SkipBack,
   SkipForward,
   Sparkles,
-  SunMedium
+  SunMedium,
+  Volume2
 } from 'lucide-react';
 import { lectureData, cycles } from './data/lectures';
 import type { Category, Lecture } from './types';
@@ -64,6 +65,7 @@ const parseHash = () => {
   if (hash.startsWith('/author/')) return 'author';
   if (hash.startsWith('/lecture/')) return 'lecture';
   if (hash.startsWith('/category/')) return 'category';
+  if (hash.startsWith('/about')) return 'about';
   return 'home';
 };
 
@@ -98,7 +100,7 @@ function App() {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
 
-  const [route, setRoute] = useState<'home' | 'catalog' | 'library' | 'cycle' | 'author' | 'lecture' | 'category'>(() => parseHash());
+  const [route, setRoute] = useState<'home' | 'catalog' | 'library' | 'cycle' | 'author' | 'lecture' | 'category' | 'about'>(() => parseHash());
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortType>('newest');
   const [categoryFilter, setCategoryFilter] = useState<Category | 'Все'>('Все');
@@ -131,7 +133,8 @@ function App() {
     currentTime: 0,
     duration: 0,
     rate: 1,
-    sleepMinutes: 0
+    sleepMinutes: 0,
+    volume: Number(localStorage.getItem('affn-volume') ?? 1)
   });
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -140,6 +143,11 @@ function App() {
     document.documentElement.classList.toggle('dark', theme === 'dark');
     localStorage.setItem(storageKeys.theme, theme);
   }, [theme]);
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.volume = playerState.volume;
+    localStorage.setItem('affn-volume', String(playerState.volume));
+  }, [playerState.volume]);
 
   useEffect(() => {
     const handleHashChange = () => setRoute(parseHash());
@@ -481,6 +489,8 @@ function App() {
       );
     }
 
+    if (route === 'about') return <AboutPage />;
+
     return (
       <HomePage
         onOpenLecture={handleOpenLecture}
@@ -521,7 +531,7 @@ function App() {
               <button className="text-sm text-text/80 transition hover:text-text dark:text-darktext/80 dark:hover:text-darktext" onClick={() => navigate('/author/abu-yahya-krymskiy')}>
                 Авторы
               </button>
-              <button className="text-sm text-text/80 transition hover:text-text dark:text-darktext/80 dark:hover:text-darktext" onClick={() => navigate('/library')}>
+              <button className="text-sm text-text/80 transition hover:text-text dark:text-darktext/80 dark:hover:text-darktext" onClick={() => navigate('/about')}>
                 О проекте
               </button>
             </nav>
@@ -589,6 +599,8 @@ function App() {
         duration={playerState.duration || currentLecture?.duration || 0}
         rate={playerState.rate}
         setRate={(newRate) => setPlayerState((prev) => ({ ...prev, rate: newRate }))}
+        volume={playerState.volume}
+        setVolume={(volume) => setPlayerState((prev) => ({ ...prev, volume }))}
         onTogglePlay={handleTogglePlay}
         onPrev={prevLecture}
         onNext={nextLecture}
@@ -1008,7 +1020,7 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
   currentLectureId: string | null;
   setCurrentLectureId: (id: string) => void;
   playerState: { isPlaying: boolean; currentTime: number; duration: number; rate: number; sleepMinutes: number };
-  setPlayerState: Dispatch<SetStateAction<{ isPlaying: boolean; currentTime: number; duration: number; rate: number; sleepMinutes: number }>>;
+  setPlayerState: Dispatch<SetStateAction<{ isPlaying: boolean; currentTime: number; duration: number; rate: number; sleepMinutes: number; volume: number }>>;
   audioRef: RefObject<HTMLAudioElement>;
   prevLecture: () => void;
   nextLecture: () => void;
@@ -1298,13 +1310,15 @@ function LectureCard({ lecture, onOpen, isFavorite, onToggleFavorite, progress }
   );
 }
 
-function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, setRate, onTogglePlay, onPrev, onNext, onSeek, sleepMinutes, setSleepMinutes }: {
+function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, setRate, volume, setVolume, onTogglePlay, onPrev, onNext, onSeek, sleepMinutes, setSleepMinutes }: {
   lecture: Lecture | null;
   isPlaying: boolean;
   currentTime: number;
   duration: number;
   rate: number;
   setRate: (value: number) => void;
+  volume: number;
+  setVolume: (value: number) => void;
   onTogglePlay: () => void;
   onPrev: () => void;
   onNext: () => void;
@@ -1341,13 +1355,18 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, setRate, 
             <button onClick={onTogglePlay} className="icon-button bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]">{isPlaying ? <Pause size={16} /> : <Play size={16} />}</button>
             <button onClick={onNext} className="icon-button"><SkipForward size={16} /></button>
 
-            <select value={rate} onChange={(e) => setRate(Number(e.target.value))} className="rounded-full border border-black/5 bg-[#F7F9FC] px-2 py-2 text-xs dark:border-white/10 dark:bg-[#161616]">
+            <label className="flex items-center gap-1 rounded-full border border-black/5 bg-[#F7F9FC] px-2 py-2 text-xs dark:border-white/10 dark:bg-[#161616]" title="Громкость">
+              <Volume2 size={13} aria-hidden="true" />
+              <input aria-label="Громкость" type="range" min="0" max="1" step="0.05" value={volume} onChange={(e) => setVolume(Number(e.target.value))} className="w-16 accent-[#B8874A] dark:accent-[#E0821E]" />
+            </label>
+
+            <select aria-label="Скорость воспроизведения" value={rate} onChange={(e) => setRate(Number(e.target.value))} className="rounded-full border border-black/5 bg-[#F7F9FC] px-2 py-2 text-xs dark:border-white/10 dark:bg-[#161616]">
               {[0.5, 0.75, 1, 1.25, 1.5, 2].map((value) => (
                 <option key={value} value={value}>{value}x</option>
               ))}
             </select>
 
-            <select value={sleepMinutes} onChange={(e) => setSleepMinutes(Number(e.target.value))} className="rounded-full border border-black/5 bg-[#F7F9FC] px-2 py-2 text-xs dark:border-white/10 dark:bg-[#161616]">
+            <select aria-label="Таймер сна" value={sleepMinutes} onChange={(e) => setSleepMinutes(Number(e.target.value))} className="rounded-full border border-black/5 bg-[#F7F9FC] px-2 py-2 text-xs dark:border-white/10 dark:bg-[#161616]">
               <option value={0}>Без таймера</option>
               <option value={15}>15 мин</option>
               <option value={30}>30 мин</option>
@@ -1358,6 +1377,33 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, setRate, 
         </div>
       </div>
     </div>
+  );
+}
+
+function AboutPage() {
+  return (
+    <main className="space-y-6">
+      <section className="panel p-7 sm:p-10">
+        <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">О проекте</div>
+        <h1 className="mt-3 max-w-3xl font-display text-5xl leading-none tracking-[-0.04em] text-text dark:text-darktext">Цифровая библиотека, построенная вокруг достоверности.</h1>
+        <p className="mt-6 max-w-2xl text-base leading-7 text-muted dark:text-darkmuted">AL-FIRQA AN-NAJIYA собирает проверяемые аудиоматериалы в спокойную образовательную среду. Мы не публикуем неподтверждённые конспекты, цитаты или статистику активности.</p>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-3">
+        <div className="panel p-5"><div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Архив</div><div className="mt-3 font-display text-3xl text-text dark:text-darktext">{lectureData.length}</div><p className="mt-2 text-sm text-muted dark:text-darkmuted">опубликованных аудиозаписей</p></div>
+        <div className="panel p-5"><div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Циклы</div><div className="mt-3 font-display text-3xl text-text dark:text-darktext">{cycles.length}</div><p className="mt-2 text-sm text-muted dark:text-darkmuted">учебный цикл в текущем каталоге</p></div>
+        <div className="panel p-5"><div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Фокус</div><div className="mt-3 font-display text-3xl text-text dark:text-darktext">Да</div><p className="mt-2 text-sm text-muted dark:text-darkmuted">без фиктивных материалов</p></div>
+      </section>
+
+      <section className="panel p-6">
+        <h2 className="font-display text-3xl tracking-[-0.04em] text-text dark:text-darktext">Что появится дальше</h2>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          {['Структурированные конспекты после получения расшифровок', 'Тексты, книги и словарь только с подтверждёнными источниками', 'Синхронизация заметок и прогресса после подключения Supabase', 'Редакторская проверка AI-черновиков до публикации'].map((item) => (
+            <div key={item} className="rounded-2xl border border-black/5 bg-[#F7F9FC] p-4 text-sm leading-6 text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darkmuted">{item}</div>
+          ))}
+        </div>
+      </section>
+    </main>
   );
 }
 
