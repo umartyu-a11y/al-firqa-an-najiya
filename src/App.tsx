@@ -202,6 +202,7 @@ function App() {
   const [repeatLesson, setRepeatLesson] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const restoringPosition = useRef(false);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -249,6 +250,27 @@ function App() {
       localStorage.removeItem('affn-current-lecture');
     }
   }, [currentLectureId]);
+
+  useEffect(() => {
+    const saveCurrentPosition = () => {
+      const audio = audioRef.current;
+      if (!currentLectureId || !audio || restoringPosition.current || audio.readyState < 1) return;
+      const currentTime = audio.currentTime;
+      if (!Number.isFinite(currentTime) || currentTime <= 0) return;
+      saveProgress(currentLectureId, currentTime, audio.duration || playerState.duration);
+    };
+    const saveWhenHidden = () => {
+      if (document.visibilityState === 'hidden') saveCurrentPosition();
+    };
+    window.addEventListener('pagehide', saveCurrentPosition);
+    window.addEventListener('beforeunload', saveCurrentPosition);
+    document.addEventListener('visibilitychange', saveWhenHidden);
+    return () => {
+      window.removeEventListener('pagehide', saveCurrentPosition);
+      window.removeEventListener('beforeunload', saveCurrentPosition);
+      document.removeEventListener('visibilitychange', saveWhenHidden);
+    };
+  }, [currentLectureId, playerState.duration]);
 
   useEffect(() => {
     let cancelled = false;
@@ -417,34 +439,32 @@ function App() {
   };
 
   useEffect(() => {
-    if (!currentLectureId) return;
+    if (!currentLectureId) {
+      restoringPosition.current = false;
+      return;
+    }
     const lecture = getLectureById(currentLectureId);
-    if (!lecture || !audioRef.current) return;
+    if (!lecture || !audioRef.current) {
+      restoringPosition.current = false;
+      return;
+    }
 
     const audio = audioRef.current;
-    const savedCurrent = getAudioProgress(currentLectureId);
+    restoringPosition.current = true;
     audio.src = lecture.audioUrl;
     audio.load();
-
-    if (savedCurrent > 0) {
-      audio.currentTime = savedCurrent;
-    }
-
-    if (playerState.isPlaying) {
-      audio.play().catch(() => {});
-    }
-  }, [currentLectureId, playerState.isPlaying]);
+  }, [currentLectureId]);
 
   useEffect(() => {
     if (!audioRef.current) return;
     const audio = audioRef.current;
     audio.playbackRate = playerState.rate;
-    if (playerState.isPlaying) {
+    if (playerState.isPlaying && currentLectureId) {
       audio.play().catch(() => {});
     } else {
       audio.pause();
     }
-  }, [playerState.rate, playerState.isPlaying]);
+  }, [currentLectureId, playerState.rate, playerState.isPlaying]);
 
   const handleTogglePlay = () => {
     if (!currentLectureId) {
@@ -478,7 +498,7 @@ function App() {
 
   const handleTimeUpdate = () => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || restoringPosition.current) return;
     if (repeatSegment.active && repeatSegment.start !== null && repeatSegment.end !== null && audio.currentTime >= repeatSegment.end) {
       audio.currentTime = repeatSegment.start;
     }
@@ -495,14 +515,14 @@ function App() {
     const audio = audioRef.current;
     if (!audio) return;
     const saved = currentLectureId ? getAudioProgress(currentLectureId) : 0;
-    if (saved > 0 && saved < audio.duration) {
-      audio.currentTime = saved;
-    }
+    const canRestore = saved > 0 && saved < audio.duration;
+    if (canRestore) audio.currentTime = saved;
+    restoringPosition.current = false;
     updateMediaSessionPosition(audio);
     setPlayerState((prev) => ({
       ...prev,
-      duration: audio.duration || prev.duration,
-      currentTime: saved > 0 && saved < audio.duration ? saved : prev.currentTime
+      duration: Number.isFinite(audio.duration) ? audio.duration : 0,
+      currentTime: canRestore ? saved : 0
     }));
   };
 
@@ -984,8 +1004,21 @@ function App() {
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={handleEnded}
-        onPause={() => { navigator.mediaSession && (navigator.mediaSession.playbackState = 'paused'); persistPlaybackProgress(currentLectureId, audioRef.current?.currentTime || playerState.currentTime, audioRef.current?.duration || playerState.duration, true); setPlayerState((prev) => ({ ...prev, isPlaying: false })); }}
+        onPause={() => {
+          const audio = audioRef.current;
+          if (!restoringPosition.current) {
+            if (audio && audio.readyState >= 1) {
+              persistPlaybackProgress(currentLectureId, audio.currentTime, audio.duration || playerState.duration, true);
+            }
+            navigator.mediaSession && (navigator.mediaSession.playbackState = 'paused');
+            setPlayerState((prev) => ({ ...prev, isPlaying: false }));
+          }
+        }}
         onPlay={() => { navigator.mediaSession && (navigator.mediaSession.playbackState = 'playing'); setPlayerState((prev) => ({ ...prev, isPlaying: true })); }}
+        onError={() => {
+          restoringPosition.current = false;
+          setPlayerState((prev) => ({ ...prev, isPlaying: false }));
+        }}
       />
     </div>
   );

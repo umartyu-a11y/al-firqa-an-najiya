@@ -1,3 +1,9 @@
+## Playback position recovery
+- [x] Save the current lecture and latest playback position locally when the page is hidden or unloaded.
+- [x] After reload, reopen the saved lecture and seek to its saved time only after audio metadata is available.
+- [x] Keep playback paused after reload; tapping Play resumes at the restored position.
+- [x] Do not overwrite a valid saved position with zero while the audio is still loading.
+
 ## Mini-player gestures
 - [x] The bottom mini-player can be dismissed with a downward swipe and restored by pressing a visible up-arrow button.
 - [x] Hiding the mini-player does not pause, stop, or reset the audio; playback controls remain available again after restoring it.
