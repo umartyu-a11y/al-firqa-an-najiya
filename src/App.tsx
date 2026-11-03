@@ -19,7 +19,9 @@ import {
   SunMedium,
   Volume2
 } from 'lucide-react';
-import { lectureData, cycles } from './data/lectures';
+import { bookData } from './data/books';
+import { cycles, lectureData, orderedCycleLectures } from './data/catalog';
+import { BooksPage, CoursesPage } from './CollectionPages';
 import type { Category, Lecture } from './types';
 import { isSupabaseConfigured } from './lib/supabase';
 import { loadCloudLibrary, loadCloudProgress, saveCloudLibrary, saveCloudProgress } from './lib/cloudLibrary';
@@ -541,8 +543,9 @@ function App() {
     if (repeatSegment.active) {
       clearRepeat();
     }
-    const currentIndex = lectureData.findIndex((lecture) => lecture.id === currentLectureId);
-    const next = lectureData[currentIndex + 1] || lectureData[0];
+    const playlist = currentLecture ? orderedCycleLectures(currentLecture.cycleId) : lectureData;
+    const currentIndex = playlist.findIndex((lecture) => lecture.id === currentLectureId);
+    const next = playlist[currentIndex + 1] || playlist[0];
     setCurrentLectureId(next.id);
     setPlayerState((prev) => ({ ...prev, isPlaying: true, currentTime: 0 }));
     pushHistory(next.id);
@@ -550,8 +553,9 @@ function App() {
 
   const prevLecture = () => {
     if (!currentLectureId) return;
-    const index = lectureData.findIndex((lecture) => lecture.id === currentLectureId);
-    const prev = lectureData[index - 1] || lectureData[lectureData.length - 1];
+    const playlist = currentLecture ? orderedCycleLectures(currentLecture.cycleId) : lectureData;
+    const index = playlist.findIndex((lecture) => lecture.id === currentLectureId);
+    const prev = playlist[index - 1] || playlist[playlist.length - 1];
     setCurrentLectureId(prev.id);
     setPlayerState((prevState) => ({ ...prevState, isPlaying: true, currentTime: 0 }));
     pushHistory(prev.id);
@@ -559,8 +563,9 @@ function App() {
 
   const nextLecture = () => {
     if (!currentLectureId) return;
-    const index = lectureData.findIndex((lecture) => lecture.id === currentLectureId);
-    const next = lectureData[index + 1] || lectureData[0];
+    const playlist = currentLecture ? orderedCycleLectures(currentLecture.cycleId) : lectureData;
+    const index = playlist.findIndex((lecture) => lecture.id === currentLectureId);
+    const next = playlist[index + 1] || playlist[0];
     setCurrentLectureId(next.id);
     setPlayerState((prevState) => ({ ...prevState, isPlaying: true, currentTime: 0 }));
     pushHistory(next.id);
@@ -725,7 +730,7 @@ function App() {
 
     if (route === 'cycle') {
       const cycleId = window.location.hash.replace(/^#\/cycle\//, '');
-      const cycleLectures = lectureData.filter((lecture) => lecture.cycleId === cycleId);
+      const cycleLectures = orderedCycleLectures(cycleId);
       const cycle = cycles.find((item) => item.id === cycleId);
 
       if (!cycle || !cycleLectures.length) {
@@ -826,6 +831,8 @@ function App() {
 
     if (route === 'resource') {
       const resource = window.location.hash.replace(/^#\//, '').split('/')[0] as ResourceType;
+      if (resource === 'books') return <BooksPage onOpenCycle={(id) => navigate(`/cycle/${id}`)} />;
+      if (resource === 'courses') return <CoursesPage onOpenCycle={(id) => navigate(`/cycle/${id}`)} />;
       return <ResourcePage resource={resource} onOpenCatalog={() => navigate('/catalog')} />;
     }
 
@@ -864,8 +871,8 @@ function App() {
               <button className="text-sm text-text/80 transition hover:text-text dark:text-darktext/80 dark:hover:text-darktext" onClick={() => navigate('/catalog')}>
                 Лекции
               </button>
-              <button className="text-sm text-text/80 transition hover:text-text dark:text-darktext/80 dark:hover:text-darktext" onClick={() => navigate('/catalog')}>
-                Категории
+              <button className="text-sm text-text/80 transition hover:text-text dark:text-darktext/80 dark:hover:text-darktext" onClick={() => navigate('/courses')}>
+                Курсы
               </button>
               <button className="text-sm text-text/80 transition hover:text-text dark:text-darktext/80 dark:hover:text-darktext" onClick={() => navigate('/author/abu-yahya-krymskiy')}>
                 Авторы
@@ -918,7 +925,7 @@ function App() {
             { label: 'Главная', icon: <Sparkles size={16} />, path: '/' },
             { label: 'Лекции', icon: <BookOpenText size={16} />, path: '/catalog' },
             { label: 'Библиотека', icon: <Heart size={16} />, path: '/library' },
-            { label: 'Автор', icon: <Headphones size={16} />, path: '/author/abu-yahya-krymskiy' }
+            { label: 'Книги', icon: <BookOpenText size={16} />, path: '/books' }
           ].map((item) => (
             <button key={item.path} onClick={() => navigate(item.path)} className="flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-medium text-muted transition hover:bg-black/5 hover:text-text dark:text-darkmuted dark:hover:bg-white/10 dark:hover:text-darktext">
               {item.icon}<span>{item.label}</span>
@@ -1280,6 +1287,7 @@ function CyclePage({ cycle, lectures, favorites, onToggleFavorite, onOpenLecture
   getProgress: (id: string) => number;
 }) {
   const listenedCount = lectures.filter((lecture) => getProgress(lecture.id) > 10).length;
+  const book = bookData.find((item) => item.cycleId === cycle.id);
   return (
     <main className="space-y-6">
       <section className="panel overflow-hidden p-0">
@@ -1300,6 +1308,7 @@ function CyclePage({ cycle, lectures, favorites, onToggleFavorite, onOpenLecture
               Прослушано: {listenedCount}/{cycle.totalLessons}
             </div>
           </div>
+          {book && <a href={book.pdfUrl} target="_blank" rel="noreferrer" className="mt-5 inline-flex rounded-full border border-[#B8874A]/30 bg-[#B8874A]/10 px-4 py-2 text-sm font-medium text-[#8C5B22] transition hover:-translate-y-0.5 dark:border-[#E0821E]/30 dark:bg-[#E0821E]/10 dark:text-[#F3B76B]">Открыть книгу PDF</a>}
         </div>
       </section>
 
@@ -1952,14 +1961,14 @@ function AboutPage() {
 
       <section className="grid gap-4 md:grid-cols-3">
         <div className="panel p-5"><div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Архив</div><div className="mt-3 font-display text-3xl text-text dark:text-darktext">{lectureData.length}</div><p className="mt-2 text-sm text-muted dark:text-darkmuted">опубликованных аудиозаписей</p></div>
-        <div className="panel p-5"><div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Циклы</div><div className="mt-3 font-display text-3xl text-text dark:text-darktext">{cycles.length}</div><p className="mt-2 text-sm text-muted dark:text-darkmuted">учебный цикл в текущем каталоге</p></div>
+        <div className="panel p-5"><div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Циклы</div><div className="mt-3 font-display text-3xl text-text dark:text-darktext">{cycles.length}</div><p className="mt-2 text-sm text-muted dark:text-darkmuted">учебных цикла в каталоге</p></div>
         <div className="panel p-5"><div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Фокус</div><div className="mt-3 font-display text-3xl text-text dark:text-darktext">Да</div><p className="mt-2 text-sm text-muted dark:text-darkmuted">без фиктивных материалов</p></div>
       </section>
 
       <section className="panel p-6">
         <h2 className="font-display text-3xl tracking-[-0.04em] text-text dark:text-darktext">Что появится дальше</h2>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          {['Структурированные конспекты после получения расшифровок', 'Тексты, книги и словарь только с подтверждёнными источниками', 'Синхронизация заметок и прогресса после подключения Supabase', 'Редакторская проверка AI-черновиков до публикации'].map((item) => (
+          {['Структурированные конспекты после получения расшифровок', 'Новые книги и тексты — после проверки источника и условий правообладателя', 'Синхронизация заметок и прогресса после подключения Supabase', 'Редакторская проверка AI-черновиков до публикации'].map((item) => (
             <div key={item} className="rounded-2xl border border-black/5 bg-[#F7F9FC] p-4 text-sm leading-6 text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darkmuted">{item}</div>
           ))}
         </div>

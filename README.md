@@ -75,3 +75,10 @@ Each bookmark can have up to eight comma-separated tags. Tags are normalized, di
 ## Lecture self-tests
 
 Each lecture page includes a local self-test workspace. Users can create questions with two to four answer options, mark the correct option, save the test offline, and later take it in “Пройти” mode. The result is shown after all questions are answered; question sets are stored separately per lecture in localStorage.
+
+
+## Книги и аудиокурсы
+
+Раздел `#/books` содержит PDF «Разъяснение текста книги “Три основы”» и ссылку на связанный цикл из 18 аудиоуроков. Раздел `#/courses` объединяет этот цикл с уже имеющимся курсом «Необходимые вопросы для каждого» из 111 записей. Уроки показываются и проигрываются по номеру, включая составную нумерацию вроде 103.1–103.3.
+
+PDF и аудио «Три основы» открываются с официальных серверов abuyahya.net; эти файлы не копируются в GitHub-репозиторий. Внешние записи не добавляются в офлайн-кэш приложения.

@@ -2229,7 +2229,7 @@ export const cycles: Cycle[] = [
     "title": "Необходимые вопросы для каждого",
     "author": "Абу Яхья Крымский",
     "authorId": "abu-yahya-krymskiy",
-    "description": "Исходный файл: 103.3. Необходимые вопросы.mp3",
+    "description": "Аудиокурс из 111 записей. Уроки отсортированы по номеру; доступное прослушивание и прогресс сохраняются в архиве.",
     "totalLessons": 111,
     "totalDuration": 139177,
     "coverTone": "from-stone-200 via-amber-50 to-white"
