@@ -3,10 +3,15 @@
     { "path": "/", "title": "AL-FIRQA AN-NAJIYA" },
     { "path": "/#/catalog", "title": "Каталог лекций" },
     { "path": "/#/library", "title": "Моя библиотека" },
-    { "path": "/#/author/abu-yahya-krymskiy", "title": "Автор" },
+    { "path": "/#/author/:authorId", "title": "Автор" },
     { "path": "/#/books", "title": "Книги и аудиокурсы" },
     { "path": "/#/courses", "title": "Аудиокурсы" },
     { "path": "/#/cycle/necessary-questions-for-everyone", "title": "Необходимые вопросы для каждого" },
-    { "path": "/#/cycle/tri-osnovy", "title": "Три основы" }
+    { "path": "/#/cycle/tri-osnovy", "title": "Три основы" },
+    { "path": "/#/lecture/:id", "title": "Лекция" },
+    { "path": "/#/category/:category", "title": "Категория" },
+    { "path": "/#/about", "title": "О проекте" },
+    { "path": "/#/texts", "title": "Тексты" },
+    { "path": "/#/dictionary", "title": "Словарь" }
   ]
 }
