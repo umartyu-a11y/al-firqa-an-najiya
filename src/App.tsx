@@ -22,6 +22,7 @@ import {
   Volume2
 } from 'lucide-react';
 import { bookData } from './data/books';
+import { cycleArchives } from './data/cycle-archives';
 import { cycles, lectureData, orderedCycleLectures } from './data/catalog';
 import { BooksPage, CoursesPage } from './CollectionPages';
 import type { Category, Lecture } from './types';
@@ -1272,6 +1273,7 @@ function CyclePage({ cycle, lectures, favorites, onToggleFavorite, onOpenLecture
 }) {
   const listenedCount = lectures.filter((lecture) => getProgress(lecture.id) > 10).length;
   const book = bookData.find((item) => item.cycleId === cycle.id);
+  const archive = cycleArchives[cycle.id];
   return (
     <main className="space-y-6">
       <section className="panel overflow-hidden p-0">
@@ -1293,6 +1295,7 @@ function CyclePage({ cycle, lectures, favorites, onToggleFavorite, onOpenLecture
             </div>
           </div>
           {book && <a href={book.pdfUrl} target="_blank" rel="noreferrer" className="mt-5 inline-flex rounded-full border border-[#B8874A]/30 bg-[#B8874A]/10 px-4 py-2 text-sm font-medium text-[#8C5B22] transition hover:-translate-y-0.5 dark:border-[#E0821E]/30 dark:bg-[#E0821E]/10 dark:text-[#F3B76B]">Открыть книгу PDF</a>}
+          {archive && <a href={archive.url} target="_blank" rel="noreferrer" className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#111820] px-4 py-2.5 text-sm font-medium text-white transition hover:-translate-y-0.5 dark:bg-[#F5F5F5] dark:text-[#111820]"><Download size={16} /><span>Скачать весь цикл ZIP</span><span className="text-xs opacity-75">{archive.trackCount} MP3 · {archive.sizeLabel}</span></a>}
         </div>
       </section>
 

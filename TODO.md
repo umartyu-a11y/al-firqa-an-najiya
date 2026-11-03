@@ -1,3 +1,9 @@
+## Downloadable full-cycle ZIP archives
+- [x] Each of the two cycle pages provides a direct download for a public ZIP containing every MP3 in that cycle, not just a playlist of links.
+- [x] The «Три основы» archive contains its 18 tracks; the «Необходимые вопросы для каждого» archive contains its 111 tracks.
+- [x] Archive filenames preserve course identity and put tracks in lesson order; each archive includes a small manifest with the track list.
+- [x] Both ZIP archives are hosted in public file storage and are linked from their corresponding cycle page.
+
 ## Home page organized around books and cycles
 - [x] The home page does not show cards for individual lessons, recent lectures, or individual progress items.
 - [x] Book-linked study cycles are presented under books, and selecting a card opens that book’s ordered audio cycle.
