@@ -147,6 +147,7 @@ function App() {
     volume: Number(localStorage.getItem('affn-volume') ?? 1)
   });
   const [repeatSegment, setRepeatSegment] = useState<{ start: number | null; end: number | null; active: boolean }>({ start: null, end: null, active: false });
+  const [repeatLesson, setRepeatLesson] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -241,7 +242,8 @@ function App() {
           lecture.category,
           lecture.cycle,
           lecture.tags.join(' '),
-          lecture.description
+          lecture.description,
+          lecture.sourceFileName || ''
         ]
           .join(' ')
           .toLowerCase();
@@ -367,6 +369,11 @@ function App() {
   const clearRepeat = () => setRepeatSegment({ start: null, end: null, active: false });
 
   const handleEnded = () => {
+    if (repeatLesson && audioRef.current) {
+      audioRef.current.currentTime = 0;
+      setPlayerState((prev) => ({ ...prev, currentTime: 0, isPlaying: true }));
+      return;
+    }
     if (repeatSegment.active) {
       clearRepeat();
     }
@@ -516,6 +523,8 @@ function App() {
           repeatSegment={repeatSegment}
           onSetRepeatPoint={setRepeatPoint}
           onClearRepeat={clearRepeat}
+          repeatLesson={repeatLesson}
+          onToggleRepeatLesson={() => setRepeatLesson((prev) => !prev)}
         />
       );
     }
@@ -1059,7 +1068,7 @@ function AuthorPage({ author, lectures, favorites, onToggleFavorite, onOpenLectu
   );
 }
 
-function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, currentLectureId, setCurrentLectureId, playerState, setPlayerState, audioRef, prevLecture, nextLecture, onSeek, onTogglePlay, handleTimeUpdate, handleLoadedMetadata, handleEnded, getProgress, bookmarks, onAddBookmark, onRemoveBookmark, repeatSegment, onSetRepeatPoint, onClearRepeat }: {
+function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, currentLectureId, setCurrentLectureId, playerState, setPlayerState, audioRef, prevLecture, nextLecture, onSeek, onTogglePlay, handleTimeUpdate, handleLoadedMetadata, handleEnded, getProgress, bookmarks, onAddBookmark, onRemoveBookmark, repeatSegment, onSetRepeatPoint, onClearRepeat, repeatLesson, onToggleRepeatLesson }: {
   lecture: Lecture;
   favorites: string[];
   onToggleFavorite: (id: string) => void;
@@ -1083,6 +1092,8 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
   repeatSegment: { start: number | null; end: number | null; active: boolean };
   onSetRepeatPoint: () => void;
   onClearRepeat: () => void;
+  repeatLesson: boolean;
+  onToggleRepeatLesson: () => void;
 }) {
   const cycleLectures = lectureData.filter((item) => item.cycleId === lecture.cycleId);
   const progress = getProgress(lecture.id);
@@ -1179,6 +1190,7 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
           <button onClick={onSetRepeatPoint} className={`rounded-full px-3 py-2 text-sm ${repeatSegment.start !== null && repeatSegment.end === null ? 'bg-[#B8874A] text-white dark:bg-[#E0821E]' : 'border border-black/5 bg-[#F7F9FC] text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext'}`}>A: {repeatSegment.start === null ? '—' : formatDuration(repeatSegment.start)}</button>
           <button onClick={onSetRepeatPoint} disabled={repeatSegment.start === null} className={`rounded-full px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40 ${repeatSegment.active ? 'bg-[#B8874A] text-white dark:bg-[#E0821E]' : 'border border-black/5 bg-[#F7F9FC] text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext'}`}>B: {repeatSegment.end === null ? '—' : formatDuration(repeatSegment.end)}</button>
           {(repeatSegment.start !== null || repeatSegment.end !== null) && <button onClick={onClearRepeat} className="rounded-full px-3 py-2 text-sm text-muted underline underline-offset-4 dark:text-darkmuted">Сбросить A–B</button>}
+          <button onClick={onToggleRepeatLesson} className={`rounded-full px-3 py-2 text-sm ${repeatLesson ? 'bg-[#B8874A] text-white dark:bg-[#E0821E]' : 'border border-black/5 bg-[#F7F9FC] text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext'}`}>Повтор урока</button>
         </div>
 
         {bookmarks.length > 0 && (
@@ -1408,11 +1420,15 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, setRate, 
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]">
-              <Headphones size={18} />
+              <div className="flex h-5 items-end gap-0.5" aria-label={isPlaying ? 'Воспроизведение' : 'Пауза'} role="img">
+                {[3, 7, 11, 6, 14, 9, 5, 12].map((height, index) => (
+                  <span key={index} className={`wave-bar w-0.5 rounded-full bg-current ${isPlaying ? 'wave-bar-active' : ''}`} style={{ height: `${height}px`, animationDelay: `${index * 80}ms` }} />
+                ))}
+              </div>
             </div>
             <div className="min-w-0">
               <div className="truncate text-sm font-medium text-text dark:text-darktext">{lecture.title}</div>
-              <div className="truncate text-xs text-muted dark:text-darkmuted">{lecture.author}</div>
+              <div className="flex items-center gap-2 truncate text-xs text-muted dark:text-darkmuted"><span>{lecture.author}</span><span aria-live="polite">{isPlaying ? 'Воспроизводится' : 'Пауза'}</span></div>
             </div>
           </div>
 
@@ -1424,10 +1440,10 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, setRate, 
             <input type="range" min={0} max={duration || 1} value={currentTime} onChange={(e) => onSeek(Number(e.target.value))} className="w-full accent-[#B8874A] dark:accent-[#E0821E]" />
           </div>
 
-          <div className="flex items-center gap-2">
-            <button onClick={onPrev} className="icon-button"><SkipBack size={16} /></button>
-            <button onClick={onTogglePlay} className="icon-button bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]">{isPlaying ? <Pause size={16} /> : <Play size={16} />}</button>
-            <button onClick={onNext} className="icon-button"><SkipForward size={16} /></button>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <button onClick={onPrev} aria-label="Предыдущая лекция" className="icon-button"><SkipBack size={16} /></button>
+            <button onClick={onTogglePlay} aria-label={isPlaying ? 'Пауза' : 'Воспроизвести'} className="icon-button bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]">{isPlaying ? <Pause size={16} /> : <Play size={16} />}</button>
+            <button onClick={onNext} aria-label="Следующая лекция" className="icon-button"><SkipForward size={16} /></button>
 
             <label className="flex items-center gap-1 rounded-full border border-black/5 bg-[#F7F9FC] px-2 py-2 text-xs dark:border-white/10 dark:bg-[#161616]" title="Громкость">
               <Volume2 size={13} aria-hidden="true" />

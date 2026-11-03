@@ -61,6 +61,16 @@ button, input, select {
   @apply flex h-10 w-10 items-center justify-center rounded-full border border-black/5 bg-[#F7F9FC] text-text transition hover:-translate-y-0.5 dark:border-white/10 dark:bg-[#161616] dark:text-darktext;
 }
 
+@keyframes affn-wave {
+  0%, 100% { transform: scaleY(0.65); opacity: 0.65; }
+  50% { transform: scaleY(1.15); opacity: 1; }
+}
+
+.wave-bar-active {
+  transform-origin: bottom;
+  animation: affn-wave 900ms ease-in-out infinite;
+}
+
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
