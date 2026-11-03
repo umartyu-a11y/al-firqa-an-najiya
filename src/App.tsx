@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Dispatch, RefObject, SetStateAction } from 'react';
 import {
   BookOpenText,
+  Bookmark,
   ChevronRight,
   Clock3,
   Headphones,
@@ -21,12 +22,14 @@ import type { Category, Lecture } from './types';
 
 type SortType = 'newest' | 'title' | 'author' | 'duration';
 type Theme = 'light' | 'dark';
+type BookmarkItem = { id: string; lectureId: string; time: number; createdAt: string };
 
 const storageKeys = {
   theme: 'affn-theme',
   favorites: 'affn-favorites',
   history: 'affn-history',
-  progress: 'affn-progress'
+  progress: 'affn-progress',
+  bookmarks: 'affn-bookmarks'
 };
 
 const authorMap = {
@@ -127,6 +130,13 @@ function App() {
       return null;
     }
   });
+  const [bookmarks, setBookmarks] = useState<BookmarkItem[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(storageKeys.bookmarks) || '[]');
+    } catch {
+      return [];
+    }
+  });
 
   const [playerState, setPlayerState] = useState({
     isPlaying: false,
@@ -136,6 +146,7 @@ function App() {
     sleepMinutes: 0,
     volume: Number(localStorage.getItem('affn-volume') ?? 1)
   });
+  const [repeatSegment, setRepeatSegment] = useState<{ start: number | null; end: number | null; active: boolean }>({ start: null, end: null, active: false });
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -162,6 +173,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem(storageKeys.history, JSON.stringify(history));
   }, [history]);
+
+  useEffect(() => {
+    localStorage.setItem(storageKeys.bookmarks, JSON.stringify(bookmarks));
+  }, [bookmarks]);
 
   useEffect(() => {
     if (currentLectureId) {
@@ -306,6 +321,9 @@ function App() {
   const handleTimeUpdate = () => {
     const audio = audioRef.current;
     if (!audio) return;
+    if (repeatSegment.active && repeatSegment.start !== null && repeatSegment.end !== null && audio.currentTime >= repeatSegment.end) {
+      audio.currentTime = repeatSegment.start;
+    }
     if (currentLectureId) saveProgress(currentLectureId, audio.currentTime);
     setPlayerState((prev) => ({
       ...prev,
@@ -328,7 +346,30 @@ function App() {
     }));
   };
 
+  const addBookmark = () => {
+    if (!currentLectureId || playerState.currentTime <= 0) return;
+    const time = Math.floor(playerState.currentTime);
+    const id = `${currentLectureId}-${time}`;
+    setBookmarks((prev) => [{ id, lectureId: currentLectureId, time, createdAt: new Date().toISOString() }, ...prev.filter((item) => item.id !== id)].slice(0, 100));
+  };
+
+  const removeBookmark = (id: string) => setBookmarks((prev) => prev.filter((item) => item.id !== id));
+
+  const setRepeatPoint = () => {
+    const time = Math.floor(playerState.currentTime);
+    if (repeatSegment.start === null || repeatSegment.end !== null) {
+      setRepeatSegment({ start: time, end: null, active: false });
+      return;
+    }
+    if (time > repeatSegment.start) setRepeatSegment({ start: repeatSegment.start, end: time, active: true });
+  };
+
+  const clearRepeat = () => setRepeatSegment({ start: null, end: null, active: false });
+
   const handleEnded = () => {
+    if (repeatSegment.active) {
+      clearRepeat();
+    }
     const currentIndex = lectureData.findIndex((lecture) => lecture.id === currentLectureId);
     const next = lectureData[currentIndex + 1] || lectureData[0];
     setCurrentLectureId(next.id);
@@ -469,6 +510,12 @@ function App() {
           handleLoadedMetadata={handleLoadedMetadata}
           handleEnded={handleEnded}
           getProgress={getAudioProgress}
+          bookmarks={bookmarks.filter((item) => item.lectureId === lecture.id)}
+          onAddBookmark={addBookmark}
+          onRemoveBookmark={removeBookmark}
+          repeatSegment={repeatSegment}
+          onSetRepeatPoint={setRepeatPoint}
+          onClearRepeat={clearRepeat}
         />
       );
     }
@@ -1012,7 +1059,7 @@ function AuthorPage({ author, lectures, favorites, onToggleFavorite, onOpenLectu
   );
 }
 
-function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, currentLectureId, setCurrentLectureId, playerState, setPlayerState, audioRef, prevLecture, nextLecture, onSeek, onTogglePlay, handleTimeUpdate, handleLoadedMetadata, handleEnded, getProgress }: {
+function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, currentLectureId, setCurrentLectureId, playerState, setPlayerState, audioRef, prevLecture, nextLecture, onSeek, onTogglePlay, handleTimeUpdate, handleLoadedMetadata, handleEnded, getProgress, bookmarks, onAddBookmark, onRemoveBookmark, repeatSegment, onSetRepeatPoint, onClearRepeat }: {
   lecture: Lecture;
   favorites: string[];
   onToggleFavorite: (id: string) => void;
@@ -1030,6 +1077,12 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
   handleLoadedMetadata: () => void;
   handleEnded: () => void;
   getProgress: (id: string) => number;
+  bookmarks: BookmarkItem[];
+  onAddBookmark: () => void;
+  onRemoveBookmark: (id: string) => void;
+  repeatSegment: { start: number | null; end: number | null; active: boolean };
+  onSetRepeatPoint: () => void;
+  onClearRepeat: () => void;
 }) {
   const cycleLectures = lectureData.filter((item) => item.cycleId === lecture.cycleId);
   const progress = getProgress(lecture.id);
@@ -1112,14 +1165,35 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
             ))}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {[15, 30, 45, 60].map((minutes) => (
-              <button key={minutes} onClick={() => setPlayerState((prev) => ({ ...prev, sleepMinutes: prev.sleepMinutes === minutes ? 0 : minutes }))} className={`rounded-full px-3 py-1.5 text-sm ${playerState.sleepMinutes === minutes ? 'bg-[#B8874A] text-white dark:bg-[#E0821E]' : 'bg-[#F7F9FC] text-text dark:bg-[#161616] dark:text-darktext'}`}>
+              <button key={minutes} aria-label={`Таймер сна ${minutes} минут`} onClick={() => setPlayerState((prev) => ({ ...prev, sleepMinutes: prev.sleepMinutes === minutes ? 0 : minutes }))} className={`rounded-full px-3 py-1.5 text-sm ${playerState.sleepMinutes === minutes ? 'bg-[#B8874A] text-white dark:bg-[#E0821E]' : 'bg-[#F7F9FC] text-text dark:bg-[#161616] dark:text-darktext'}`}>
                 {minutes}м
               </button>
             ))}
           </div>
         </div>
+
+        <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-black/5 pt-4 dark:border-white/10">
+          <button onClick={onAddBookmark} className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 text-sm text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext"><Bookmark size={15} /> Закладка на {formatDuration(playerState.currentTime)}</button>
+          <button onClick={onSetRepeatPoint} className={`rounded-full px-3 py-2 text-sm ${repeatSegment.start !== null && repeatSegment.end === null ? 'bg-[#B8874A] text-white dark:bg-[#E0821E]' : 'border border-black/5 bg-[#F7F9FC] text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext'}`}>A: {repeatSegment.start === null ? '—' : formatDuration(repeatSegment.start)}</button>
+          <button onClick={onSetRepeatPoint} disabled={repeatSegment.start === null} className={`rounded-full px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40 ${repeatSegment.active ? 'bg-[#B8874A] text-white dark:bg-[#E0821E]' : 'border border-black/5 bg-[#F7F9FC] text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext'}`}>B: {repeatSegment.end === null ? '—' : formatDuration(repeatSegment.end)}</button>
+          {(repeatSegment.start !== null || repeatSegment.end !== null) && <button onClick={onClearRepeat} className="rounded-full px-3 py-2 text-sm text-muted underline underline-offset-4 dark:text-darkmuted">Сбросить A–B</button>}
+        </div>
+
+        {bookmarks.length > 0 && (
+          <div className="mt-4 rounded-2xl border border-black/5 bg-[#F7F9FC] p-4 dark:border-white/10 dark:bg-[#161616]">
+            <div className="mb-3 text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Закладки этой лекции</div>
+            <div className="flex flex-wrap gap-2">
+              {bookmarks.map((item) => (
+                <div key={item.id} className="inline-flex items-center gap-1 rounded-full border border-black/5 bg-white pl-3 text-sm dark:border-white/10 dark:bg-[#101010]">
+                  <button onClick={() => onSeek(item.time)} className="py-2 text-text dark:text-darktext">{formatDuration(item.time)}</button>
+                  <button onClick={() => onRemoveBookmark(item.id)} aria-label={`Удалить закладку ${formatDuration(item.time)}`} className="px-2 py-2 text-muted dark:text-darkmuted">×</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
