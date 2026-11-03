@@ -621,6 +621,32 @@ function App() {
     window.setTimeout(() => popup.print(), 250);
   };
 
+  const exportAllBookmarksText = () => {
+    const entries = bookmarks.map((item) => ({ item, lecture: getLectureById(item.lectureId) })).filter((entry): entry is { item: BookmarkItem; lecture: Lecture } => Boolean(entry.lecture));
+    const lines = ['AL-FIRQA AN-NAJIYA', 'Все закладки и заметки', `Экспортировано: ${new Date().toLocaleString('ru-RU')}`, ''];
+    entries.forEach(({ item, lecture }, index) => {
+      lines.push(`${index + 1}. ${lecture.title}`, `Автор: ${lecture.author}`, `Позиция: ${formatDuration(item.time)}`, item.note?.trim() || 'Без заметки', '');
+    });
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'al-firqa-an-najiya-bookmarks.txt';
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportAllBookmarksPdf = () => {
+    const entries = bookmarks.map((item) => ({ item, lecture: getLectureById(item.lectureId) })).filter((entry): entry is { item: BookmarkItem; lecture: Lecture } => Boolean(entry.lecture));
+    const popup = window.open('', '_blank', 'width=760,height=900');
+    if (!popup) return;
+    const rows = entries.map(({ item, lecture }) => `<article><h2>${escapeHtml(lecture.title)}</h2><div class="meta">${escapeHtml(lecture.author)} · ${escapeHtml(formatDuration(item.time))}</div><p>${escapeHtml(item.note?.trim() || 'Без заметки')}</p></article>`).join('');
+    popup.document.write(`<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>AL-FIRQA AN-NAJIYA — все заметки</title><style>body{font-family:Arial,sans-serif;max-width:760px;margin:40px auto;padding:0 24px;color:#111820}h1{font-size:28px;margin-bottom:8px}header{border-bottom:1px solid #ddd;padding-bottom:20px;margin-bottom:24px}article{border:1px solid #ddd;border-radius:14px;padding:16px;margin:12px 0;break-inside:avoid}h2{font-size:18px;margin:0 0 8px;color:#9b6d32}.meta{font-size:13px;color:#66717d;margin-bottom:10px}p{white-space:pre-wrap;line-height:1.55;margin:0}@media print{body{margin:0 auto}}</style></head><body><header><h1>Все закладки и заметки</h1><div>AL-FIRQA AN-NAJIYA</div><small>Экспортировано: ${escapeHtml(new Date().toLocaleString('ru-RU'))}</small></header>${rows || '<p>Закладок пока нет.</p>'}</body></html>`);
+    popup.document.close();
+    popup.focus();
+    window.setTimeout(() => popup.print(), 250);
+  };
+
   const favoriteLectures = lectureData.filter((lecture) => favorites.includes(lecture.id));
   const continueLectures = lectureData.filter((lecture) => getAudioProgress(lecture.id) > 15);
   const recentLectures = history.map((id) => getLectureById(id)).filter(Boolean) as Lecture[];
@@ -641,6 +667,9 @@ function App() {
           authSession={authSession}
           onOpenAuth={() => { setAuthMessage(''); setAuthOpen(true); }}
           onSignOut={handleSignOut}
+          bookmarks={bookmarks}
+          onExportAllText={exportAllBookmarksText}
+          onExportAllPdf={exportAllBookmarksPdf}
         />
       );
     }
@@ -1546,7 +1575,7 @@ function CategoryPage({ category, lectures, favorites, onToggleFavorite, onOpenL
   );
 }
 
-function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpenLecture, onToggleFavorite, favorites, getProgress, cloudReady, cloudEnabled, authSession, onOpenAuth, onSignOut }: {
+function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpenLecture, onToggleFavorite, favorites, getProgress, cloudReady, cloudEnabled, authSession, onOpenAuth, onSignOut, bookmarks, onExportAllText, onExportAllPdf }: {
   continueLectures: Lecture[];
   favoriteLectures: Lecture[];
   recentLectures: Lecture[];
@@ -1559,6 +1588,9 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
   authSession: Session | null;
   onOpenAuth: () => void;
   onSignOut: () => void;
+  bookmarks: BookmarkItem[];
+  onExportAllText: () => void;
+  onExportAllPdf: () => void;
 }) {
   return (
     <main className="space-y-6">
@@ -1577,6 +1609,11 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
         <div className="panel p-5"><div className="text-sm text-muted dark:text-darkmuted">Продолжить прослушивание</div><div className="mt-3 font-display text-3xl text-text dark:text-darktext">{continueLectures.length}</div></div>
         <div className="panel p-5"><div className="text-sm text-muted dark:text-darkmuted">Избранные лекции</div><div className="mt-3 font-display text-3xl text-text dark:text-darktext">{favoriteLectures.length}</div></div>
         <div className="panel p-5"><div className="text-sm text-muted dark:text-darkmuted">Последние открытые</div><div className="mt-3 font-display text-3xl text-text dark:text-darktext">{recentLectures.length}</div></div>
+      </section>
+
+      <section className="panel flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div><div className="text-sm font-medium text-text dark:text-darktext">Экспорт библиотеки</div><p className="mt-1 text-sm text-muted dark:text-darkmuted">Все закладки и заметки со всех лекций: {bookmarks.length}</p></div>
+        <div className="flex shrink-0 gap-2"><button disabled={!bookmarks.length} onClick={onExportAllText} className="inline-flex items-center gap-1 rounded-full border border-black/5 px-3 py-2 text-xs text-muted disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:text-darkmuted">TXT</button><button disabled={!bookmarks.length} onClick={onExportAllPdf} className="inline-flex items-center gap-1 rounded-full border border-black/5 px-3 py-2 text-xs text-muted disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:text-darkmuted">PDF</button></div>
       </section>
 
       <section className="space-y-4">

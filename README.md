@@ -50,3 +50,8 @@ On any lecture page, use `Закладка` to save the current timestamp. Each 
 ## Exporting notes
 
 The lecture player can export its bookmarks and notes as a UTF-8 `.txt` file. The `PDF` action opens a print-friendly document in a new window; choose “Save as PDF” in the browser or system print dialog. This keeps Cyrillic text readable without embedding a third-party font and works with the current lecture's local notes.
+
+
+## Full library export
+
+The Library page now exports all locally stored bookmarks and notes from every lecture as one UTF-8 `.txt` file or one print-ready document for “Save as PDF”. Entries include the lecture title, author, timestamp and note text. Empty export buttons remain disabled until at least one bookmark exists.
