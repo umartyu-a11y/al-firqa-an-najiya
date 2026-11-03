@@ -32,6 +32,16 @@ type ResourceType = 'books' | 'texts' | 'dictionary' | 'courses';
 type LibrarySearchType = 'all' | 'note' | 'bookmark';
 type LibrarySearchSort = 'newest' | 'oldest';
 type BookmarkItem = { id: string; lectureId: string; time: number; createdAt: string; note?: string; tags?: string[] };
+type QuizQuestion = { id: string; prompt: string; options: string[]; correctIndex: number };
+
+const readQuizQuestions = (lectureId: string): QuizQuestion[] => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(`affn-quiz-${lectureId}`) || '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
 
 const storageKeys = {
   theme: 'affn-theme',
@@ -1405,6 +1415,36 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
 }) {
   const cycleLectures = lectureData.filter((item) => item.cycleId === lecture.cycleId);
   const progress = getProgress(lecture.id);
+  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>(() => readQuizQuestions(lecture.id));
+  const [quizMode, setQuizMode] = useState<'take' | 'create'>('take');
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [draftPrompt, setDraftPrompt] = useState('');
+  const [draftOptions, setDraftOptions] = useState(['', '', '', '']);
+  const [draftCorrect, setDraftCorrect] = useState(0);
+
+  useEffect(() => {
+    setQuizQuestions(readQuizQuestions(lecture.id));
+    setQuizAnswers({});
+    setQuizSubmitted(false);
+    setQuizMode('take');
+  }, [lecture.id]);
+
+  useEffect(() => {
+    localStorage.setItem(`affn-quiz-${lecture.id}`, JSON.stringify(quizQuestions));
+  }, [lecture.id, quizQuestions]);
+
+  const addQuizQuestion = () => {
+    const options = draftOptions.map((option) => option.trim()).filter(Boolean);
+    if (!draftPrompt.trim() || options.length < 2 || draftCorrect >= options.length) return;
+    setQuizQuestions((prev) => [...prev, { id: `${lecture.id}-${Date.now()}`, prompt: draftPrompt.trim(), options, correctIndex: draftCorrect }]);
+    setDraftPrompt('');
+    setDraftOptions(['', '', '', '']);
+    setDraftCorrect(0);
+  };
+
+  const removeQuizQuestion = (id: string) => setQuizQuestions((prev) => prev.filter((question) => question.id !== id));
+  const quizScore = quizQuestions.reduce((score, question) => score + (quizAnswers[question.id] === question.correctIndex ? 1 : 0), 0);
 
   return (
     <main className="space-y-6">
@@ -1525,6 +1565,25 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
             </div>
           </div>
         )}
+      </section>
+
+      <section className="panel p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div><div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Самопроверка</div><h2 className="mt-2 font-display text-3xl tracking-[-0.04em] text-text dark:text-darktext">Тест по лекции</h2><p className="mt-2 text-sm leading-6 text-muted dark:text-darkmuted">Создайте вопросы по материалу лекции и пройдите их позже без подключения к сети.</p></div>
+          <div className="flex shrink-0 gap-2"><button onClick={() => { setQuizMode('take'); setQuizSubmitted(false); }} className={`rounded-full px-3 py-2 text-xs ${quizMode === 'take' ? 'bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]' : 'border border-black/5 text-muted dark:border-white/10 dark:text-darkmuted'}`}>Пройти</button><button onClick={() => setQuizMode('create')} className={`rounded-full px-3 py-2 text-xs ${quizMode === 'create' ? 'bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]' : 'border border-black/5 text-muted dark:border-white/10 dark:text-darkmuted'}`}>Создать</button></div>
+        </div>
+
+        {quizMode === 'create' ? (
+          <div className="mt-5 space-y-4">
+            <label className="block text-sm font-medium text-text dark:text-darktext">Вопрос<input value={draftPrompt} onChange={(event) => setDraftPrompt(event.target.value)} placeholder="Что важно запомнить из лекции?" className="mt-2 w-full rounded-2xl border border-black/5 bg-[#F7F9FC] px-4 py-3 font-normal outline-none dark:border-white/10 dark:bg-[#161616] dark:text-darktext" /></label>
+            <div className="grid gap-2 sm:grid-cols-2">{draftOptions.map((option, index) => <label key={index} className="text-xs text-muted dark:text-darkmuted">Вариант {index + 1}<input value={option} onChange={(event) => setDraftOptions((prev) => prev.map((value, optionIndex) => optionIndex === index ? event.target.value : value))} placeholder={`Вариант ${index + 1}`} className="mt-1 w-full rounded-xl border border-black/5 bg-[#F7F9FC] px-3 py-2 text-sm text-text outline-none dark:border-white/10 dark:bg-[#161616] dark:text-darktext" /></label>)}</div>
+            <label className="block text-xs text-muted dark:text-darkmuted">Правильный вариант<select value={draftCorrect} onChange={(event) => setDraftCorrect(Number(event.target.value))} className="mt-1 w-full rounded-xl border border-black/5 bg-[#F7F9FC] px-3 py-2 text-sm text-text outline-none dark:border-white/10 dark:bg-[#161616] dark:text-darktext">{draftOptions.map((_, index) => <option key={index} value={index}>Вариант {index + 1}</option>)}</select></label>
+            <button onClick={addQuizQuestion} disabled={!draftPrompt.trim() || draftOptions.filter(Boolean).length < 2} className="rounded-full bg-[#111820] px-4 py-2.5 text-sm text-white disabled:cursor-not-allowed disabled:opacity-40 dark:bg-[#F5F5F5] dark:text-[#111820]">Добавить вопрос</button>
+            {!!quizQuestions.length && <div className="space-y-2 border-t border-black/5 pt-4 dark:border-white/10">{quizQuestions.map((question, index) => <div key={question.id} className="flex items-start justify-between gap-3 rounded-2xl bg-[#F7F9FC] p-3 dark:bg-[#161616]"><div className="text-sm text-text dark:text-darktext"><span className="mr-2 text-muted dark:text-darkmuted">{index + 1}.</span>{question.prompt}<div className="mt-1 text-xs text-muted dark:text-darkmuted">{question.options.length} варианта ответа</div></div><button onClick={() => removeQuizQuestion(question.id)} className="text-xs text-muted dark:text-darkmuted">Удалить</button></div>)}</div>}
+          </div>
+        ) : quizQuestions.length ? (
+          <div className="mt-5 space-y-4">{quizQuestions.map((question, index) => <fieldset key={question.id} className="rounded-2xl border border-black/5 p-4 dark:border-white/10"><legend className="max-w-full px-1 text-sm font-medium text-text dark:text-darktext">{index + 1}. {question.prompt}</legend><div className="mt-3 space-y-2">{question.options.map((option, optionIndex) => <label key={optionIndex} className={`flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-sm ${quizSubmitted && optionIndex === question.correctIndex ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : quizSubmitted && quizAnswers[question.id] === optionIndex ? 'bg-red-500/10 text-red-700 dark:text-red-300' : 'bg-[#F7F9FC] text-text dark:bg-[#161616] dark:text-darktext'}`}><input type="radio" name={question.id} checked={quizAnswers[question.id] === optionIndex} onChange={() => { setQuizAnswers((prev) => ({ ...prev, [question.id]: optionIndex })); setQuizSubmitted(false); }} />{option}</label>)}</div></fieldset>)}<div className="flex flex-wrap items-center gap-3"><button onClick={() => setQuizSubmitted(true)} disabled={Object.keys(quizAnswers).length < quizQuestions.length} className="rounded-full bg-[#111820] px-4 py-2.5 text-sm text-white disabled:cursor-not-allowed disabled:opacity-40 dark:bg-[#F5F5F5] dark:text-[#111820]">Проверить ответы</button>{quizSubmitted && <span className="text-sm font-medium text-text dark:text-darktext">Результат: {quizScore}/{quizQuestions.length}</span>}</div></div>
+        ) : <div className="mt-5 rounded-2xl bg-[#F7F9FC] p-5 text-sm leading-6 text-muted dark:bg-[#161616] dark:text-darkmuted">Пока нет вопросов. Переключитесь на «Создать», чтобы составить тест по прослушанному материалу.</div>}
       </section>
 
       <section className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">

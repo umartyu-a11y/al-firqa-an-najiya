@@ -70,3 +70,8 @@ Library search results can be filtered to all records, note-bearing records or p
 ## Bookmark tags
 
 Each bookmark can have up to eight comma-separated tags. Tags are normalized, displayed as chips, included in library search and can be selected as a grouping filter. They are also included in TXT/PDF exports.
+
+
+## Lecture self-tests
+
+Each lecture page includes a local self-test workspace. Users can create questions with two to four answer options, mark the correct option, save the test offline, and later take it in “Пройти” mode. The result is shown after all questions are answered; question sets are stored separately per lecture in localStorage.
