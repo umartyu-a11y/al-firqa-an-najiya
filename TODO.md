@@ -52,3 +52,12 @@
 - [x] Использовать network-first navigation с offline fallback на index.html.
 - [x] Не кэшировать аудио и cloud API-запросы, чтобы не расходовать хранилище и не показывать устаревшие данные.
 - [ ] Проверить install/update сценарии Service Worker в реальном браузере на GitHub Pages.
+
+
+## Background audio
+
+- [x] Добавить Media Session metadata для текущей лекции.
+- [x] Добавить play/pause, previous/next, seek ±10 секунд, seekto и stop для lock screen/headset controls.
+- [x] Синхронизировать playback state и position state с HTMLAudioElement.
+- [x] Сохранить корневой audio element при смене маршрута и добавить playsInline.
+- [ ] Проверить поведение Media Session на реальном iPhone/Safari и Android/Chrome.

@@ -361,6 +361,19 @@ function App() {
 
   const currentLecture = currentLectureId ? lectureMap[currentLectureId] : null;
 
+  const updateMediaSessionPosition = (audio: HTMLAudioElement) => {
+    if (!('mediaSession' in navigator) || !Number.isFinite(audio.duration) || audio.duration <= 0) return;
+    try {
+      navigator.mediaSession.setPositionState({
+        duration: audio.duration,
+        playbackRate: audio.playbackRate || 1,
+        position: Math.min(audio.currentTime, audio.duration)
+      });
+    } catch {
+      // Some mobile browsers expose Media Session but reject position updates.
+    }
+  };
+
   useEffect(() => {
     if (!currentLectureId) return;
     const lecture = getLectureById(currentLectureId);
@@ -417,6 +430,7 @@ function App() {
       audio.currentTime = repeatSegment.start;
     }
     if (currentLectureId) saveProgress(currentLectureId, audio.currentTime);
+    updateMediaSessionPosition(audio);
     setPlayerState((prev) => ({
       ...prev,
       currentTime: audio.currentTime,
@@ -431,6 +445,7 @@ function App() {
     if (saved > 0 && saved < audio.duration) {
       audio.currentTime = saved;
     }
+    updateMediaSessionPosition(audio);
     setPlayerState((prev) => ({
       ...prev,
       duration: audio.duration || prev.duration,
@@ -491,6 +506,46 @@ function App() {
     setPlayerState((prevState) => ({ ...prevState, isPlaying: true, currentTime: 0 }));
     pushHistory(next.id);
   };
+
+  useEffect(() => {
+    if (!currentLecture || !('mediaSession' in navigator)) return;
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: currentLecture.title,
+      artist: currentLecture.author,
+      album: currentLecture.cycle,
+      artwork: [{ src: new URL(`${import.meta.env.BASE_URL}favicon.svg`, window.location.origin).href, sizes: 'any', type: 'image/svg+xml' }]
+    });
+    navigator.mediaSession.playbackState = playerState.isPlaying ? 'playing' : 'paused';
+
+    const seekBy = (offset: number) => {
+      if (!audioRef.current) return;
+      handleSeek(Math.max(0, Math.min(audioRef.current.duration || currentLecture.duration, audioRef.current.currentTime + offset)));
+    };
+
+    navigator.mediaSession.setActionHandler('play', () => setPlayerState((prev) => ({ ...prev, isPlaying: true })));
+    navigator.mediaSession.setActionHandler('pause', () => setPlayerState((prev) => ({ ...prev, isPlaying: false })));
+    navigator.mediaSession.setActionHandler('previoustrack', prevLecture);
+    navigator.mediaSession.setActionHandler('nexttrack', nextLecture);
+    navigator.mediaSession.setActionHandler('seekbackward', (details) => seekBy(-(details.seekOffset || 10)));
+    navigator.mediaSession.setActionHandler('seekforward', (details) => seekBy(details.seekOffset || 10));
+    navigator.mediaSession.setActionHandler('seekto', (details) => {
+      if (!audioRef.current || details.seekTime === undefined) return;
+      handleSeek(details.seekTime);
+    });
+    navigator.mediaSession.setActionHandler('stop', () => {
+      if (audioRef.current) audioRef.current.currentTime = 0;
+      setPlayerState((prev) => ({ ...prev, currentTime: 0, isPlaying: false }));
+    });
+
+    return () => {
+      navigator.mediaSession.metadata = null;
+      navigator.mediaSession.playbackState = 'none';
+      ['play', 'pause', 'previoustrack', 'nexttrack', 'seekbackward', 'seekforward', 'seekto', 'stop'].forEach((action) => {
+        try { navigator.mediaSession.setActionHandler(action as MediaSessionAction, null); } catch { /* unsupported action */ }
+      });
+    };
+  }, [currentLectureId, currentLecture, playerState.isPlaying]);
 
   const handleOpenLecture = (lectureId: string) => {
     setCurrentLectureId(lectureId);
@@ -789,11 +844,13 @@ function App() {
       <audio
         ref={audioRef}
         preload="metadata"
+        playsInline
+        aria-label="Аудиоплеер лекции"
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={handleEnded}
-        onPause={() => setPlayerState((prev) => ({ ...prev, isPlaying: false }))}
-        onPlay={() => setPlayerState((prev) => ({ ...prev, isPlaying: true }))}
+        onPause={() => { navigator.mediaSession && (navigator.mediaSession.playbackState = 'paused'); setPlayerState((prev) => ({ ...prev, isPlaying: false })); }}
+        onPlay={() => { navigator.mediaSession && (navigator.mediaSession.playbackState = 'playing'); setPlayerState((prev) => ({ ...prev, isPlaying: true })); }}
       />
     </div>
   );

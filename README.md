@@ -31,3 +31,7 @@ npm run build
 ## Offline mode
 
 The production build registers `public/sw.js`. It caches the application shell, hashed JavaScript/CSS assets, manifest and the bundled lecture catalog. Navigation uses a network-first strategy with an `index.html` fallback, so previously opened catalog and text routes remain available offline. Audio files and cloud API requests are intentionally not cached; audio playback and Supabase synchronization resume when the connection returns.
+
+## Background audio
+
+The player uses the Media Session API to publish the current lecture to supported mobile browsers and installed PWAs. Lock-screen and headset controls support play/pause, previous/next lecture, ±10-second seeking, direct seek position and stop. Playback remains owned by the root audio element while routes change. Browser support and background playback policies still depend on the device and browser; playback must first be started by a user gesture.
