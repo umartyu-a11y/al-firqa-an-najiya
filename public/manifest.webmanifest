@@ -9,10 +9,10 @@
   "theme_color": "#F2F6FA",
   "icons": [
     {
-      "src": "/al-firqa-an-najiya/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "src": "/al-firqa-an-najiya/logo-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

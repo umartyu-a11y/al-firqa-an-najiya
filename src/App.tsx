@@ -759,8 +759,8 @@ function App() {
         <header className="sticky top-3 z-40 mb-8">
           <div className="mx-auto flex max-w-[1280px] items-center justify-between rounded-full border border-black/5 bg-white/80 px-4 py-3 shadow-[0_8px_30px_rgba(17,24,32,0.06)] backdrop-blur-xl dark:border-white/10 dark:bg-[#101010]/85">
             <button className="flex items-center gap-3" onClick={() => navigate('/')}>
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#111820] text-sm font-bold text-[#F2F6FA] dark:bg-[#F5F5F5] dark:text-[#111820]">
-                A
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#111820] p-1.5 dark:bg-[#F5F5F5]">
+                <img src={`${import.meta.env.BASE_URL}logo-icon.png`} alt="" className="h-full w-full object-contain" />
               </div>
               <div className="text-left">
                 <div className="font-semibold tracking-[0.12em] text-[10px] uppercase text-muted dark:text-darkmuted">
@@ -1758,9 +1758,14 @@ function AboutPage() {
   return (
     <main className="space-y-6">
       <section className="panel p-7 sm:p-10">
-        <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">О проекте</div>
-        <h1 className="mt-3 max-w-3xl font-display text-5xl leading-none tracking-[-0.04em] text-text dark:text-darktext">Цифровая библиотека, построенная вокруг достоверности.</h1>
-        <p className="mt-6 max-w-2xl text-base leading-7 text-muted dark:text-darkmuted">AL-FIRQA AN-NAJIYA собирает проверяемые аудиоматериалы в спокойную образовательную среду. Мы не публикуем неподтверждённые конспекты, цитаты или статистику активности.</p>
+        <div className="grid items-center gap-8 lg:grid-cols-[1fr_240px]">
+          <div>
+            <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">О проекте</div>
+            <h1 className="mt-3 max-w-3xl font-display text-5xl leading-none tracking-[-0.04em] text-text dark:text-darktext">Цифровая библиотека, построенная вокруг достоверности.</h1>
+            <p className="mt-6 max-w-2xl text-base leading-7 text-muted dark:text-darkmuted">AL-FIRQA AN-NAJIYA собирает проверяемые аудиоматериалы в спокойную образовательную среду. Мы не публикуем неподтверждённые конспекты, цитаты или статистику активности.</p>
+          </div>
+          <img src={`${import.meta.env.BASE_URL}logo-full.png`} alt="AL-FIRQA AN-NAJIYA" className="mx-auto max-h-44 w-full object-contain opacity-90" />
+        </div>
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
