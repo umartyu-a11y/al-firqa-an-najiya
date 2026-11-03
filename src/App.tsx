@@ -1854,7 +1854,7 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, setRate, 
   setSleepMinutes: (value: number) => void;
 }) {
   const [collapsed, setCollapsed] = useState(false);
-  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const touchStart = useRef<{ x: number; y: number; blocked: boolean } | null>(null);
   if (!lecture) return null;
 
   if (collapsed) {
@@ -1873,16 +1873,25 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, setRate, 
       className="fixed inset-x-0 bottom-0 z-50 px-3 pb-3 sm:px-5"
       onTouchStart={(event) => {
         const touch = event.touches[0];
-        touchStart.current = touch ? { x: touch.clientX, y: touch.clientY } : null;
+        const target = event.target;
+        const blocked = target instanceof Element && Boolean(target.closest('button, input, select, label'));
+        touchStart.current = touch ? { x: touch.clientX, y: touch.clientY, blocked } : null;
       }}
       onTouchEnd={(event) => {
         const start = touchStart.current;
         const touch = event.changedTouches[0];
         touchStart.current = null;
-        if (!start || !touch) return;
+        if (!start || !touch || start.blocked) return;
         const deltaY = touch.clientY - start.y;
         const deltaX = touch.clientX - start.x;
-        if (deltaY > 64 && deltaY > Math.abs(deltaX) * 1.2) setCollapsed(true);
+        const horizontalDistance = Math.abs(deltaX);
+        const verticalDistance = Math.abs(deltaY);
+        if (horizontalDistance > 64 && horizontalDistance > verticalDistance * 1.2) {
+          if (deltaX < 0) onNext();
+          else onPrev();
+          return;
+        }
+        if (deltaY > 64 && deltaY > horizontalDistance * 1.2) setCollapsed(true);
       }}
       onTouchCancel={() => { touchStart.current = null; }}
     >

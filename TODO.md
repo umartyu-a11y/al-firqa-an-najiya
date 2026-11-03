@@ -1,7 +1,9 @@
-## Mini-player collapse and restore
+## Mini-player gestures
 - [x] The bottom mini-player can be dismissed with a downward swipe and restored by pressing a visible up-arrow button.
 - [x] Hiding the mini-player does not pause, stop, or reset the audio; playback controls remain available again after restoring it.
 - [x] The gesture and restore button remain usable on mobile and desktop and have accessible button labels.
+- [x] Swiping left advances to the next track; swiping right returns to the previous track.
+- [x] Swipes that begin on buttons, seek/volume sliders, or selectors do not change tracks.
 
 ## Books and audio collections
 - [x] Раздел «Книги» показывает только проверенное издание и ведёт к PDF и официальной странице источника.
