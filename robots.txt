@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://umartyu-a11y.github.io/al-firqa-an-najiya/sitemap.xml

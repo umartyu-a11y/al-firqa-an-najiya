@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#F2F6FA"/>
+  <rect x="60" y="60" width="1080" height="510" rx="28" fill="#FFFFFF" stroke="#111820" stroke-opacity="0.08"/>
+  <text x="100" y="220" fill="#111820" font-size="38" font-family="Inter, Arial, sans-serif" letter-spacing="8">AL-FIRQA</text>
+  <text x="100" y="300" fill="#111820" font-size="104" font-family="Fraunces, Georgia, serif">AN-NAJIYA</text>
+  <text x="100" y="390" fill="#697481" font-size="32" font-family="Inter, Arial, sans-serif">Исламские лекции</text>
+  <rect x="100" y="440" width="200" height="70" rx="35" fill="#B8874A"/>
+  <text x="150" y="486" fill="#FFFFFF" font-size="28" font-family="Inter, Arial, sans-serif">Archive</text>
+</svg>
