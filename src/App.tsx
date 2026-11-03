@@ -21,6 +21,8 @@ import { lectureData, cycles } from './data/lectures';
 import type { Category, Lecture } from './types';
 import { isSupabaseConfigured } from './lib/supabase';
 import { loadCloudLibrary, saveCloudLibrary } from './lib/cloudLibrary';
+import { getAuthSession, requestPersistentAccess, signOutUser, subscribeToAuth } from './lib/auth';
+import type { Session } from '@supabase/supabase-js';
 
 type SortType = 'newest' | 'title' | 'author' | 'duration';
 type Theme = 'light' | 'dark';
@@ -143,6 +145,11 @@ function App() {
   });
 
   const [cloudReady, setCloudReady] = useState(false);
+  const [authSession, setAuthSession] = useState<Session | null>(null);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authEmail, setAuthEmail] = useState('');
+  const [authBusy, setAuthBusy] = useState(false);
+  const [authMessage, setAuthMessage] = useState('');
 
   const [playerState, setPlayerState] = useState({
     isPlaying: false,
@@ -222,6 +229,41 @@ function App() {
     if (!cloudReady || !isSupabaseConfigured) return;
     void saveCloudLibrary({ favorites, history });
   }, [cloudReady, favorites, history]);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    let cancelled = false;
+    void getAuthSession().then((session) => {
+      if (!cancelled) setAuthSession(session);
+    });
+    const unsubscribe = subscribeToAuth((_event, session) => {
+      setAuthSession(session);
+      if (!session) return;
+      void loadCloudLibrary().then((remote) => {
+        if (!remote || cancelled) return;
+        setFavorites((local) => Array.from(new Set([...remote.favorites, ...local])));
+        setHistory((local) => Array.from(new Set([...remote.history, ...local])).slice(0, 12));
+        setCloudReady(true);
+      });
+    });
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, []);
+
+  const handleRequestAccess = async () => {
+    setAuthBusy(true);
+    setAuthMessage('');
+    const result = await requestPersistentAccess(authEmail);
+    setAuthBusy(false);
+    setAuthMessage(result.error || 'Проверьте почту и перейдите по ссылке подтверждения.');
+  };
+
+  const handleSignOut = async () => {
+    await signOutUser();
+    setAuthMessage('Вы вышли. Локальная библиотека сохранена на этом устройстве.');
+  };
 
   useEffect(() => {
     if (!playerState.sleepMinutes || !playerState.isPlaying) return;
@@ -462,6 +504,9 @@ function App() {
           getProgress={getAudioProgress}
           cloudReady={cloudReady}
           cloudEnabled={isSupabaseConfigured}
+          authSession={authSession}
+          onOpenAuth={() => { setAuthMessage(''); setAuthOpen(true); }}
+          onSignOut={handleSignOut}
         />
       );
     }
@@ -716,6 +761,17 @@ function App() {
         sleepMinutes={playerState.sleepMinutes}
         setSleepMinutes={(minutes) => setPlayerState((prev) => ({ ...prev, sleepMinutes: minutes }))}
       />
+
+      {authOpen && (
+        <AuthDialog
+          email={authEmail}
+          setEmail={setAuthEmail}
+          busy={authBusy}
+          message={authMessage}
+          onSubmit={handleRequestAccess}
+          onClose={() => setAuthOpen(false)}
+        />
+      )}
 
       <audio
         ref={audioRef}
@@ -1338,7 +1394,7 @@ function CategoryPage({ category, lectures, favorites, onToggleFavorite, onOpenL
   );
 }
 
-function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpenLecture, onToggleFavorite, favorites, getProgress, cloudReady, cloudEnabled }: {
+function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpenLecture, onToggleFavorite, favorites, getProgress, cloudReady, cloudEnabled, authSession, onOpenAuth, onSignOut }: {
   continueLectures: Lecture[];
   favoriteLectures: Lecture[];
   recentLectures: Lecture[];
@@ -1348,6 +1404,9 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
   getProgress: (id: string) => number;
   cloudReady: boolean;
   cloudEnabled: boolean;
+  authSession: Session | null;
+  onOpenAuth: () => void;
+  onSignOut: () => void;
 }) {
   return (
     <main className="space-y-6">
@@ -1355,7 +1414,10 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
         <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Личный раздел</div>
         <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <h1 className="font-display text-4xl tracking-[-0.04em] text-text dark:text-darktext">Моя библиотека</h1>
-          <span className="inline-flex w-fit items-center rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-1.5 text-xs text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darkmuted">{cloudEnabled && cloudReady ? 'Синхронизация включена' : 'Сохранение на устройстве'}</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex w-fit items-center rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-1.5 text-xs text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darkmuted">{cloudEnabled && cloudReady ? 'Синхронизация включена' : 'Сохранение на устройстве'}</span>
+            {authSession?.user.email ? <button onClick={onSignOut} className="rounded-full border border-black/5 px-3 py-1.5 text-xs text-muted dark:border-white/10 dark:text-darkmuted">Выйти</button> : <button onClick={onOpenAuth} disabled={!cloudEnabled} className="rounded-full bg-[#111820] px-3 py-1.5 text-xs text-white disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#F5F5F5] dark:text-[#111820]">Сохранить в облако</button>}
+          </div>
         </div>
       </section>
 
@@ -1566,6 +1628,19 @@ function ResourcePage({ resource, onOpenCatalog }: { resource: ResourceType; onO
         <button onClick={onOpenCatalog} className="shrink-0 rounded-full bg-[#111820] px-5 py-3 text-sm font-medium text-white dark:bg-[#F5F5F5] dark:text-[#111820]">Слушать лекции</button>
       </section>
     </main>
+  );
+}
+
+function AuthDialog({ email, setEmail, busy, message, onSubmit, onClose }: { email: string; setEmail: (value: string) => void; busy: boolean; message: string; onSubmit: () => void; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[#111820]/35 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+      <div className="w-full max-w-md rounded-[28px] border border-black/5 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-[#101010]">
+        <div className="flex items-start justify-between gap-4"><div><div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Постоянный доступ</div><h2 id="auth-title" className="mt-2 font-display text-3xl text-text dark:text-darktext">Сохранить библиотеку</h2></div><button onClick={onClose} aria-label="Закрыть" className="text-2xl text-muted dark:text-darkmuted">×</button></div>
+        <p className="mt-4 text-sm leading-6 text-muted dark:text-darkmuted">Укажите email — мы отправим безопасную ссылку входа. Избранное и история сохранятся в постоянном аккаунте.</p>
+        <form onSubmit={(event) => { event.preventDefault(); onSubmit(); }} className="mt-5 space-y-3"><label className="block text-sm font-medium text-text dark:text-darktext">Email<input autoFocus type="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" className="mt-2 w-full rounded-2xl border border-black/10 bg-[#F7F9FC] px-4 py-3 outline-none dark:border-white/10 dark:bg-[#161616] dark:text-darktext" /></label><button disabled={busy} className="w-full rounded-full bg-[#111820] px-4 py-3 text-sm font-medium text-white disabled:opacity-50 dark:bg-[#F5F5F5] dark:text-[#111820]">{busy ? 'Отправляем…' : 'Отправить ссылку входа'}</button></form>
+        {message && <p className="mt-4 rounded-2xl bg-[#F7F9FC] p-3 text-sm leading-6 text-muted dark:bg-[#161616] dark:text-darkmuted">{message}</p>}
+      </div>
+    </div>
   );
 }
 

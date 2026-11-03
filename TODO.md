@@ -34,3 +34,12 @@
 - [x] Добавить SQL-миграцию и RLS для `user_library_state`.
 - [x] Вынести Supabase в отдельный vendor chunk.
 - [ ] Включить Anonymous Sign-Ins и применить миграцию в конкретном Supabase-проекте.
+
+
+## Persistent auth
+
+- [x] Добавить email magic link для постоянного доступа.
+- [x] Сохранять существующий anonymous user_id при подтверждении email.
+- [x] Объединять локальные и облачные избранные лекции и историю после входа.
+- [x] Добавить выход из аккаунта и fallback без Supabase.
+- [ ] Включить Email provider, задать redirect URL и проверить письмо в конкретном Supabase-проекте.

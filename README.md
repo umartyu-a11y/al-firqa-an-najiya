@@ -18,6 +18,8 @@ VITE_SUPABASE_ANON_KEY=your-publishable-or-anon-key
 
 Never put a `service_role` key or database password in frontend environment variables. The app uses an anonymous authenticated session and RLS policies restrict each row to its own `auth.uid()`. Without the variables or when Supabase is unavailable, favorites and history remain available through local storage.
 
+The library page supports persistent access through an email magic link. When the current session is anonymous, Supabase upgrades that same identity after email confirmation, so the existing cloud row and its favorites/history keep the same `user_id`. Configure the Supabase Auth email provider and add the deployed site URL to the Auth redirect allow-list.
+
 ## Development
 
 ```bash
