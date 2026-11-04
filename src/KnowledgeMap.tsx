@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowDown, ArrowUpRight, BookOpenText, FileText, Headphones, Link2, Mic, MicOff, Search, Tag } from 'lucide-react';
+import { ArrowDown, ArrowUpRight, BookOpenText, FileText, Headphones, Link2, Mic, Search, Tag } from 'lucide-react';
 import { bookData } from './data/books';
 import { cycles, lectureData } from './data/catalog';
 import { lectureNotesById } from './data/lectureNotes';
@@ -351,7 +351,16 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
               title={voiceListening ? 'Остановить голосовой поиск' : voiceSupported ? 'Искать голосом' : 'Голосовой поиск недоступен в этом браузере'}
               className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B8874A] disabled:cursor-not-allowed disabled:opacity-40 ${voiceListening ? 'bg-[#B8874A]/15 text-[#805322] dark:bg-[#E0821E]/15 dark:text-[#F3B76B]' : 'text-muted hover:bg-black/5 hover:text-text dark:text-darkmuted dark:hover:bg-white/10 dark:hover:text-darktext'}`}
             >
-              {voiceListening ? <MicOff size={17} aria-hidden="true" /> : <Mic size={17} aria-hidden="true" />}
+              {voiceListening ? (
+                <span className="flex items-center gap-1" aria-hidden="true">
+                  <Mic size={16} />
+                  <span className="flex h-4 items-end gap-0.5">
+                    {[5, 10, 7].map((height, index) => (
+                      <span key={index} className="wave-bar-active block w-0.5 rounded-full bg-current" style={{ height, animationDelay: `${index * 150}ms` }} />
+                    ))}
+                  </span>
+                </span>
+              ) : <Mic size={17} aria-hidden="true" />}
             </button>
           </div>
           <label className="rounded-2xl border border-black/5 bg-[#F7F9FC] px-4 py-2 dark:border-white/10 dark:bg-[#161616]">
