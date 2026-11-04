@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { ArrowDown, ArrowUpRight, BookOpenText, FileText, Headphones, Link2, Search, Tag } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowDown, ArrowUpRight, BookOpenText, FileText, Headphones, Link2, Mic, MicOff, Search, Tag } from 'lucide-react';
 import { bookData } from './data/books';
 import { cycles, lectureData } from './data/catalog';
 import { lectureNotesById } from './data/lectureNotes';
@@ -17,6 +17,30 @@ type GraphNode = {
 };
 type GraphEdge = { from: string; to: string; label: string };
 type GraphConnection = { edge: GraphEdge; node: GraphNode; direction: 'in' | 'out' };
+type VoiceRecognitionResult = { readonly length: number; readonly isFinal: boolean; readonly [index: number]: { readonly transcript: string } };
+type VoiceRecognitionEvent = { readonly resultIndex: number; readonly results: ArrayLike<VoiceRecognitionResult> };
+type VoiceRecognitionErrorEvent = { readonly error: string };
+type VoiceRecognition = {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  onstart: (() => void) | null;
+  onresult: ((event: VoiceRecognitionEvent) => void) | null;
+  onerror: ((event: VoiceRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+};
+type VoiceRecognitionConstructor = new () => VoiceRecognition;
+
+function getVoiceRecognitionConstructor() {
+  const speechWindow = window as Window & {
+    SpeechRecognition?: VoiceRecognitionConstructor;
+    webkitSpeechRecognition?: VoiceRecognitionConstructor;
+  };
+  return speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
+}
 
 function formatRussianCount(count: number, one: string, few: string, many: string) {
   const lastTwo = count % 100;
@@ -199,8 +223,63 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
   const [kindFilter, setKindFilter] = useState<'all' | NodeKind>('all');
   const [selectedId, setSelectedId] = useState('book:tri-osnovy-book');
   const [showAllConnections, setShowAllConnections] = useState(false);
+  const [voiceSupported, setVoiceSupported] = useState(false);
+  const [voiceListening, setVoiceListening] = useState(false);
+  const [voiceMessage, setVoiceMessage] = useState('');
+  const voiceRecognitionRef = useRef<VoiceRecognition | null>(null);
   const nodeById = useMemo(() => new Map(graph.nodes.map((node) => [node.id, node])), [graph.nodes]);
   const selected = nodeById.get(selectedId) || graph.nodes[0];
+
+  useEffect(() => {
+    setVoiceSupported(Boolean(getVoiceRecognitionConstructor()));
+    return () => voiceRecognitionRef.current?.abort();
+  }, []);
+
+  const toggleVoiceSearch = () => {
+    if (voiceListening) {
+      voiceRecognitionRef.current?.stop();
+      return;
+    }
+    const Recognition = getVoiceRecognitionConstructor();
+    if (!Recognition) {
+      setVoiceMessage('Голосовой ввод не поддерживается этим браузером.');
+      return;
+    }
+
+    const recognition = new Recognition();
+    recognition.lang = 'ru-RU';
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.onstart = () => setVoiceMessage('Говорите — результаты поиска обновятся по распознанным словам.');
+    recognition.onresult = (event) => {
+      const transcript = Array.from({ length: event.results.length }, (_, index) => event.results[index][0]?.transcript || '').join(' ').trim();
+      if (transcript) setQuery(transcript);
+    };
+    recognition.onerror = (event) => {
+      setVoiceListening(false);
+      const messages: Record<string, string> = {
+        'not-allowed': 'Разрешите доступ к микрофону в настройках браузера и попробуйте снова.',
+        'service-not-allowed': 'Браузер не разрешил службу распознавания речи.',
+        'no-speech': 'Речь не обнаружена. Нажмите на микрофон и попробуйте ещё раз.',
+        network: 'Служба распознавания речи недоступна. Проверьте соединение и попробуйте снова.'
+      };
+      setVoiceMessage(messages[event.error] || 'Не удалось распознать речь. Попробуйте ещё раз или введите запрос вручную.');
+    };
+    recognition.onend = () => {
+      setVoiceListening(false);
+      voiceRecognitionRef.current = null;
+    };
+    voiceRecognitionRef.current = recognition;
+    setVoiceMessage('Запрашиваем доступ к микрофону…');
+    setVoiceListening(true);
+    try {
+      recognition.start();
+    } catch {
+      voiceRecognitionRef.current = null;
+      setVoiceListening(false);
+      setVoiceMessage('Не удалось запустить микрофон. Попробуйте ещё раз или введите запрос вручную.');
+    }
+  };
 
   const searchResults = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase();
@@ -253,7 +332,7 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
       <section className="panel p-5 sm:p-6" aria-labelledby="knowledge-search-heading">
         <h2 id="knowledge-search-heading" className="font-display text-2xl text-text dark:text-darktext">Найти узел карты</h2>
         <div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_15rem]">
-          <label className="flex min-h-12 items-center gap-2 rounded-2xl border border-black/5 bg-[#F7F9FC] px-4 dark:border-white/10 dark:bg-[#161616]">
+          <div className="flex min-h-12 items-center gap-2 rounded-2xl border border-black/5 bg-[#F7F9FC] px-4 dark:border-white/10 dark:bg-[#161616]">
             <Search size={17} className="shrink-0 text-muted dark:text-darkmuted" aria-hidden="true" />
             <input
               type="search"
@@ -263,7 +342,18 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
               aria-label="Поиск узлов карты знаний"
               className="w-full bg-transparent text-sm text-text outline-none placeholder:text-muted dark:text-darktext dark:placeholder:text-darkmuted"
             />
-          </label>
+            <button
+              type="button"
+              onClick={toggleVoiceSearch}
+              disabled={!voiceSupported && !voiceMessage}
+              aria-label={voiceListening ? 'Остановить голосовой поиск' : 'Начать голосовой поиск'}
+              aria-pressed={voiceListening}
+              title={voiceListening ? 'Остановить голосовой поиск' : voiceSupported ? 'Искать голосом' : 'Голосовой поиск недоступен в этом браузере'}
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B8874A] disabled:cursor-not-allowed disabled:opacity-40 ${voiceListening ? 'bg-[#B8874A]/15 text-[#805322] dark:bg-[#E0821E]/15 dark:text-[#F3B76B]' : 'text-muted hover:bg-black/5 hover:text-text dark:text-darkmuted dark:hover:bg-white/10 dark:hover:text-darktext'}`}
+            >
+              {voiceListening ? <MicOff size={17} aria-hidden="true" /> : <Mic size={17} aria-hidden="true" />}
+            </button>
+          </div>
           <label className="rounded-2xl border border-black/5 bg-[#F7F9FC] px-4 py-2 dark:border-white/10 dark:bg-[#161616]">
             <span className="mb-1 block text-[10px] uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Тип узла</span>
             <select value={kindFilter} onChange={(event) => setKindFilter(event.target.value as 'all' | NodeKind)} className="w-full bg-transparent text-sm text-text outline-none dark:text-darktext" aria-label="Фильтр типа узла">
@@ -272,6 +362,9 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
             </select>
           </label>
         </div>
+        <p className="mt-3 text-xs leading-5 text-muted dark:text-darkmuted" aria-live="polite">
+          {voiceMessage || (!voiceSupported ? 'Голосовой поиск не поддерживается этим браузером; можно искать текстом.' : 'Голосовой ввод на русском запускается по кнопке микрофона. Обработка аудио зависит от браузера и его поставщика.')}
+        </p>
         {query.trim() && (
           <div className="mt-4" role="region" aria-label="Результаты поиска по карте">
             <p className="mb-2 text-sm text-muted dark:text-darkmuted" aria-live="polite">{searchResults.length ? `Показано результатов: ${searchResults.length}${searchResults.length === 12 ? ' (первые 12)' : ''}` : 'Совпадений в доступных названиях и метаданных нет.'}</p>
