@@ -33,6 +33,7 @@ type VoiceRecognition = {
   abort: () => void;
 };
 type VoiceRecognitionConstructor = new () => VoiceRecognition;
+type AudioContextConstructor = new () => AudioContext;
 
 function getVoiceRecognitionConstructor() {
   const speechWindow = window as Window & {
@@ -40,6 +41,11 @@ function getVoiceRecognitionConstructor() {
     webkitSpeechRecognition?: VoiceRecognitionConstructor;
   };
   return speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
+}
+
+function getAudioContextConstructor() {
+  const audioWindow = window as Window & { webkitAudioContext?: AudioContextConstructor };
+  return window.AudioContext || audioWindow.webkitAudioContext;
 }
 
 function formatRussianCount(count: number, one: string, few: string, many: string) {
@@ -224,20 +230,60 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
   const [selectedId, setSelectedId] = useState('book:tri-osnovy-book');
   const [showAllConnections, setShowAllConnections] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
+  const [voiceStarting, setVoiceStarting] = useState(false);
   const [voiceListening, setVoiceListening] = useState(false);
   const [voiceMessage, setVoiceMessage] = useState('');
+  const [voiceLevel, setVoiceLevel] = useState(0);
   const voiceRecognitionRef = useRef<VoiceRecognition | null>(null);
+  const voiceStreamRef = useRef<MediaStream | null>(null);
+  const voiceAudioContextRef = useRef<AudioContext | null>(null);
+  const voiceMeterFrameRef = useRef<number | null>(null);
+  const voiceRequestIdRef = useRef(0);
   const nodeById = useMemo(() => new Map(graph.nodes.map((node) => [node.id, node])), [graph.nodes]);
   const selected = nodeById.get(selectedId) || graph.nodes[0];
+  const voiceActive = voiceStarting || voiceListening;
 
   useEffect(() => {
-    setVoiceSupported(Boolean(getVoiceRecognitionConstructor()));
-    return () => voiceRecognitionRef.current?.abort();
+    setVoiceSupported(Boolean(getVoiceRecognitionConstructor() && typeof navigator.mediaDevices?.getUserMedia === 'function' && getAudioContextConstructor()));
+    return () => {
+      voiceRequestIdRef.current += 1;
+      voiceRecognitionRef.current?.abort();
+      if (voiceMeterFrameRef.current !== null) cancelAnimationFrame(voiceMeterFrameRef.current);
+      voiceStreamRef.current?.getTracks().forEach((track) => track.stop());
+      if (voiceAudioContextRef.current && voiceAudioContextRef.current.state !== 'closed') {
+        void voiceAudioContextRef.current.close().catch(() => undefined);
+      }
+    };
   }, []);
 
-  const toggleVoiceSearch = () => {
+  const releaseVoiceMeter = () => {
+    if (voiceMeterFrameRef.current !== null) cancelAnimationFrame(voiceMeterFrameRef.current);
+    voiceMeterFrameRef.current = null;
+    voiceStreamRef.current?.getTracks().forEach((track) => track.stop());
+    voiceStreamRef.current = null;
+    const context = voiceAudioContextRef.current;
+    voiceAudioContextRef.current = null;
+    if (context && context.state !== 'closed') void context.close().catch(() => undefined);
+    setVoiceLevel(0);
+  };
+
+  const toggleVoiceSearch = async () => {
+    if (voiceStarting) {
+      voiceRequestIdRef.current += 1;
+      setVoiceStarting(false);
+      setVoiceListening(false);
+      voiceRecognitionRef.current?.abort();
+      releaseVoiceMeter();
+      setVoiceMessage('Запуск голосового поиска отменён.');
+      return;
+    }
     if (voiceListening) {
+      voiceRequestIdRef.current += 1;
       voiceRecognitionRef.current?.stop();
+      voiceRecognitionRef.current = null;
+      setVoiceListening(false);
+      releaseVoiceMeter();
+      setVoiceMessage('Голосовой поиск остановлен.');
       return;
     }
     const Recognition = getVoiceRecognitionConstructor();
@@ -246,17 +292,91 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
       return;
     }
 
+    const requestId = ++voiceRequestIdRef.current;
+    setVoiceStarting(true);
+    setVoiceMessage('Запрашиваем доступ к микрофону…');
+    let stream: MediaStream;
+    try {
+      if (!navigator.mediaDevices?.getUserMedia) throw new Error('microphone-unavailable');
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (requestId !== voiceRequestIdRef.current) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
+      voiceStreamRef.current = stream;
+      const AudioContextClass = getAudioContextConstructor();
+      if (!AudioContextClass) throw new Error('audio-meter-unavailable');
+      const context = new AudioContextClass();
+      voiceAudioContextRef.current = context;
+      if (context.state === 'suspended') await context.resume();
+      if (requestId !== voiceRequestIdRef.current) {
+        releaseVoiceMeter();
+        return;
+      }
+
+      const analyser = context.createAnalyser();
+      analyser.fftSize = 512;
+      const source = context.createMediaStreamSource(stream);
+      const silentOutput = context.createGain();
+      silentOutput.gain.value = 0;
+      source.connect(analyser);
+      analyser.connect(silentOutput);
+      silentOutput.connect(context.destination);
+      const samples = new Float32Array(analyser.fftSize);
+      let smoothedLevel = 0;
+      let lastUiUpdate = 0;
+      const measureInput = (time: number) => {
+        if (requestId !== voiceRequestIdRef.current) return;
+        analyser.getFloatTimeDomainData(samples);
+        const meanSquare = samples.reduce((sum, sample) => sum + sample * sample, 0) / samples.length;
+        const rms = Math.sqrt(meanSquare);
+        const targetLevel = Math.min(1, rms * 8);
+        smoothedLevel += (targetLevel - smoothedLevel) * (targetLevel > smoothedLevel ? 0.55 : 0.18);
+        if (time - lastUiUpdate >= 60) {
+          setVoiceLevel(smoothedLevel);
+          lastUiUpdate = time;
+        }
+        voiceMeterFrameRef.current = requestAnimationFrame(measureInput);
+      };
+      voiceMeterFrameRef.current = requestAnimationFrame(measureInput);
+    } catch (error) {
+      if (requestId !== voiceRequestIdRef.current) return;
+      releaseVoiceMeter();
+      setVoiceStarting(false);
+      const errorName = error instanceof Error && ['audio-meter-unavailable', 'microphone-unavailable'].includes(error.message)
+        ? error.message
+        : error instanceof Error ? error.name : '';
+      const messages: Record<string, string> = {
+        NotAllowedError: 'Для измерения уровня разрешите доступ к микрофону в браузере.',
+        NotFoundError: 'Микрофон не найден. Подключите микрофон и попробуйте снова.',
+        NotReadableError: 'Не удалось открыть микрофон. Проверьте, не занят ли он другим приложением.',
+        SecurityError: 'Доступ к микрофону недоступен в этом контексте. Откройте сайт по защищённому HTTPS-соединению.',
+        'audio-meter-unavailable': 'Этот браузер не поддерживает локальный измеритель уровня звука.',
+        'microphone-unavailable': 'Браузер не предоставляет доступ к микрофону; голосовой поиск недоступен.'
+      };
+      setVoiceMessage(messages[errorName] || 'Не удалось получить уровень сигнала микрофона. Проверьте разрешения и попробуйте снова.');
+      return;
+    }
+
     const recognition = new Recognition();
     recognition.lang = 'ru-RU';
     recognition.continuous = false;
     recognition.interimResults = true;
-    recognition.onstart = () => setVoiceMessage('Говорите — результаты поиска обновятся по распознанным словам.');
+    recognition.onstart = () => {
+      if (requestId !== voiceRequestIdRef.current) return;
+      setVoiceStarting(false);
+      setVoiceListening(true);
+      setVoiceMessage('Говорите — результаты поиска обновятся по распознанным словам, уровень микрофона показан рядом.');
+    };
     recognition.onresult = (event) => {
       const transcript = Array.from({ length: event.results.length }, (_, index) => event.results[index][0]?.transcript || '').join(' ').trim();
       if (transcript) setQuery(transcript);
     };
     recognition.onerror = (event) => {
+      if (requestId !== voiceRequestIdRef.current) return;
+      setVoiceStarting(false);
       setVoiceListening(false);
+      releaseVoiceMeter();
       const messages: Record<string, string> = {
         'not-allowed': 'Разрешите доступ к микрофону в настройках браузера и попробуйте снова.',
         'service-not-allowed': 'Браузер не разрешил службу распознавания речи.',
@@ -266,17 +386,21 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
       setVoiceMessage(messages[event.error] || 'Не удалось распознать речь. Попробуйте ещё раз или введите запрос вручную.');
     };
     recognition.onend = () => {
+      if (requestId !== voiceRequestIdRef.current) return;
+      setVoiceStarting(false);
       setVoiceListening(false);
       voiceRecognitionRef.current = null;
+      releaseVoiceMeter();
     };
     voiceRecognitionRef.current = recognition;
-    setVoiceMessage('Запрашиваем доступ к микрофону…');
-    setVoiceListening(true);
     try {
       recognition.start();
     } catch {
+      voiceRequestIdRef.current += 1;
       voiceRecognitionRef.current = null;
+      setVoiceStarting(false);
       setVoiceListening(false);
+      releaseVoiceMeter();
       setVoiceMessage('Не удалось запустить микрофон. Попробуйте ещё раз или введите запрос вручную.');
     }
   };
@@ -346,17 +470,17 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
               type="button"
               onClick={toggleVoiceSearch}
               disabled={!voiceSupported && !voiceMessage}
-              aria-label={voiceListening ? 'Остановить голосовой поиск' : 'Начать голосовой поиск'}
-              aria-pressed={voiceListening}
-              title={voiceListening ? 'Остановить голосовой поиск' : voiceSupported ? 'Искать голосом' : 'Голосовой поиск недоступен в этом браузере'}
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B8874A] disabled:cursor-not-allowed disabled:opacity-40 ${voiceListening ? 'bg-[#B8874A]/15 text-[#805322] dark:bg-[#E0821E]/15 dark:text-[#F3B76B]' : 'text-muted hover:bg-black/5 hover:text-text dark:text-darkmuted dark:hover:bg-white/10 dark:hover:text-darktext'}`}
+              aria-label={voiceActive ? 'Остановить голосовой поиск' : 'Начать голосовой поиск'}
+              aria-pressed={voiceActive}
+              title={voiceActive ? 'Остановить голосовой поиск' : voiceSupported ? 'Искать голосом' : 'Голосовой поиск недоступен в этом браузере'}
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B8874A] disabled:cursor-not-allowed disabled:opacity-40 ${voiceActive ? 'bg-[#B8874A]/15 text-[#805322] dark:bg-[#E0821E]/15 dark:text-[#F3B76B]' : 'text-muted hover:bg-black/5 hover:text-text dark:text-darkmuted dark:hover:bg-white/10 dark:hover:text-darktext'}`}
             >
               {voiceListening ? (
                 <span className="flex items-center gap-1" aria-hidden="true">
                   <Mic size={16} />
                   <span className="flex h-4 items-end gap-0.5">
-                    {[5, 10, 7].map((height, index) => (
-                      <span key={index} className="wave-bar-active block w-0.5 rounded-full bg-current" style={{ height, animationDelay: `${index * 150}ms` }} />
+                    {[0.55, 1, 0.72].map((gain, index) => (
+                      <span key={index} className="block w-0.5 rounded-full bg-current transition-[height] duration-75" style={{ height: `${Math.max(2, Math.round(voiceLevel * 15 * gain))}px` }} />
                     ))}
                   </span>
                 </span>
@@ -372,7 +496,7 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
           </label>
         </div>
         <p className="mt-3 text-xs leading-5 text-muted dark:text-darkmuted" aria-live="polite">
-          {voiceMessage || (!voiceSupported ? 'Голосовой поиск не поддерживается этим браузером; можно искать текстом.' : 'Голосовой ввод на русском запускается по кнопке микрофона. Обработка аудио зависит от браузера и его поставщика.')}
+          {voiceMessage || (!voiceSupported ? 'Голосовой поиск с измерением уровня не поддерживается этим браузером; можно искать текстом.' : 'RMS-уровень микрофона анализируется локально. Распознавание речи обрабатывает браузер и его поставщик.')}
         </p>
         {query.trim() && (
           <div className="mt-4" role="region" aria-label="Результаты поиска по карте">
