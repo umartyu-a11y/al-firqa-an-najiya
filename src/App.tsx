@@ -10,6 +10,7 @@ import {
   Download,
   Headphones,
   Heart,
+  MessageCircle,
   Moon,
   Pause,
   Play,
@@ -30,6 +31,7 @@ import { HandwritingPad, HandwritingPreview } from './HandwritingPad';
 import { CourseSourceText } from './CourseSourceText';
 import { LectureNotes } from './LectureNotes';
 import { LearningDashboard } from './LearningDashboard';
+import { SocialPage } from './SocialPage';
 import type { LearningDashboardSnapshot } from './lib/learningDashboard';
 import { buildLearningDashboardSnapshot } from './lib/learningDashboard';
 import type { BookmarkItem, Category, HandwritingStroke, Lecture, LectureProgressEntry, QuizQuestion } from './types';
@@ -94,6 +96,7 @@ const parseHash = () => {
   if (!hash || hash === '/') return 'home';
   if (hash.startsWith('/catalog')) return 'catalog';
   if (hash.startsWith('/library')) return 'library';
+  if (hash.startsWith('/social')) return 'social';
   if (hash.startsWith('/cycle/')) return 'cycle';
   if (hash.startsWith('/author/')) return 'author';
   if (hash.startsWith('/lecture/')) return 'lecture';
@@ -183,7 +186,7 @@ function App() {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
 
-  const [route, setRoute] = useState<'home' | 'catalog' | 'library' | 'cycle' | 'author' | 'lecture' | 'category' | 'knowledge' | 'about' | 'resource'>(() => parseHash());
+  const [route, setRoute] = useState<'home' | 'catalog' | 'library' | 'social' | 'cycle' | 'author' | 'lecture' | 'category' | 'knowledge' | 'about' | 'resource'>(() => parseHash());
   const [search, setSearch] = useState('');
   const [librarySearch, setLibrarySearch] = useState('');
   const [librarySearchType, setLibrarySearchType] = useState<LibrarySearchType>('all');
@@ -1073,6 +1076,8 @@ function App() {
 
     if (route === 'knowledge') return <KnowledgeMap onNavigate={navigate} />;
 
+    if (route === 'social') return <SocialPage session={authSession} onOpenAuth={() => setAuthOpen(true)} onOpenCatalog={() => navigate('/catalog')} />;
+
     if (route === 'about') return <AboutPage />;
 
     if (route === 'resource') {
@@ -1105,7 +1110,7 @@ function App() {
               </div>
             </button>
 
-            <nav className="hidden items-center gap-8 lg:flex">
+            <nav className="hidden items-center gap-5 lg:flex">
               <button className="text-sm text-text/80 transition hover:text-text dark:text-darktext/80 dark:hover:text-darktext" onClick={() => navigate('/catalog')}>
                 Лекции
               </button>
@@ -1120,6 +1125,9 @@ function App() {
               </button>
               <button className="text-sm text-text/80 transition hover:text-text dark:text-darktext/80 dark:hover:text-darktext" onClick={() => navigate('/knowledge')}>
                 Карта знаний
+              </button>
+              <button className="text-sm text-text/80 transition hover:text-text dark:text-darktext/80 dark:hover:text-darktext" onClick={() => navigate('/social')}>
+                Сообщество
               </button>
               <button className="text-sm text-text/80 transition hover:text-text dark:text-darktext/80 dark:hover:text-darktext" onClick={() => navigate('/about')}>
                 О проекте
@@ -1162,13 +1170,14 @@ function App() {
 
         {renderRoute()}
 
-        <nav aria-label="Быстрая навигация" className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 gap-1 rounded-2xl border border-black/5 bg-white/90 p-2 shadow-[0_18px_60px_rgba(17,24,32,0.14)] backdrop-blur-xl lg:hidden dark:border-white/10 dark:bg-[#101010]/90">
+        <nav aria-label="Быстрая навигация" className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-6 gap-1 rounded-2xl border border-black/5 bg-white/90 p-2 shadow-[0_18px_60px_rgba(17,24,32,0.14)] backdrop-blur-xl lg:hidden dark:border-white/10 dark:bg-[#101010]/90">
           {[
             { label: 'Главная', icon: <Sparkles size={16} />, path: '/' },
             { label: 'Лекции', icon: <BookOpenText size={16} />, path: '/catalog' },
             { label: 'Библиотека', icon: <Heart size={16} />, path: '/library' },
             { label: 'Карта', icon: <Search size={16} />, path: '/knowledge' },
-            { label: 'Книги', icon: <BookOpenText size={16} />, path: '/books' }
+            { label: 'Книги', icon: <BookOpenText size={16} />, path: '/books' },
+            { label: 'Сообщество', icon: <MessageCircle size={16} />, path: '/social' }
           ].map((item) => (
             <button key={item.path} onClick={() => navigate(item.path)} className="flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-medium text-muted transition hover:bg-black/5 hover:text-text dark:text-darkmuted dark:hover:bg-white/10 dark:hover:text-darktext">
               {item.icon}<span>{item.label}</span>
@@ -1182,7 +1191,7 @@ function App() {
             <div>Исламские лекции и архив знаний</div>
           </div>
           <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs">
-            {[['Книги', '/books'], ['Тексты', '/texts'], ['Словарь', '/dictionary'], ['Курсы', '/courses'], ['Карта знаний', '/knowledge'], ['О проекте', '/about']].map(([label, path]) => (
+            {[['Книги', '/books'], ['Тексты', '/texts'], ['Словарь', '/dictionary'], ['Курсы', '/courses'], ['Карта знаний', '/knowledge'], ['Сообщество', '/social'], ['О проекте', '/about']].map(([label, path]) => (
               <button key={path} onClick={() => navigate(path)} className="text-muted underline-offset-4 transition hover:text-text hover:underline dark:text-darkmuted dark:hover:text-darktext">{label}</button>
             ))}
           </div>
