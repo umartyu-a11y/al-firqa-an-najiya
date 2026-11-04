@@ -9,6 +9,7 @@
     { "path": "/#/knowledge", "title": "Карта знаний" },
     { "path": "/#/cycle/necessary-questions-for-everyone", "title": "Необходимые вопросы для каждого" },
     { "path": "/#/cycle/tri-osnovy", "title": "Три основы" },
+    { "path": "/#/cycle/kniga-edinobozhiya", "title": "Книга единобожия" },
     { "path": "/#/lecture/:id", "title": "Лекция" },
     { "path": "/#/category/:category", "title": "Категория" },
     { "path": "/#/about", "title": "О проекте" },

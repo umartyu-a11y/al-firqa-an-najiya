@@ -35,6 +35,7 @@ export interface Cycle {
   totalLessons: number;
   totalDuration: number;
   coverTone: string;
+  sourceUrl?: string;
 }
 
 export interface BookmarkItem {

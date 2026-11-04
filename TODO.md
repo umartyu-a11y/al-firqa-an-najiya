@@ -160,3 +160,9 @@
 - [ ] Refine typography, light/dark modes, transitions, search speed, Arabic/RTL handling and responsive phone/iPad/desktop navigation while preserving current visual identity and features.
 - [ ] Validate keyboard, zoom, screen-reader, reduced-motion and device layouts; publish only checked accessibility claims.
 - [ ] Maintain free access; manage PWA version updates without losing user data, and offer offline books/audio only when rights are confirmed and storage size, download progress, errors and removal are user-controlled.
+
+
+## 25. Книга единобожия — полный аудиокурс
+- [x] Добавить все 172 нумерованные аудиозаписи исходной страницы в каталог «Книга единобожия», с последовательной навигацией, общим плеером, верной длительностью и атрибуцией Абу Яхья Крымскому.
+- [x] Публично разместить копии записей в GitHub Release, не добавляя 3,3 GiB MP3 в Git-историю или сборку GitHub Pages; привязать страницу курса к Release assets и сохранить ссылку на исходную страницу.
+- [x] После проверки сборки и воспроизведения опубликовать каталог и страницу курса на GitHub Pages; не включать внешние MP3 в офлайн-кэш приложения.
