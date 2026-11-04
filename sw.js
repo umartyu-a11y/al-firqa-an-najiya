@@ -1,4 +1,4 @@
-const VERSION = 'affn-offline-v1';
+const VERSION = 'affn-offline-v2';
 const STATIC_CACHE = `${VERSION}-static`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 const APP_SHELL = [
@@ -47,7 +47,7 @@ self.addEventListener('fetch', (event) => {
 
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request)
+      fetch(new Request(request, { cache: 'no-cache' }))
         .then((response) => {
           const copy = response.clone();
           caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, copy));
