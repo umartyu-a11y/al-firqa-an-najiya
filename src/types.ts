@@ -20,6 +20,7 @@ export interface Lecture {
   duration: number;
   description: string;
   audioUrl: string;
+  fallbackAudioUrl?: string;
   date: string;
   tags: string[];
   sourceUrl?: string;

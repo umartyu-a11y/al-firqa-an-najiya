@@ -232,6 +232,7 @@ function App() {
   const [repeatLesson, setRepeatLesson] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioFallbackAttempted = useRef(false);
   const restoringPosition = useRef(false);
   const handlingTrackEnd = useRef(false);
   const pendingUserLectureNavigation = useRef<string | null>(null);
@@ -507,6 +508,7 @@ function App() {
     }
 
     const audio = audioRef.current;
+    audioFallbackAttempted.current = false;
     restoringPosition.current = true;
     setAudioStatus('loading');
     audio.src = lecture.audioUrl;
@@ -1211,6 +1213,20 @@ function App() {
         onError={() => {
           handlingTrackEnd.current = false;
           restoringPosition.current = false;
+          const audio = audioRef.current;
+          if (audio && currentLecture?.fallbackAudioUrl && !audioFallbackAttempted.current) {
+            audioFallbackAttempted.current = true;
+            setAudioStatus('loading');
+            audio.src = currentLecture.fallbackAudioUrl;
+            audio.load();
+            if (playerState.isPlaying) {
+              audio.play().catch(() => {
+                setPlayerState((prev) => ({ ...prev, isPlaying: false }));
+                setAudioStatus('error');
+              });
+            }
+            return;
+          }
           setAudioStatus('error');
           setPlayerState((prev) => ({ ...prev, isPlaying: false }));
         }}
