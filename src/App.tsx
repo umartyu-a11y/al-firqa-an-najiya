@@ -26,12 +26,14 @@ import { cycleArchives } from './data/cycle-archives';
 import { cycles, lectureData, orderedCycleLectures } from './data/catalog';
 import { BooksPage, CoursesPage } from './CollectionPages';
 import { KnowledgeMap } from './KnowledgeMap';
+import { HandwritingPad, HandwritingPreview } from './HandwritingPad';
 import { LectureNotes } from './LectureNotes';
-import type { BookmarkItem, Category, Lecture, LectureProgressEntry, QuizQuestion } from './types';
+import type { BookmarkItem, Category, HandwritingStroke, Lecture, LectureProgressEntry, QuizQuestion } from './types';
 import { isSupabaseConfigured } from './lib/supabase';
 import { loadCloudLibrary, loadCloudProgress, saveCloudLibrary, saveCloudProgress } from './lib/cloudLibrary';
 import { getAuthSession, requestPersistentAccess, signOutUser, subscribeToAuth } from './lib/auth';
 import { createLocalLibraryBackup, MAX_LOCAL_BACKUP_BYTES, parseLocalLibraryBackup } from './lib/localBackup';
+import { sanitizeHandwritingStrokes } from './lib/handwriting';
 import type { Session } from '@supabase/supabase-js';
 
 type SortType = 'newest' | 'title' | 'author' | 'duration';
@@ -137,6 +139,13 @@ const mergeCloudProgress = (remote: Record<string, { currentTime: number; durati
 
 const escapeHtml = (value: string) => value.replace(/[&<>\"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', "'": '&#039;' }[character] || character));
 
+const renderHandwritingSvg = (drawing?: HandwritingStroke[]) => {
+  const strokes = sanitizeHandwritingStrokes(drawing);
+  if (!strokes.length) return '';
+  const paths = strokes.map((stroke) => `<path d="${escapeHtml(stroke.path)}" fill="none" stroke="${stroke.color}" stroke-width="${stroke.width.toFixed(2)}" stroke-opacity="${(stroke.opacity ?? 1).toFixed(2)}" stroke-linecap="round" stroke-linejoin="round"/>`).join('');
+  return `<div class="handwriting"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 240" role="img" aria-label="Рукописная заметка"><rect width="800" height="240" fill="#fffefb"/>${paths}</svg></div>`;
+};
+
 function App() {
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = localStorage.getItem(storageKeys.theme);
@@ -181,7 +190,12 @@ function App() {
   });
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>(() => {
     try {
-      return JSON.parse(localStorage.getItem(storageKeys.bookmarks) || '[]');
+      const stored: unknown = JSON.parse(localStorage.getItem(storageKeys.bookmarks) || '[]');
+      if (!Array.isArray(stored)) return [];
+      return stored.filter((item): item is BookmarkItem => Boolean(item && typeof item === 'object' && !Array.isArray(item))).map((item) => {
+        const handwriting = sanitizeHandwritingStrokes((item as BookmarkItem).handwriting);
+        return { ...(item as BookmarkItem), ...(handwriting.length ? { handwriting } : { handwriting: undefined }) };
+      });
     } catch {
       return [];
     }
@@ -581,11 +595,15 @@ function App() {
     if (!currentLectureId || playerState.currentTime <= 0) return;
     const time = Math.floor(playerState.currentTime);
     const id = `${currentLectureId}-${time}`;
-    setBookmarks((prev) => [{ id, lectureId: currentLectureId, time, createdAt: new Date().toISOString(), note: prev.find((item) => item.id === id)?.note || '', tags: prev.find((item) => item.id === id)?.tags || [] }, ...prev.filter((item) => item.id !== id)].slice(0, 100));
+    setBookmarks((prev) => [{ id, lectureId: currentLectureId, time, createdAt: new Date().toISOString(), note: prev.find((item) => item.id === id)?.note || '', tags: prev.find((item) => item.id === id)?.tags || [], handwriting: prev.find((item) => item.id === id)?.handwriting || [] }, ...prev.filter((item) => item.id !== id)].slice(0, 100));
   };
 
   const updateBookmarkNote = (id: string, note: string) => {
     setBookmarks((prev) => prev.map((item) => item.id === id ? { ...item, note } : item));
+  };
+
+  const updateBookmarkDrawing = (id: string, handwriting: HandwritingStroke[]) => {
+    setBookmarks((prev) => prev.map((item) => item.id === id ? { ...item, handwriting: sanitizeHandwritingStrokes(handwriting) } : item));
   };
 
   const updateBookmarkTags = (id: string, value: string) => {
@@ -708,7 +726,7 @@ function App() {
       `Автор: ${lecture.author}`,
       `Цикл: ${lecture.cycle}`,
       '',
-      ...items.flatMap((item, index) => [`${index + 1}. ${formatDuration(item.time)}`, `Теги: ${(item.tags || []).join(', ') || '—'}`, item.note?.trim() || 'Без заметки', ''])
+      ...items.flatMap((item, index) => [`${index + 1}. ${formatDuration(item.time)}`, `Теги: ${(item.tags || []).join(', ') || '—'}`, item.note?.trim() || 'Без заметки', ...(item.handwriting?.length ? ['Рукописный рисунок включён в PDF и JSON-резервную копию.'] : []), ''])
     ];
     const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -722,8 +740,8 @@ function App() {
   const exportBookmarksPdf = (lecture: Lecture, items: BookmarkItem[]) => {
     const popup = window.open('', '_blank', 'width=760,height=900');
     if (!popup) return;
-    const rows = items.map((item) => `<article><h2>${escapeHtml(formatDuration(item.time))}</h2><div class="meta">Теги: ${escapeHtml((item.tags || []).join(', ') || '—')}</div><p>${escapeHtml(item.note?.trim() || 'Без заметки')}</p></article>`).join('');
-    popup.document.write(`<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>${escapeHtml(lecture.title)} — закладки</title><style>body{font-family:Arial,sans-serif;max-width:760px;margin:40px auto;padding:0 24px;color:#111820}h1{font-size:28px;margin-bottom:8px}header{border-bottom:1px solid #ddd;padding-bottom:20px;margin-bottom:24px}article{border:1px solid #ddd;border-radius:14px;padding:16px;margin:12px 0;break-inside:avoid}h2{font-size:18px;margin:0 0 8px;color:#9b6d32}p{white-space:pre-wrap;line-height:1.55;margin:0}@media print{body{margin:0 auto}}</style></head><body><header><h1>Закладки и заметки</h1><div>${escapeHtml(lecture.title)}</div><small>${escapeHtml(lecture.author)} · ${escapeHtml(lecture.cycle)}</small></header>${rows || '<p>Закладок пока нет.</p>'}</body></html>`);
+    const rows = items.map((item) => `<article><h2>${escapeHtml(formatDuration(item.time))}</h2><div class="meta">Теги: ${escapeHtml((item.tags || []).join(', ') || '—')}</div>${renderHandwritingSvg(item.handwriting)}<p>${escapeHtml(item.note?.trim() || 'Без заметки')}</p></article>`).join('');
+    popup.document.write(`<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>${escapeHtml(lecture.title)} — закладки</title><style>body{font-family:Arial,sans-serif;max-width:760px;margin:40px auto;padding:0 24px;color:#111820}h1{font-size:28px;margin-bottom:8px}header{border-bottom:1px solid #ddd;padding-bottom:20px;margin-bottom:24px}article{border:1px solid #ddd;border-radius:14px;padding:16px;margin:12px 0;break-inside:avoid}h2{font-size:18px;margin:0 0 8px;color:#9b6d32}p{white-space:pre-wrap;line-height:1.55;margin:0}.handwriting svg{display:block;width:100%;height:auto;max-height:240px;margin:12px 0;border:1px solid #ddd;border-radius:10px}@media print{body{margin:0 auto}}</style></head><body><header><h1>Закладки и заметки</h1><div>${escapeHtml(lecture.title)}</div><small>${escapeHtml(lecture.author)} · ${escapeHtml(lecture.cycle)}</small></header>${rows || '<p>Закладок пока нет.</p>'}</body></html>`);
     popup.document.close();
     popup.focus();
     window.setTimeout(() => popup.print(), 250);
@@ -733,7 +751,7 @@ function App() {
     const entries = bookmarks.map((item) => ({ item, lecture: getLectureById(item.lectureId) })).filter((entry): entry is { item: BookmarkItem; lecture: Lecture } => Boolean(entry.lecture));
     const lines = ['AL-FIRQA AN-NAJIYA', 'Все закладки и заметки', `Экспортировано: ${new Date().toLocaleString('ru-RU')}`, ''];
     entries.forEach(({ item, lecture }, index) => {
-      lines.push(`${index + 1}. ${lecture.title}`, `Автор: ${lecture.author}`, `Позиция: ${formatDuration(item.time)}`, `Теги: ${(item.tags || []).join(', ') || '—'}`, item.note?.trim() || 'Без заметки', '');
+      lines.push(`${index + 1}. ${lecture.title}`, `Автор: ${lecture.author}`, `Позиция: ${formatDuration(item.time)}`, `Теги: ${(item.tags || []).join(', ') || '—'}`, item.note?.trim() || 'Без заметки', ...(item.handwriting?.length ? ['Рукописный рисунок включён в PDF и JSON-резервную копию.'] : []), '');
     });
     const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -748,8 +766,8 @@ function App() {
     const entries = bookmarks.map((item) => ({ item, lecture: getLectureById(item.lectureId) })).filter((entry): entry is { item: BookmarkItem; lecture: Lecture } => Boolean(entry.lecture));
     const popup = window.open('', '_blank', 'width=760,height=900');
     if (!popup) return;
-    const rows = entries.map(({ item, lecture }) => `<article><h2>${escapeHtml(lecture.title)}</h2><div class="meta">${escapeHtml(lecture.author)} · ${escapeHtml(formatDuration(item.time))} · Теги: ${escapeHtml((item.tags || []).join(', ') || '—')}</div><p>${escapeHtml(item.note?.trim() || 'Без заметки')}</p></article>`).join('');
-    popup.document.write(`<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>AL-FIRQA AN-NAJIYA — все заметки</title><style>body{font-family:Arial,sans-serif;max-width:760px;margin:40px auto;padding:0 24px;color:#111820}h1{font-size:28px;margin-bottom:8px}header{border-bottom:1px solid #ddd;padding-bottom:20px;margin-bottom:24px}article{border:1px solid #ddd;border-radius:14px;padding:16px;margin:12px 0;break-inside:avoid}h2{font-size:18px;margin:0 0 8px;color:#9b6d32}.meta{font-size:13px;color:#66717d;margin-bottom:10px}p{white-space:pre-wrap;line-height:1.55;margin:0}@media print{body{margin:0 auto}}</style></head><body><header><h1>Все закладки и заметки</h1><div>AL-FIRQA AN-NAJIYA</div><small>Экспортировано: ${escapeHtml(new Date().toLocaleString('ru-RU'))}</small></header>${rows || '<p>Закладок пока нет.</p>'}</body></html>`);
+    const rows = entries.map(({ item, lecture }) => `<article><h2>${escapeHtml(lecture.title)}</h2><div class="meta">${escapeHtml(lecture.author)} · ${escapeHtml(formatDuration(item.time))} · Теги: ${escapeHtml((item.tags || []).join(', ') || '—')}</div>${renderHandwritingSvg(item.handwriting)}<p>${escapeHtml(item.note?.trim() || 'Без заметки')}</p></article>`).join('');
+    popup.document.write(`<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>AL-FIRQA AN-NAJIYA — все заметки</title><style>body{font-family:Arial,sans-serif;max-width:760px;margin:40px auto;padding:0 24px;color:#111820}h1{font-size:28px;margin-bottom:8px}header{border-bottom:1px solid #ddd;padding-bottom:20px;margin-bottom:24px}article{border:1px solid #ddd;border-radius:14px;padding:16px;margin:12px 0;break-inside:avoid}h2{font-size:18px;margin:0 0 8px;color:#9b6d32}.meta{font-size:13px;color:#66717d;margin-bottom:10px}p{white-space:pre-wrap;line-height:1.55;margin:0}.handwriting svg{display:block;width:100%;height:auto;max-height:240px;margin:12px 0;border:1px solid #ddd;border-radius:10px}@media print{body{margin:0 auto}}</style></head><body><header><h1>Все закладки и заметки</h1><div>AL-FIRQA AN-NAJIYA</div><small>Экспортировано: ${escapeHtml(new Date().toLocaleString('ru-RU'))}</small></header>${rows || '<p>Закладок пока нет.</p>'}</body></html>`);
     popup.document.close();
     popup.focus();
     window.setTimeout(() => popup.print(), 250);
@@ -978,6 +996,7 @@ function App() {
           onAddBookmark={addBookmark}
           onRemoveBookmark={removeBookmark}
           onUpdateBookmarkNote={updateBookmarkNote}
+          onUpdateBookmarkDrawing={updateBookmarkDrawing}
           onUpdateBookmarkTags={updateBookmarkTags}
           onExportText={(items) => exportBookmarksText(lecture, items)}
           onExportPdf={(items) => exportBookmarksPdf(lecture, items)}
@@ -1568,7 +1587,7 @@ function AuthorPage({ author, lectures, favorites, onToggleFavorite, onOpenLectu
   );
 }
 
-function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, currentLectureId, setCurrentLectureId, playerState, setPlayerState, audioRef, prevLecture, nextLecture, onSeek, onTogglePlay, handleTimeUpdate, handleLoadedMetadata, handleEnded, getProgress, bookmarks, onAddBookmark, onRemoveBookmark, onUpdateBookmarkNote, onUpdateBookmarkTags, onExportText, onExportPdf, repeatSegment, onSetRepeatPoint, onClearRepeat, repeatLesson, onToggleRepeatLesson }: {
+function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, currentLectureId, setCurrentLectureId, playerState, setPlayerState, audioRef, prevLecture, nextLecture, onSeek, onTogglePlay, handleTimeUpdate, handleLoadedMetadata, handleEnded, getProgress, bookmarks, onAddBookmark, onRemoveBookmark, onUpdateBookmarkNote, onUpdateBookmarkDrawing, onUpdateBookmarkTags, onExportText, onExportPdf, repeatSegment, onSetRepeatPoint, onClearRepeat, repeatLesson, onToggleRepeatLesson }: {
   lecture: Lecture;
   favorites: string[];
   onToggleFavorite: (id: string) => void;
@@ -1590,6 +1609,7 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
   onAddBookmark: () => void;
   onRemoveBookmark: (id: string) => void;
   onUpdateBookmarkNote: (id: string, note: string) => void;
+  onUpdateBookmarkDrawing: (id: string, handwriting: HandwritingStroke[]) => void;
   onUpdateBookmarkTags: (id: string, value: string) => void;
   onExportText: (items: BookmarkItem[]) => void;
   onExportPdf: (items: BookmarkItem[]) => void;
@@ -1744,6 +1764,7 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
                     <button onClick={() => onRemoveBookmark(item.id)} aria-label={`Удалить закладку ${formatDuration(item.time)}`} className="text-sm text-muted dark:text-darkmuted">Удалить</button>
                   </div>
                   <textarea value={item.note || ''} onChange={(event) => onUpdateBookmarkNote(item.id, event.target.value)} maxLength={500} rows={2} placeholder="Добавить заметку к этому фрагменту…" aria-label={`Заметка к закладке ${formatDuration(item.time)}`} className="mt-2 w-full resize-y rounded-xl border border-black/5 bg-[#F7F9FC] px-3 py-2 text-sm text-text outline-none placeholder:text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darktext dark:placeholder:text-darkmuted" />
+                  <HandwritingPad label={`Рисунок к закладке ${formatDuration(item.time)}`} strokes={item.handwriting} onChange={(drawing) => onUpdateBookmarkDrawing(item.id, drawing)} />
                   <input value={(item.tags || []).join(', ')} onChange={(event) => onUpdateBookmarkTags(item.id, event.target.value)} placeholder="Теги через запятую: акыда, повторить" aria-label={`Теги к закладке ${formatDuration(item.time)}`} className="mt-2 w-full rounded-xl border border-black/5 bg-[#F7F9FC] px-3 py-2 text-xs text-text outline-none placeholder:text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darktext dark:placeholder:text-darkmuted" />
                   {!!item.tags?.length && <div className="mt-2 flex flex-wrap gap-1.5">{item.tags.map((tag) => <span key={tag} className="rounded-full bg-[#B8874A]/10 px-2 py-1 text-[11px] text-[#8A612E] dark:bg-[#E0821E]/10 dark:text-[#E5A35B]">#{tag}</span>)}</div>}
                 </div>
@@ -1874,7 +1895,8 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
   const availableTags = Array.from(new Set(bookmarks.flatMap((item) => item.tags || []))).sort((a, b) => a.localeCompare(b, 'ru'));
   const matchingBookmarks = bookmarks.map((item) => ({ item, lecture: getLectureById(item.lectureId) })).filter((entry): entry is { item: BookmarkItem; lecture: Lecture } => Boolean(entry.lecture)).filter(({ item, lecture }) => {
     const haystack = [lecture.title, lecture.author, lecture.cycle, formatDuration(item.time), item.note || '', ...(item.tags || [])].join(' ').toLowerCase();
-    const typeMatches = librarySearchType === 'all' || (librarySearchType === 'note' ? Boolean(item.note?.trim()) : !item.note?.trim());
+    const hasNote = Boolean(item.note?.trim() || item.handwriting?.length);
+    const typeMatches = librarySearchType === 'all' || (librarySearchType === 'note' ? hasNote : !hasNote);
     const tagMatches = selectedTag === 'all' || (item.tags || []).includes(selectedTag);
     return typeMatches && tagMatches && (!normalizedSearch || haystack.includes(normalizedSearch));
   }).sort((a, b) => {
@@ -1924,7 +1946,7 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
 
       <section className="panel p-5">
         <div className="flex flex-col gap-3 sm:flex-row"><div className="flex flex-1 items-center gap-2 rounded-2xl border border-black/5 bg-[#F7F9FC] px-4 py-3 dark:border-white/10 dark:bg-[#161616]"><Search size={16} className="text-muted dark:text-darkmuted" /><input value={librarySearch} onChange={(event) => setLibrarySearch(event.target.value)} placeholder="Найти в заметках и закладках…" aria-label="Поиск по сохранённым заметкам и закладкам" className="w-full bg-transparent text-sm text-text outline-none placeholder:text-muted dark:text-darktext dark:placeholder:text-darkmuted" /></div><select value={librarySearchType} onChange={(event) => setLibrarySearchType(event.target.value as LibrarySearchType)} aria-label="Тип сохранённой записи" className="rounded-2xl border border-black/5 bg-[#F7F9FC] px-3 py-3 text-sm text-text outline-none dark:border-white/10 dark:bg-[#161616] dark:text-darktext"><option value="all">Все типы</option><option value="note">Только заметки</option><option value="bookmark">Только закладки</option></select><select value={librarySearchSort} onChange={(event) => setLibrarySearchSort(event.target.value as LibrarySearchSort)} aria-label="Сортировка сохранённых записей" className="rounded-2xl border border-black/5 bg-[#F7F9FC] px-3 py-3 text-sm text-text outline-none dark:border-white/10 dark:bg-[#161616] dark:text-darktext"><option value="newest">Сначала новые</option><option value="oldest">Сначала старые</option></select>{availableTags.length > 0 && <select value={selectedTag} onChange={(event) => setSelectedTag(event.target.value)} aria-label="Фильтр по тегу" className="rounded-2xl border border-black/5 bg-[#F7F9FC] px-3 py-3 text-sm text-text outline-none dark:border-white/10 dark:bg-[#161616] dark:text-darktext"><option value="all">Все теги</option>{availableTags.map((tag) => <option key={tag} value={tag}>#{tag}</option>)}</select>}</div>
-        {(normalizedSearch || librarySearchType !== 'all' || selectedTag !== 'all') && <div className="mt-4 space-y-3"><div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Найдено: {matchingBookmarks.length} · {librarySearchType === 'all' ? 'все типы' : librarySearchType === 'note' ? 'заметки' : 'закладки'}{selectedTag !== 'all' ? ` · #${selectedTag}` : ''}</div>{matchingBookmarks.length ? matchingBookmarks.map(({ item, lecture }) => <button key={item.id} onClick={() => onOpenLecture(lecture.id)} className="block w-full rounded-2xl border border-black/5 bg-[#F7F9FC] p-4 text-left transition hover:border-[#B8874A]/40 dark:border-white/10 dark:bg-[#161616]"><div className="flex items-center justify-between gap-3"><div className="font-medium text-text dark:text-darktext"><HighlightedText text={lecture.title} query={librarySearch} /></div><span className="shrink-0 text-right text-sm text-[#9B6D32] dark:text-[#E0821E]"><span className="block">{formatDuration(item.time)}</span><span className="text-[10px] uppercase tracking-[0.1em] text-muted dark:text-darkmuted">{item.note?.trim() ? 'Заметка' : 'Закладка'}</span></span></div><div className="mt-1 text-xs text-muted dark:text-darkmuted"><HighlightedText text={lecture.author} query={librarySearch} /></div>{item.note && <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted dark:text-darkmuted"><HighlightedText text={item.note} query={librarySearch} /></p>}{!!item.tags?.length && <div className="mt-3 flex flex-wrap gap-1.5">{item.tags.map((tag) => <span key={tag} className="rounded-full bg-[#B8874A]/10 px-2 py-1 text-[11px] text-[#8A612E] dark:bg-[#E0821E]/10 dark:text-[#E5A35B]">#{tag}</span>)}</div>}</button>) : <div className="rounded-2xl bg-[#F7F9FC] p-4 text-sm text-muted dark:bg-[#161616] dark:text-darkmuted">В сохранённых заметках и закладках ничего не найдено.</div>}</div>}
+        {(normalizedSearch || librarySearchType !== 'all' || selectedTag !== 'all') && <div className="mt-4 space-y-3"><div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Найдено: {matchingBookmarks.length} · {librarySearchType === 'all' ? 'все типы' : librarySearchType === 'note' ? 'заметки' : 'закладки'}{selectedTag !== 'all' ? ` · #${selectedTag}` : ''}</div>{matchingBookmarks.length ? matchingBookmarks.map(({ item, lecture }) => <button key={item.id} onClick={() => onOpenLecture(lecture.id)} className="block w-full rounded-2xl border border-black/5 bg-[#F7F9FC] p-4 text-left transition hover:border-[#B8874A]/40 dark:border-white/10 dark:bg-[#161616]"><div className="flex items-center justify-between gap-3"><div className="font-medium text-text dark:text-darktext"><HighlightedText text={lecture.title} query={librarySearch} /></div><span className="shrink-0 text-right text-sm text-[#9B6D32] dark:text-[#E0821E]"><span className="block">{formatDuration(item.time)}</span><span className="text-[10px] uppercase tracking-[0.1em] text-muted dark:text-darkmuted">{item.handwriting?.length ? 'Рисунок от руки' : item.note?.trim() ? 'Заметка' : 'Закладка'}</span></span></div><div className="mt-1 text-xs text-muted dark:text-darkmuted"><HighlightedText text={lecture.author} query={librarySearch} /></div>{item.note && <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted dark:text-darkmuted"><HighlightedText text={item.note} query={librarySearch} /></p>}<HandwritingPreview strokes={item.handwriting} />{!!item.tags?.length && <div className="mt-3 flex flex-wrap gap-1.5">{item.tags.map((tag) => <span key={tag} className="rounded-full bg-[#B8874A]/10 px-2 py-1 text-[11px] text-[#8A612E] dark:bg-[#E0821E]/10 dark:text-[#E5A35B]">#{tag}</span>)}</div>}</button>) : <div className="rounded-2xl bg-[#F7F9FC] p-4 text-sm text-muted dark:bg-[#161616] dark:text-darkmuted">В сохранённых заметках и закладках ничего не найдено.</div>}</div>}
       </section>
 
       <section className="space-y-4">

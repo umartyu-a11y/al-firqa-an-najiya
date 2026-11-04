@@ -1,4 +1,5 @@
 import { lectureData } from '../data/catalog';
+import { sanitizeHandwritingStrokes } from './handwriting';
 import type { BookmarkItem, LectureProgressEntry, LocalLibraryBackup, QuizQuestion } from '../types';
 
 export const MAX_LOCAL_BACKUP_BYTES = 5 * 1024 * 1024;
@@ -32,6 +33,7 @@ const parseBookmark = (value: unknown): BookmarkItem | null => {
     ? Array.from(new Set(value.tags.filter((tag): tag is string => typeof tag === 'string').map((tag) => tag.trim().slice(0, 48)).filter(Boolean))).slice(0, 8)
     : [];
   const note = typeof value.note === 'string' ? value.note.slice(0, 500) : '';
+  const handwriting = sanitizeHandwritingStrokes(value.handwriting);
 
   return {
     id,
@@ -39,7 +41,8 @@ const parseBookmark = (value: unknown): BookmarkItem | null => {
     time: Number(value.time),
     createdAt: value.createdAt,
     note,
-    tags
+    tags,
+    ...(handwriting.length ? { handwriting } : {})
   };
 };
 

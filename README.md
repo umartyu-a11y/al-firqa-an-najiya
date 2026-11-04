@@ -44,21 +44,21 @@ Listening position is stored in `user_lecture_progress` per user and lecture. Du
 
 ## Player bookmarks and notes
 
-On any lecture page, use `Закладка` to save the current timestamp. Each saved marker can be opened to seek back to that point, annotated with a note up to 500 characters, or removed. Notes are automatically stored in localStorage and remain available offline. Cross-device synchronization for these notes is kept as a separate follow-up Supabase task.
+On any lecture page, use `Закладка` to save the current timestamp. Each saved marker can be opened to seek back to that point, annotated with a note up to 500 characters, or removed. A handwriting pad accepts finger, Apple Pencil/stylus and mouse input; pencil/pen strokes are stored with the bookmark in localStorage. The pad supports undoing the last stroke and clearing the drawing. Cross-device synchronization for bookmark drawings is not enabled.
 
 
 ## Exporting notes
 
-The lecture player can export its bookmarks and notes as a UTF-8 `.txt` file. The `PDF` action opens a print-friendly document in a new window; choose “Save as PDF” in the browser or system print dialog. This keeps Cyrillic text readable without embedding a third-party font and works with the current lecture's local notes.
+The lecture player can export its bookmarks and notes as a UTF-8 `.txt` file. The `PDF` action opens a print-friendly document in a new window, including saved handwriting drawings; choose “Save as PDF” in the browser or system print dialog. This keeps Cyrillic text readable without embedding a third-party font and works with the current lecture's local notes.
 
 
 ## Full library export
 
-The Library page now exports all locally stored bookmarks and notes from every lecture as one UTF-8 `.txt` file or one print-ready document for “Save as PDF”. Entries include the lecture title, author, timestamp and note text. Empty export buttons remain disabled until at least one bookmark exists.
+The Library page now exports all locally stored bookmarks and notes from every lecture as one UTF-8 `.txt` file or one print-ready document for “Save as PDF”. Entries include the lecture title, author, timestamp, note text and drawings in PDF. Empty export buttons remain disabled until at least one bookmark exists.
 
 ## Local library backup
 
-The Library page can download a versioned JSON backup of local favorites, listening history and progress, bookmarks/notes, user-created quiz questions and preferences. Restore accepts AL-FIRQA AN-NAJIYA version-1 JSON files up to 5 MiB, validates lecture IDs and record shapes, and merges with existing device data rather than clearing it. Audio files and cloud credentials are never included. Backups are not encrypted and may contain private notes; store the downloaded file securely.
+The Library page can download a versioned JSON backup of local favorites, listening history and progress, bookmarks/notes including vector handwriting strokes, user-created quiz questions and preferences. Restore accepts AL-FIRQA AN-NAJIYA version-1 JSON files up to 5 MiB, validates lecture IDs and record shapes, and merges with existing device data rather than clearing it. Audio files and cloud credentials are never included. Backups are not encrypted and may contain private notes; store the downloaded file securely.
 
 
 ## Library search

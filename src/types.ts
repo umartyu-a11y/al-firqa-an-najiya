@@ -38,6 +38,13 @@ export interface Cycle {
   sourceUrl?: string;
 }
 
+export interface HandwritingStroke {
+  path: string;
+  color: string;
+  width: number;
+  opacity?: number;
+}
+
 export interface BookmarkItem {
   id: string;
   lectureId: string;
@@ -45,6 +52,7 @@ export interface BookmarkItem {
   createdAt: string;
   note?: string;
   tags?: string[];
+  handwriting?: HandwritingStroke[];
 }
 
 export interface QuizQuestion {
