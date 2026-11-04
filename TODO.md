@@ -33,8 +33,8 @@
 - [x] Preserve the current local My Library area with favorites, history, continued listening, local bookmarks/notes, exports, and search.
 - [x] Export and restore a versioned local JSON backup for favorites, history, playback progress, notes/bookmarks, user-created quizzes and preferences; import is validated and merges without deleting existing local records.
 - [x] Warn that JSON backups contain unencrypted private notes; cap imports at 5 MiB and omit audio binaries and cloud credentials.
-- [ ] Present a privacy-respecting user dashboard with learning overview, recent activity, saved resources and clear local-only/cloud-sync status.
-- [ ] Never show invented study statistics; derive them only from saved, available learning records.
+- [x] Present a privacy-respecting user dashboard with learning overview, recent activity, saved resources and clear local-only/cloud-sync status.
+- [x] Never show invented study statistics; derive them only from saved, available learning records. The overview counts saved playback positions and never labels a lesson completed without an explicit completion action.
 
 ## 5. Learning Progress
 - [x] Store local per-lecture playback position and show progress for available lessons/cycles.
@@ -186,3 +186,9 @@
 ## 29. Вход в архив с главной страницы
 - [x] Представить сайт как более широкий архив лекций и учебных материалов, а не только как «Циклы по книгам».
 - [x] Добавить на главную блок «Начните здесь» с прямыми ссылками на поиск лекций, каталог учебных циклов и библиотеку книг.
+
+## 30. Полезные пустые состояния ресурсов
+- [x] В личной библиотеке объяснить, как начать прослушивание, сохранить избранное и создать заметку/закладку; дать прямой переход к каталогу лекций.
+- [x] При пустой выдаче поиска по сохранённым заметкам и закладкам объяснить, что можно изменить, и предоставить сброс запроса и фильтров.
+- [x] На странице «Тексты» указать, что опубликованные тексты доступны на страницах уроков, и направить к учебным циклам; отсутствие блока в первоисточнике не заполнять самостоятельно.
+- [x] На странице «Словарь» честно обозначить отсутствие отдельного проверенного словаря и направить к уже связанным терминам Карты знаний.

@@ -29,6 +29,9 @@ import { KnowledgeMap } from './KnowledgeMap';
 import { HandwritingPad, HandwritingPreview } from './HandwritingPad';
 import { CourseSourceText } from './CourseSourceText';
 import { LectureNotes } from './LectureNotes';
+import { LearningDashboard } from './LearningDashboard';
+import type { LearningDashboardSnapshot } from './lib/learningDashboard';
+import { buildLearningDashboardSnapshot } from './lib/learningDashboard';
 import type { BookmarkItem, Category, HandwritingStroke, Lecture, LectureProgressEntry, QuizQuestion } from './types';
 import { isSupabaseConfigured } from './lib/supabase';
 import { loadCloudLibrary, loadCloudProgress, saveCloudLibrary, saveCloudProgress } from './lib/cloudLibrary';
@@ -102,6 +105,23 @@ const parseHash = () => {
 };
 
 const getLectureById = (id: string) => lectureData.find((lecture) => lecture.id === id);
+
+const readAudioProgressSnapshot = (): Record<string, LectureProgressEntry> => {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(storageKeys.progress) || '{}');
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+    const result: Record<string, LectureProgressEntry> = {};
+    for (const [id, value] of Object.entries(parsed)) {
+      if (!value || typeof value !== 'object') continue;
+      const entry = value as Partial<LectureProgressEntry>;
+      if (typeof entry.currentTime !== 'number' || !Number.isFinite(entry.currentTime) || typeof entry.duration !== 'number' || !Number.isFinite(entry.duration) || typeof entry.updatedAt !== 'string') continue;
+      result[id] = { currentTime: Math.max(0, entry.currentTime), duration: Math.max(0, entry.duration), updatedAt: entry.updatedAt };
+    }
+    return result;
+  } catch {
+    return {};
+  }
+};
 
 const getAudioProgress = (id: string) => {
   try {
@@ -877,6 +897,18 @@ function App() {
   const favoriteLectures = lectureData.filter((lecture) => favorites.includes(lecture.id));
   const continueLectures = lectureData.filter((lecture) => getAudioProgress(lecture.id) > 15);
   const recentLectures = history.map((id) => getLectureById(id)).filter(Boolean) as Lecture[];
+  const dashboardSnapshot = buildLearningDashboardSnapshot({
+    lectures: lectureData,
+    cycles,
+    favorites,
+    history,
+    bookmarks,
+    progress: readAudioProgressSnapshot(),
+    cloudConfigured: isSupabaseConfigured,
+    cloudReady,
+    hasCloudSession: Boolean(authSession),
+    online: isOnline
+  });
 
   const renderRoute = () => {
     if (route === 'library') {
@@ -886,10 +918,12 @@ function App() {
           favoriteLectures={favoriteLectures}
           recentLectures={recentLectures}
           onOpenLecture={handleOpenLecture}
+          dashboard={dashboardSnapshot}
+          onShowFavorites={() => document.getElementById('library-favorites')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          onShowBookmarks={() => document.getElementById('library-bookmarks')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           onToggleFavorite={toggleFavorite}
           favorites={favorites}
           getProgress={getAudioProgress}
-          cloudReady={cloudReady}
           cloudEnabled={isSupabaseConfigured}
           authSession={authSession}
           onOpenAuth={() => { setAuthMessage(''); setAuthOpen(true); }}
@@ -900,6 +934,7 @@ function App() {
           onExportBackup={exportLocalLibraryBackup}
           onImportBackup={importLocalLibraryBackup}
           backupMessage={backupMessage}
+          onOpenCatalog={() => navigate('/catalog')}
           librarySearch={librarySearch}
           setLibrarySearch={setLibrarySearch}
           librarySearchType={librarySearchType}
@@ -1044,7 +1079,7 @@ function App() {
       const resource = window.location.hash.replace(/^#\//, '').split('/')[0] as ResourceType;
       if (resource === 'books') return <BooksPage onOpenCycle={(id) => navigate(`/cycle/${id}`)} />;
       if (resource === 'courses') return <CoursesPage onOpenCycle={(id) => navigate(`/cycle/${id}`)} />;
-      return <ResourcePage resource={resource} onOpenCatalog={() => navigate('/catalog')} />;
+      return <ResourcePage resource={resource} onOpenCatalog={() => navigate('/catalog')} onOpenCourses={() => navigate('/courses')} onOpenBooks={() => navigate('/books')} onOpenKnowledge={() => navigate('/knowledge')} />;
     }
 
     return <HomePage />;
@@ -1902,15 +1937,17 @@ function CategoryPage({ category, lectures, favorites, onToggleFavorite, onOpenL
   );
 }
 
-function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpenLecture, onToggleFavorite, favorites, getProgress, cloudReady, cloudEnabled, authSession, onOpenAuth, onSignOut, bookmarks, onExportAllText, onExportAllPdf, onExportBackup, onImportBackup, backupMessage, librarySearch, setLibrarySearch, librarySearchType, setLibrarySearchType, librarySearchSort, setLibrarySearchSort }: {
+function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpenLecture, dashboard, onShowFavorites, onShowBookmarks, onToggleFavorite, favorites, getProgress, cloudEnabled, authSession, onOpenAuth, onSignOut, bookmarks, onExportAllText, onExportAllPdf, onExportBackup, onImportBackup, backupMessage, onOpenCatalog, librarySearch, setLibrarySearch, librarySearchType, setLibrarySearchType, librarySearchSort, setLibrarySearchSort }: {
   continueLectures: Lecture[];
   favoriteLectures: Lecture[];
   recentLectures: Lecture[];
   onOpenLecture: (id: string) => void;
+  dashboard: LearningDashboardSnapshot;
+  onShowFavorites: () => void;
+  onShowBookmarks: () => void;
   onToggleFavorite: (id: string) => void;
   favorites: string[];
   getProgress: (id: string) => number;
-  cloudReady: boolean;
   cloudEnabled: boolean;
   authSession: Session | null;
   onOpenAuth: () => void;
@@ -1921,6 +1958,7 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
   onExportBackup: () => void;
   onImportBackup: (file: File) => Promise<void>;
   backupMessage: string;
+  onOpenCatalog: () => void;
   librarySearch: string;
   setLibrarySearch: (value: string) => void;
   librarySearchType: LibrarySearchType;
@@ -1948,19 +1986,15 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
       <section className="panel p-6">
         <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Личный раздел</div>
         <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <h1 className="font-display text-4xl tracking-[-0.04em] text-text dark:text-darktext">Моя библиотека</h1>
+          <h1 className="font-display text-4xl tracking-[-0.04em] text-text dark:text-darktext">Панель обучения</h1>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex w-fit items-center rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-1.5 text-xs text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darkmuted">{cloudEnabled && cloudReady ? 'Синхронизация включена' : 'Сохранение на устройстве'}</span>
+            <span className="inline-flex w-fit items-center rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-1.5 text-xs text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darkmuted">{dashboard.storage.label}</span>
             {authSession?.user.email ? <button onClick={onSignOut} className="rounded-full border border-black/5 px-3 py-1.5 text-xs text-muted dark:border-white/10 dark:text-darkmuted">Выйти</button> : <button onClick={onOpenAuth} disabled={!cloudEnabled} className="rounded-full bg-[#111820] px-3 py-1.5 text-xs text-white disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#F5F5F5] dark:text-[#111820]">Сохранить в облако</button>}
           </div>
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
-        <div className="panel p-5"><div className="text-sm text-muted dark:text-darkmuted">Продолжить прослушивание</div><div className="mt-3 font-display text-3xl text-text dark:text-darktext">{continueLectures.length}</div></div>
-        <div className="panel p-5"><div className="text-sm text-muted dark:text-darkmuted">Избранные лекции</div><div className="mt-3 font-display text-3xl text-text dark:text-darktext">{favoriteLectures.length}</div></div>
-        <div className="panel p-5"><div className="text-sm text-muted dark:text-darkmuted">Последние открытые</div><div className="mt-3 font-display text-3xl text-text dark:text-darktext">{recentLectures.length}</div></div>
-      </section>
+      <LearningDashboard snapshot={dashboard} onOpenLecture={onOpenLecture} onOpenCatalog={onOpenCatalog} onShowFavorites={onShowFavorites} onShowBookmarks={onShowBookmarks} />
 
       <section className="panel space-y-5 p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -1983,9 +2017,10 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
         <div className="flex shrink-0 gap-2"><button disabled={!bookmarks.length} onClick={onExportAllText} className="inline-flex items-center gap-1 rounded-full border border-black/5 px-3 py-2 text-xs text-muted disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:text-darkmuted">TXT</button><button disabled={!bookmarks.length} onClick={onExportAllPdf} className="inline-flex items-center gap-1 rounded-full border border-black/5 px-3 py-2 text-xs text-muted disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:text-darkmuted">PDF</button></div>
       </section>
 
-      <section className="panel p-5">
+      <section id="library-bookmarks" className="panel p-5">
         <div className="flex flex-col gap-3 sm:flex-row"><div className="flex flex-1 items-center gap-2 rounded-2xl border border-black/5 bg-[#F7F9FC] px-4 py-3 dark:border-white/10 dark:bg-[#161616]"><Search size={16} className="text-muted dark:text-darkmuted" /><input value={librarySearch} onChange={(event) => setLibrarySearch(event.target.value)} placeholder="Найти в заметках и закладках…" aria-label="Поиск по сохранённым заметкам и закладкам" className="w-full bg-transparent text-sm text-text outline-none placeholder:text-muted dark:text-darktext dark:placeholder:text-darkmuted" /></div><select value={librarySearchType} onChange={(event) => setLibrarySearchType(event.target.value as LibrarySearchType)} aria-label="Тип сохранённой записи" className="rounded-2xl border border-black/5 bg-[#F7F9FC] px-3 py-3 text-sm text-text outline-none dark:border-white/10 dark:bg-[#161616] dark:text-darktext"><option value="all">Все типы</option><option value="note">Только заметки</option><option value="bookmark">Только закладки</option></select><select value={librarySearchSort} onChange={(event) => setLibrarySearchSort(event.target.value as LibrarySearchSort)} aria-label="Сортировка сохранённых записей" className="rounded-2xl border border-black/5 bg-[#F7F9FC] px-3 py-3 text-sm text-text outline-none dark:border-white/10 dark:bg-[#161616] dark:text-darktext"><option value="newest">Сначала новые</option><option value="oldest">Сначала старые</option></select>{availableTags.length > 0 && <select value={selectedTag} onChange={(event) => setSelectedTag(event.target.value)} aria-label="Фильтр по тегу" className="rounded-2xl border border-black/5 bg-[#F7F9FC] px-3 py-3 text-sm text-text outline-none dark:border-white/10 dark:bg-[#161616] dark:text-darktext"><option value="all">Все теги</option>{availableTags.map((tag) => <option key={tag} value={tag}>#{tag}</option>)}</select>}</div>
-        {(normalizedSearch || librarySearchType !== 'all' || selectedTag !== 'all') && <div className="mt-4 space-y-3"><div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Найдено: {matchingBookmarks.length} · {librarySearchType === 'all' ? 'все типы' : librarySearchType === 'note' ? 'заметки' : 'закладки'}{selectedTag !== 'all' ? ` · #${selectedTag}` : ''}</div>{matchingBookmarks.length ? matchingBookmarks.map(({ item, lecture }) => <button key={item.id} onClick={() => onOpenLecture(lecture.id)} className="block w-full rounded-2xl border border-black/5 bg-[#F7F9FC] p-4 text-left transition hover:border-[#B8874A]/40 dark:border-white/10 dark:bg-[#161616]"><div className="flex items-center justify-between gap-3"><div className="font-medium text-text dark:text-darktext"><HighlightedText text={lecture.title} query={librarySearch} /></div><span className="shrink-0 text-right text-sm text-[#9B6D32] dark:text-[#E0821E]"><span className="block">{formatDuration(item.time)}</span><span className="text-[10px] uppercase tracking-[0.1em] text-muted dark:text-darkmuted">{item.handwriting?.length ? 'Рисунок от руки' : item.note?.trim() ? 'Заметка' : 'Закладка'}</span></span></div><div className="mt-1 text-xs text-muted dark:text-darkmuted"><HighlightedText text={lecture.author} query={librarySearch} /></div>{item.note && <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted dark:text-darkmuted"><HighlightedText text={item.note} query={librarySearch} /></p>}<HandwritingPreview strokes={item.handwriting} />{!!item.tags?.length && <div className="mt-3 flex flex-wrap gap-1.5">{item.tags.map((tag) => <span key={tag} className="rounded-full bg-[#B8874A]/10 px-2 py-1 text-[11px] text-[#8A612E] dark:bg-[#E0821E]/10 dark:text-[#E5A35B]">#{tag}</span>)}</div>}</button>) : <div className="rounded-2xl bg-[#F7F9FC] p-4 text-sm text-muted dark:bg-[#161616] dark:text-darkmuted">В сохранённых заметках и закладках ничего не найдено.</div>}</div>}
+        {(normalizedSearch || librarySearchType !== 'all' || selectedTag !== 'all') && <div className="mt-4 space-y-3"><div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Найдено: {matchingBookmarks.length} · {librarySearchType === 'all' ? 'все типы' : librarySearchType === 'note' ? 'заметки' : 'закладки'}{selectedTag !== 'all' ? ` · #${selectedTag}` : ''}</div>{matchingBookmarks.length ? matchingBookmarks.map(({ item, lecture }) => <button key={item.id} onClick={() => onOpenLecture(lecture.id)} className="block w-full rounded-2xl border border-black/5 bg-[#F7F9FC] p-4 text-left transition hover:border-[#B8874A]/40 dark:border-white/10 dark:bg-[#161616]"><div className="flex items-center justify-between gap-3"><div className="font-medium text-text dark:text-darktext"><HighlightedText text={lecture.title} query={librarySearch} /></div><span className="shrink-0 text-right text-sm text-[#9B6D32] dark:text-[#E0821E]"><span className="block">{formatDuration(item.time)}</span><span className="text-[10px] uppercase tracking-[0.1em] text-muted dark:text-darkmuted">{item.handwriting?.length ? 'Рисунок от руки' : item.note?.trim() ? 'Заметка' : 'Закладка'}</span></span></div><div className="mt-1 text-xs text-muted dark:text-darkmuted"><HighlightedText text={lecture.author} query={librarySearch} /></div>{item.note && <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted dark:text-darkmuted"><HighlightedText text={item.note} query={librarySearch} /></p>}<HandwritingPreview strokes={item.handwriting} />{!!item.tags?.length && <div className="mt-3 flex flex-wrap gap-1.5">{item.tags.map((tag) => <span key={tag} className="rounded-full bg-[#B8874A]/10 px-2 py-1 text-[11px] text-[#8A612E] dark:bg-[#E0821E]/10 dark:text-[#E5A35B]">#{tag}</span>)}</div>}</button>) : <div className="rounded-2xl bg-[#F7F9FC] p-4 dark:bg-[#161616]"><p className="text-sm text-muted dark:text-darkmuted">Сохранённых записей, соответствующих этим условиям, нет. Измените запрос или сбросьте фильтры.</p><button type="button" onClick={() => { setLibrarySearch(''); setLibrarySearchType('all'); setSelectedTag('all'); }} className="mt-3 rounded-full border border-black/10 px-4 py-2 text-sm font-medium text-text hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#B8874A] dark:border-white/10 dark:text-darktext dark:hover:bg-white/10">Сбросить поиск и фильтры</button></div>}</div>}
+        {bookmarks.length === 0 && !normalizedSearch && librarySearchType === 'all' && selectedTag === 'all' && <div className="mt-4"><LibraryEmptyState message="Здесь появятся ваши заметки и закладки по времени. Откройте лекцию и сохраните нужный фрагмент." onOpenCatalog={onOpenCatalog} /></div>}
       </section>
 
       <section className="space-y-4">
@@ -1997,11 +2032,11 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
             ))}
           </div>
         ) : (
-          <div className="panel p-6 text-sm text-muted dark:text-darkmuted">Пока нет сохранённых мест прослушивания.</div>
+          <LibraryEmptyState message="Сохранённый прогресс появится здесь после начала прослушивания. Выберите лекцию, чтобы продолжить в удобное время." onOpenCatalog={onOpenCatalog} />
         )}
       </section>
 
-      <section className="space-y-4">
+      <section id="library-favorites" className="scroll-mt-24 space-y-4">
         <div className="mb-3 text-sm uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Избранное</div>
         {favoriteLectures.length ? (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -2010,7 +2045,7 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
             ))}
           </div>
         ) : (
-          <div className="panel p-6 text-sm text-muted dark:text-darkmuted">У вас пока нет избранных лекций.</div>
+          <LibraryEmptyState message="Отметьте лекцию как избранную, чтобы быстро вернуться к ней из этого раздела." onOpenCatalog={onOpenCatalog} />
         )}
       </section>
 
@@ -2023,10 +2058,19 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
             ))}
           </div>
         ) : (
-          <div className="panel p-6 text-sm text-muted dark:text-darkmuted">История прослушивания пока пуста.</div>
+          <LibraryEmptyState message="Открытые лекции будут появляться здесь автоматически; это устройство не отправляет историю без вашей настройки синхронизации." onOpenCatalog={onOpenCatalog} />
         )}
       </section>
     </main>
+  );
+}
+
+function LibraryEmptyState({ message, onOpenCatalog }: { message: string; onOpenCatalog: () => void }) {
+  return (
+    <div className="panel flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+      <p className="max-w-2xl text-sm leading-6 text-muted dark:text-darkmuted">{message}</p>
+      <button type="button" onClick={onOpenCatalog} className="shrink-0 rounded-full bg-[#111820] px-4 py-2.5 text-sm font-medium text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B8874A] dark:bg-[#F5F5F5] dark:text-[#111820]">Найти лекцию</button>
+    </div>
   );
 }
 
@@ -2219,11 +2263,11 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, audioStat
   );
 }
 
-function ResourcePage({ resource, onOpenCatalog }: { resource: ResourceType; onOpenCatalog: () => void }) {
+function ResourcePage({ resource, onOpenCatalog, onOpenCourses, onOpenBooks, onOpenKnowledge }: { resource: ResourceType; onOpenCatalog: () => void; onOpenCourses: () => void; onOpenBooks: () => void; onOpenKnowledge: () => void }) {
   const content: Record<ResourceType, { eyebrow: string; title: string; description: string; note: string }> = {
     books: { eyebrow: 'Библиотека книг', title: 'Книги появятся после проверки прав на распространение.', description: 'Этот раздел подготовлен для PDF-книг, авторов, обложек и истории чтения.', note: 'Пока здесь нет опубликованных книг. Мы не добавляем файлы без подтверждённого разрешения.' },
-    texts: { eyebrow: 'Тексты и переводы', title: 'Тексты требуют подтверждённых оригиналов и атрибуции.', description: 'Здесь будут полные тексты, переводы, временные метки и синхронизация с аудио.', note: 'Расшифровки и переводы ещё не опубликованы, поэтому мы не создаём их автоматически без проверки.' },
-    dictionary: { eyebrow: 'Терминологический словарь', title: 'Словарь будет связан с реальными материалами архива.', description: 'Для каждой записи будут доступны арабское написание, огласовки, транслитерация, перевод и ссылки.', note: 'В текущем каталоге нет редакционно проверенных словарных записей.' },
+    texts: { eyebrow: 'Тексты уроков', title: 'Материалы источников доступны на страницах уроков.', description: 'Откройте учебный цикл и выберите урок: опубликованный для него текст показывается рядом с аудио вместе с атрибуцией и ссылкой на первоисточник.', note: 'Отдельный общий указатель текстов пока не создан. Если в первоисточнике текст отсутствует, страница сообщает об этом и не дополняет его самостоятельно.' },
+    dictionary: { eyebrow: 'Терминологический словарь', title: 'Отдельный проверенный словарь ещё не опубликован.', description: 'Некоторые термины уже связаны с существующими конспектами и источниками в Карте знаний.', note: 'Карта показывает только имеющиеся записи и связи; самостоятельные словарные статьи появятся после проверки и атрибуции.' },
     courses: { eyebrow: 'Учебные курсы', title: 'Академия начнётся с проверенных циклов и конспектов.', description: 'Этот раздел станет основой для учебных планов, прогресса, повторения и тестов.', note: 'Тесты и учебные планы не создаются до появления подтверждённых конспектов.' }
   };
   const item = content[resource] || content.books;
@@ -2235,8 +2279,10 @@ function ResourcePage({ resource, onOpenCatalog }: { resource: ResourceType; onO
         <p className="mt-6 max-w-2xl text-base leading-7 text-muted dark:text-darkmuted">{item.description}</p>
       </section>
       <section className="panel flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between">
-        <div><div className="text-sm font-medium text-text dark:text-darktext">Раздел ещё не опубликован</div><p className="mt-2 max-w-2xl text-sm leading-6 text-muted dark:text-darkmuted">{item.note}</p></div>
-        <button onClick={onOpenCatalog} className="shrink-0 rounded-full bg-[#111820] px-5 py-3 text-sm font-medium text-white dark:bg-[#F5F5F5] dark:text-[#111820]">Слушать лекции</button>
+        <div><div className="text-sm font-medium text-text dark:text-darktext">{resource === 'texts' ? 'Как открыть текст урока' : resource === 'dictionary' ? 'Где искать связанные термины' : 'Раздел ещё не опубликован'}</div><p className="mt-2 max-w-2xl text-sm leading-6 text-muted dark:text-darkmuted">{item.note}</p></div>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          {resource === 'texts' ? <><button type="button" onClick={onOpenCourses} className="rounded-full bg-[#111820] px-5 py-3 text-sm font-medium text-white dark:bg-[#F5F5F5] dark:text-[#111820]">Открыть учебные циклы</button><button type="button" onClick={onOpenBooks} className="rounded-full border border-black/10 px-5 py-3 text-sm text-text dark:border-white/10 dark:text-darktext">Книги</button></> : resource === 'dictionary' ? <><button type="button" onClick={onOpenKnowledge} className="rounded-full bg-[#111820] px-5 py-3 text-sm font-medium text-white dark:bg-[#F5F5F5] dark:text-[#111820]">Открыть карту знаний</button><button type="button" onClick={onOpenCatalog} className="rounded-full border border-black/10 px-5 py-3 text-sm text-text dark:border-white/10 dark:text-darktext">К лекциям</button></> : <button type="button" onClick={onOpenCatalog} className="rounded-full bg-[#111820] px-5 py-3 text-sm font-medium text-white dark:bg-[#F5F5F5] dark:text-[#111820]">Слушать лекции</button>}
+        </div>
       </section>
     </main>
   );
