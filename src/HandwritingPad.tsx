@@ -5,6 +5,7 @@ import type { HandwritingStroke } from './types';
 
 const VIEW_WIDTH = 800;
 const VIEW_HEIGHT = 240;
+const CSS_PX_PER_MM = 96 / 25.4;
 const MAX_POINTS_PER_STROKE = 120;
 const MAX_PATH_LENGTH = 1800;
 const MAX_TOTAL_PATH_LENGTH = 12000;
@@ -14,7 +15,20 @@ type Point = { x: number; y: number };
 type ActiveStroke = { pointerId: number; color: string; width: number; opacity: number; points: Point[]; path: string };
 
 const getPoint = (event: ReactPointerEvent<SVGSVGElement>): Point => {
-  const rect = event.currentTarget.getBoundingClientRect();
+  const svg = event.currentTarget;
+  const matrix = svg.getScreenCTM();
+  if (matrix) {
+    const point = svg.createSVGPoint();
+    point.x = event.clientX;
+    point.y = event.clientY;
+    const local = point.matrixTransform(matrix.inverse());
+    return {
+      x: Math.max(0, Math.min(VIEW_WIDTH, local.x)),
+      y: Math.max(0, Math.min(VIEW_HEIGHT, local.y))
+    };
+  }
+
+  const rect = svg.getBoundingClientRect();
   return {
     x: Math.max(0, Math.min(VIEW_WIDTH, ((event.clientX - rect.left) / rect.width) * VIEW_WIDTH)),
     y: Math.max(0, Math.min(VIEW_HEIGHT, ((event.clientY - rect.top) / rect.height) * VIEW_HEIGHT))
@@ -31,7 +45,7 @@ export function HandwritingPreview({ strokes }: { strokes?: HandwritingStroke[] 
   const safeStrokes = sanitizeHandwritingStrokes(strokes);
   if (!safeStrokes.length) return null;
   return (
-    <svg viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`} role="img" aria-label="Рукописная заметка" className="mt-3 block h-24 w-full rounded-xl border border-black/5 bg-[#fffefb] dark:border-white/10">
+    <svg viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`} preserveAspectRatio="none" role="img" aria-label="Рукописная заметка" className="mt-3 block h-24 w-full rounded-xl border border-black/5 bg-[#fffefb] dark:border-white/10">
       <StrokePaths strokes={safeStrokes} />
     </svg>
   );
@@ -39,6 +53,7 @@ export function HandwritingPreview({ strokes }: { strokes?: HandwritingStroke[] 
 
 export function HandwritingPad({ strokes = [], onChange, label }: { strokes?: HandwritingStroke[]; onChange: (strokes: HandwritingStroke[]) => void; label: string }) {
   const [tool, setTool] = useState<Tool>('pencil');
+  const [thicknessMm, setThicknessMm] = useState(1.5);
   const [draft, setDraft] = useState<HandwritingStroke | null>(null);
   const activeStroke = useRef<ActiveStroke | null>(null);
   const safeStrokes = sanitizeHandwritingStrokes(strokes);
@@ -49,11 +64,10 @@ export function HandwritingPad({ strokes = [], onChange, label }: { strokes?: Ha
     if (!canDraw || activeStroke.current || event.button !== 0) return;
     event.preventDefault();
     const point = getPoint(event);
-    const pressure = event.pointerType === 'pen' ? (event.pressure || 0.45) : 0.5;
     const stroke: ActiveStroke = {
       pointerId: event.pointerId,
       color: tool === 'pencil' ? '#263238' : '#9b6d32',
-      width: tool === 'pencil' ? 2.8 + pressure * 2 : 4 + pressure * 1.5,
+      width: thicknessMm * CSS_PX_PER_MM,
       opacity: tool === 'pencil' ? 0.82 : 1,
       points: [point],
       path: pathFromPoints([point])
@@ -103,11 +117,17 @@ export function HandwritingPad({ strokes = [], onChange, label }: { strokes?: Ha
         <span className="mr-auto text-xs font-medium text-muted dark:text-darkmuted">Рисунок к закладке</span>
         <button type="button" aria-pressed={tool === 'pencil'} onClick={() => setTool('pencil')} className={`rounded-full px-3 py-2 text-xs ${tool === 'pencil' ? 'bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]' : 'border border-black/10 text-text dark:border-white/10 dark:text-darktext'}`}>Карандаш</button>
         <button type="button" aria-pressed={tool === 'pen'} onClick={() => setTool('pen')} className={`rounded-full px-3 py-2 text-xs ${tool === 'pen' ? 'bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]' : 'border border-black/10 text-text dark:border-white/10 dark:text-darktext'}`}>Перо</button>
+        <label className="flex min-w-40 items-center gap-2 text-xs text-muted dark:text-darkmuted">
+          <span>Толщина</span>
+          <input type="range" min="1" max="10" step="0.5" value={thicknessMm} onChange={(event) => setThicknessMm(Number(event.target.value))} aria-label="Толщина линии, миллиметры" className="w-full accent-[#B8874A] dark:accent-[#E0821E]" />
+          <output className="w-10 text-right tabular-nums">{thicknessMm} мм</output>
+        </label>
         <button type="button" disabled={!safeStrokes.length} onClick={() => onChange(safeStrokes.slice(0, -1))} className="rounded-full border border-black/10 px-3 py-2 text-xs text-muted disabled:opacity-40 dark:border-white/10 dark:text-darkmuted">Отменить</button>
         <button type="button" disabled={!safeStrokes.length} onClick={clear} className="rounded-full border border-black/10 px-3 py-2 text-xs text-muted disabled:opacity-40 dark:border-white/10 dark:text-darkmuted">Очистить</button>
       </div>
       <svg
         viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
+        preserveAspectRatio="none"
         role="application"
         aria-label={`${label}. Рисуйте пальцем или стилусом`}
         onPointerDown={startStroke}

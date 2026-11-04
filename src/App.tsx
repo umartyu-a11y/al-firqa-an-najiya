@@ -139,11 +139,19 @@ const mergeCloudProgress = (remote: Record<string, { currentTime: number; durati
 
 const escapeHtml = (value: string) => value.replace(/[&<>\"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', "'": '&#039;' }[character] || character));
 
+const resizeNoteField = (element: HTMLTextAreaElement | null) => {
+  if (!element) return;
+  element.style.height = 'auto';
+  const maxHeight = Math.floor(window.innerHeight * 0.5);
+  element.style.height = `${Math.min(element.scrollHeight, maxHeight)}px`;
+  element.style.overflowY = element.scrollHeight > maxHeight ? 'auto' : 'hidden';
+};
+
 const renderHandwritingSvg = (drawing?: HandwritingStroke[]) => {
   const strokes = sanitizeHandwritingStrokes(drawing);
   if (!strokes.length) return '';
   const paths = strokes.map((stroke) => `<path d="${escapeHtml(stroke.path)}" fill="none" stroke="${stroke.color}" stroke-width="${stroke.width.toFixed(2)}" stroke-opacity="${(stroke.opacity ?? 1).toFixed(2)}" stroke-linecap="round" stroke-linejoin="round"/>`).join('');
-  return `<div class="handwriting"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 240" role="img" aria-label="Рукописная заметка"><rect width="800" height="240" fill="#fffefb"/>${paths}</svg></div>`;
+  return `<div class="handwriting"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 240" preserveAspectRatio="none" role="img" aria-label="Рукописная заметка"><rect width="800" height="240" fill="#fffefb"/>${paths}</svg></div>`;
 };
 
 function App() {
@@ -1763,7 +1771,7 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
                     <button onClick={() => onSeek(item.time)} className="font-medium text-text underline decoration-[#B8874A]/50 underline-offset-4 dark:text-darktext">{formatDuration(item.time)}</button>
                     <button onClick={() => onRemoveBookmark(item.id)} aria-label={`Удалить закладку ${formatDuration(item.time)}`} className="text-sm text-muted dark:text-darkmuted">Удалить</button>
                   </div>
-                  <textarea value={item.note || ''} onChange={(event) => onUpdateBookmarkNote(item.id, event.target.value)} maxLength={500} rows={2} placeholder="Добавить заметку к этому фрагменту…" aria-label={`Заметка к закладке ${formatDuration(item.time)}`} className="mt-2 w-full resize-y rounded-xl border border-black/5 bg-[#F7F9FC] px-3 py-2 text-sm text-text outline-none placeholder:text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darktext dark:placeholder:text-darkmuted" />
+                  <textarea ref={resizeNoteField} value={item.note || ''} onInput={(event) => resizeNoteField(event.currentTarget)} onChange={(event) => onUpdateBookmarkNote(item.id, event.target.value)} maxLength={500} rows={2} placeholder="Добавить заметку к этому фрагменту…" aria-label={`Заметка к закладке ${formatDuration(item.time)}`} className="mt-2 w-full resize-y rounded-xl border border-black/5 bg-[#F7F9FC] px-3 py-2 text-sm text-text outline-none placeholder:text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darktext dark:placeholder:text-darkmuted" />
                   <HandwritingPad label={`Рисунок к закладке ${formatDuration(item.time)}`} strokes={item.handwriting} onChange={(drawing) => onUpdateBookmarkDrawing(item.id, drawing)} />
                   <input value={(item.tags || []).join(', ')} onChange={(event) => onUpdateBookmarkTags(item.id, event.target.value)} placeholder="Теги через запятую: акыда, повторить" aria-label={`Теги к закладке ${formatDuration(item.time)}`} className="mt-2 w-full rounded-xl border border-black/5 bg-[#F7F9FC] px-3 py-2 text-xs text-text outline-none placeholder:text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darktext dark:placeholder:text-darkmuted" />
                   {!!item.tags?.length && <div className="mt-2 flex flex-wrap gap-1.5">{item.tags.map((tag) => <span key={tag} className="rounded-full bg-[#B8874A]/10 px-2 py-1 text-[11px] text-[#8A612E] dark:bg-[#E0821E]/10 dark:text-[#E5A35B]">#{tag}</span>)}</div>}

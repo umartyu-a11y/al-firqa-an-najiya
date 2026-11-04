@@ -20,7 +20,7 @@ export const sanitizeHandwritingStrokes = (value: unknown): HandwritingStroke[] 
     if (typeof stroke.color !== 'string' || !SAFE_COLORS.has(stroke.color.toLowerCase())) continue;
     const width = Number(stroke.width);
     const opacity = stroke.opacity === undefined ? 1 : Number(stroke.opacity);
-    if (!Number.isFinite(width) || width < 1 || width > 10 || !Number.isFinite(opacity) || opacity < 0.1 || opacity > 1) continue;
+    if (!Number.isFinite(width) || width < 1 || width > 38 || !Number.isFinite(opacity) || opacity < 0.1 || opacity > 1) continue;
 
     const coordinates = stroke.path.match(/-?\d+(?:\.\d+)?/g)?.map(Number) || [];
     let coordinatesAreValid = coordinates.length >= 2 && coordinates.length % 2 === 0;

@@ -44,7 +44,7 @@ Listening position is stored in `user_lecture_progress` per user and lecture. Du
 
 ## Player bookmarks and notes
 
-On any lecture page, use `Закладка` to save the current timestamp. Each saved marker can be opened to seek back to that point, annotated with a note up to 500 characters, or removed. A handwriting pad accepts finger, Apple Pencil/stylus and mouse input; pencil/pen strokes are stored with the bookmark in localStorage. The pad supports undoing the last stroke and clearing the drawing. Cross-device synchronization for bookmark drawings is not enabled.
+On any lecture page, use `Закладка` to save the current timestamp. Each saved marker can be opened to seek back to that point, annotated with a note up to 500 characters, or removed. Text notes expand automatically while typing and scroll inside the field when they reach half the screen height. A handwriting pad accepts finger, Apple Pencil/stylus and mouse input; strokes are mapped through the SVG screen transform to stay under the pointer. Choose a line thickness from 1 mm to 10 mm; pencil/pen strokes are stored with the bookmark in localStorage. The pad supports undoing the last stroke and clearing the drawing. Cross-device synchronization for bookmark drawings is not enabled.
 
 
 ## Exporting notes
