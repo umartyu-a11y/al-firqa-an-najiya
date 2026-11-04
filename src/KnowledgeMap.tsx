@@ -17,6 +17,7 @@ type GraphNode = {
 };
 type GraphEdge = { from: string; to: string; label: string };
 type GraphConnection = { edge: GraphEdge; node: GraphNode; direction: 'in' | 'out' };
+type TaxonomyFilter = { id: string; topicId: string; relation: 'категория каталога' | 'тег каталога'; title: string };
 type VoiceRecognitionResult = { readonly length: number; readonly isFinal: boolean; readonly [index: number]: { readonly transcript: string } };
 type VoiceRecognitionEvent = { readonly resultIndex: number; readonly results: ArrayLike<VoiceRecognitionResult> };
 type VoiceRecognitionErrorEvent = { readonly error: string };
@@ -227,6 +228,7 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
   const graph = useMemo(buildGraph, []);
   const [query, setQuery] = useState('');
   const [kindFilter, setKindFilter] = useState<'all' | NodeKind>('all');
+  const [taxonomyFilterId, setTaxonomyFilterId] = useState('');
   const [selectedId, setSelectedId] = useState('book:tri-osnovy-book');
   const [showAllConnections, setShowAllConnections] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
@@ -242,6 +244,16 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
   const nodeById = useMemo(() => new Map(graph.nodes.map((node) => [node.id, node])), [graph.nodes]);
   const selected = nodeById.get(selectedId) || graph.nodes[0];
   const voiceActive = voiceStarting || voiceListening;
+  const taxonomyFilters = useMemo<TaxonomyFilter[]>(() => {
+    const filters = graph.edges.flatMap((edge) => {
+      if (edge.label !== 'категория каталога' && edge.label !== 'тег каталога') return [];
+      const relation = edge.label as TaxonomyFilter['relation'];
+      const topic = nodeById.get(edge.to);
+      return topic ? [{ id: JSON.stringify([relation, edge.to]), topicId: edge.to, relation, title: topic.title }] : [];
+    });
+    return Array.from(new Map(filters.map((filter) => [filter.id, filter])).values())
+      .sort((a, b) => a.relation.localeCompare(b.relation, 'ru') || a.title.localeCompare(b.title, 'ru'));
+  }, [graph.edges, nodeById]);
 
   useEffect(() => {
     setVoiceSupported(Boolean(getVoiceRecognitionConstructor() && typeof navigator.mediaDevices?.getUserMedia === 'function' && getAudioContextConstructor()));
@@ -407,12 +419,30 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
 
   const searchResults = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase();
-    if (!needle) return [];
+    const selectedTaxonomy = taxonomyFilters.find((filter) => filter.id === taxonomyFilterId);
+    if (!needle && !selectedTaxonomy) return [];
+    const taxonomyNodeIds = new Set<string>();
+    if (selectedTaxonomy) {
+      taxonomyNodeIds.add(selectedTaxonomy.topicId);
+      const lectureIds = graph.edges
+        .filter((edge) => edge.to === selectedTaxonomy.topicId && edge.label === selectedTaxonomy.relation)
+        .map((edge) => edge.from);
+      lectureIds.forEach((lectureId) => {
+        taxonomyNodeIds.add(lectureId);
+        graph.edges.filter((edge) => edge.from === lectureId).forEach((edge) => {
+          taxonomyNodeIds.add(edge.to);
+          if (nodeById.get(edge.to)?.kind === 'note') {
+            graph.edges.filter((childEdge) => childEdge.from === edge.to).forEach((childEdge) => taxonomyNodeIds.add(childEdge.to));
+          }
+        });
+      });
+    }
     return graph.nodes
       .filter((node) => (kindFilter === 'all' || node.kind === kindFilter)
-        && `${node.title} ${node.description} ${node.status}`.toLocaleLowerCase().includes(needle))
+        && (!selectedTaxonomy || taxonomyNodeIds.has(node.id))
+        && (!needle || `${node.title} ${node.description} ${node.status}`.toLocaleLowerCase().includes(needle)))
       .slice(0, 12);
-  }, [graph.nodes, kindFilter, query]);
+  }, [graph.edges, graph.nodes, kindFilter, nodeById, query, taxonomyFilterId, taxonomyFilters]);
 
   const connections = useMemo<GraphConnection[]>(() => {
     if (!selected) return [];
@@ -455,8 +485,8 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
 
       <section className="panel p-5 sm:p-6" aria-labelledby="knowledge-search-heading">
         <h2 id="knowledge-search-heading" className="font-display text-2xl text-text dark:text-darktext">Найти узел карты</h2>
-        <div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_15rem]">
-          <div className="flex min-h-12 items-center gap-2 rounded-2xl border border-black/5 bg-[#F7F9FC] px-4 dark:border-white/10 dark:bg-[#161616]">
+        <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_13rem_16rem]">
+          <div className="flex min-h-12 items-center gap-2 rounded-2xl border border-black/5 bg-[#F7F9FC] px-4 dark:border-white/10 dark:bg-[#161616] md:col-span-2 lg:col-span-1">
             <Search size={17} className="shrink-0 text-muted dark:text-darkmuted" aria-hidden="true" />
             <input
               type="search"
@@ -494,13 +524,25 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
               {(Object.keys(kindLabels) as NodeKind[]).map((kind) => <option key={kind} value={kind}>{kindLabels[kind]}</option>)}
             </select>
           </label>
+          <label className="rounded-2xl border border-black/5 bg-[#F7F9FC] px-4 py-2 dark:border-white/10 dark:bg-[#161616]">
+            <span className="mb-1 block text-[10px] uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Категория или тег</span>
+            <select value={taxonomyFilterId} onChange={(event) => setTaxonomyFilterId(event.target.value)} className="w-full bg-transparent text-sm text-text outline-none dark:text-darktext" aria-label="Фильтр категории или тега">
+              <option value="">Все категории и теги</option>
+              <optgroup label="Категории">
+                {taxonomyFilters.filter((filter) => filter.relation === 'категория каталога').map((filter) => <option key={filter.id} value={filter.id}>{filter.title}</option>)}
+              </optgroup>
+              <optgroup label="Теги">
+                {taxonomyFilters.filter((filter) => filter.relation === 'тег каталога').map((filter) => <option key={filter.id} value={filter.id}>{filter.title}</option>)}
+              </optgroup>
+            </select>
+          </label>
         </div>
         <p className="mt-3 text-xs leading-5 text-muted dark:text-darkmuted" aria-live="polite">
           {voiceMessage || (!voiceSupported ? 'Голосовой поиск с измерением уровня не поддерживается этим браузером; можно искать текстом.' : 'RMS-уровень микрофона анализируется локально. Распознавание речи обрабатывает браузер и его поставщик.')}
         </p>
-        {query.trim() && (
+        {(query.trim() || taxonomyFilterId) && (
           <div className="mt-4" role="region" aria-label="Результаты поиска по карте">
-            <p className="mb-2 text-sm text-muted dark:text-darkmuted" aria-live="polite">{searchResults.length ? `Показано результатов: ${searchResults.length}${searchResults.length === 12 ? ' (первые 12)' : ''}` : 'Совпадений в доступных названиях и метаданных нет.'}</p>
+            <p className="mb-2 text-sm text-muted dark:text-darkmuted" aria-live="polite">{searchResults.length ? `Показано результатов: ${searchResults.length}${searchResults.length === 12 ? ' (первые 12)' : ''}` : 'Совпадений по заданным условиям нет.'}</p>
             {searchResults.length > 0 && <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
               {searchResults.map((node) => (
                 <button key={node.id} type="button" onClick={() => focusNode(node.id)} className={`flex min-h-14 items-center gap-3 rounded-2xl border border-black/5 p-3 text-left transition hover:border-[#B8874A]/50 dark:border-white/10 dark:hover:border-[#E0821E]/50 ${selectedId === node.id ? 'ring-2 ring-[#B8874A]/50 dark:ring-[#E0821E]/50' : ''}`} aria-current={selectedId === node.id ? 'true' : undefined}>
