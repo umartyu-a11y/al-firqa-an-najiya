@@ -7,6 +7,7 @@
     { "path": "/#/books", "title": "Книги и аудиокурсы" },
     { "path": "/#/courses", "title": "Аудиокурсы" },
     { "path": "/#/knowledge", "title": "Карта знаний" },
+    { "path": "/#/social", "title": "Сообщество" },
     { "path": "/#/cycle/necessary-questions-for-everyone", "title": "Необходимые вопросы для каждого" },
     { "path": "/#/cycle/tri-osnovy", "title": "Три основы" },
     { "path": "/#/cycle/kniga-edinobozhiya", "title": "Книга единобожия" },
