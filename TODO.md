@@ -120,3 +120,43 @@
 ### Lecture self-tests
 - [x] Keep locally created per-lecture question sets, answer selection, scoring after all answers and offline storage.
 - [ ] Cross-device test synchronization is included in the Cross-device Synchronization criteria above.
+
+## 16. Knowledge Map — первый локальный этап
+- [x] Создать отдельную интерактивную карту только на основе текущих записей книг, циклов, уроков и существующего конспекта; связывать книгу и цикл только по явному `cycleId`, цикл и урок — по `cycleId`, урок и конспект — по `lectureId`, конспект и термин/источник — только по уже существующим идентификаторам и ссылкам.
+- [x] Показывать для каждого узла тип, название, доступный источник и фактический редакционный статус; текущий конспект урока 1 остаётся помеченным как черновик, а цитируемые им сведения не представляются как независимо проверенные.
+- [x] Фильтровать и искать только по реально имеющимся названиям и метаданным; связывать уроки с темами лишь по имеющимся категориям/тегам; не придумывать главы или доказательства при отсутствии исходной записи.
+- [x] Открывать существующие маршруты уроков/циклов и указанные источники; сохранить hash-router, GitHub Pages base path, темы, единый аудиоплеер и локальные данные.
+- [x] Реализовать этап без новых backend-таблиц, cloud sync, секретов и изменения production-развёртывания.
+
+## 17. Smart Transcript
+- [ ] Publish complete transcripts only from supplied or otherwise verified recordings; split them into meaningful chapters with timestamps, audio seek links and transcript search.
+- [ ] Provide an editor workflow for corrections and preserve the transcript source, revision history and review status; do not treat automated speech recognition as a verified transcript.
+
+## 18. Research Center and source provenance
+- [ ] Add structured Quran, hadith, bibliography, Arabic-primary-source and Russian-translation records only with checkable attribution, publication/source links and editorial review status.
+- [ ] Link citations to actual lecture/note fragments and term entries; retain revision history and distinguish quoted, paraphrased, weak/uncertain and not-yet-reviewed material without inventing evidence.
+
+## 19. Smart Learning
+- [ ] Add spaced repetition, term flashcards, examinations/randomized questions, daily goals, study calendar and individual plans; published answer keys must link to reviewed source material.
+- [ ] Derive progress/statistics only from real user actions; preserve local/offline self-tests and provide reset/export controls before any cross-device sync.
+
+## 20. AI Library Assistant
+- [ ] Answer only from the available reviewed library; show citations and source quotations, link answers to specific lesson/audio timestamps, and clearly abstain when the archive has no answer.
+- [ ] Do not fabricate evidence or present generated responses as religious fatwas; do not deploy the assistant until its source-index, privacy, backend and abuse controls are reviewed.
+
+## 21. Deep Study Mode for iPad
+- [ ] Provide a focused study layout combining the player with a synchronized reviewed transcript, notes, bookmarks and linked evidence; preserve direct seek-to-fragment behavior.
+- [ ] Support adjustable reading size and full-screen reading with keyboard, touch, RTL Arabic, reduced-motion and screen-reader access.
+
+## 22. Personal Knowledge Management
+- [ ] Add personal collections, study journal, study history, note export, saved timestamp fragments and curated personal lists without inventing study activity.
+- [ ] Keep private data local by default; document backup/encryption and require per-user RLS and conflict behavior before cross-device sync.
+
+## 23. Content Quality Control and publishing
+- [ ] Provide editorial correction, citation checking, error reporting, revision history, moderation of user reports and explicit draft/reviewed/published states.
+- [ ] Enable editors/admins only through a trusted server-side role model and auditable backend; public release of religious content requires source attribution and an identified review action.
+
+## 24. Premium UX, accessibility and offline
+- [ ] Refine typography, light/dark modes, transitions, search speed, Arabic/RTL handling and responsive phone/iPad/desktop navigation while preserving current visual identity and features.
+- [ ] Validate keyboard, zoom, screen-reader, reduced-motion and device layouts; publish only checked accessibility claims.
+- [ ] Maintain free access; manage PWA version updates without losing user data, and offer offline books/audio only when rights are confirmed and storage size, download progress, errors and removal are user-controlled.

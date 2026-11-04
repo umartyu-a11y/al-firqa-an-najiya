@@ -25,6 +25,7 @@ import { bookData } from './data/books';
 import { cycleArchives } from './data/cycle-archives';
 import { cycles, lectureData, orderedCycleLectures } from './data/catalog';
 import { BooksPage, CoursesPage } from './CollectionPages';
+import { KnowledgeMap } from './KnowledgeMap';
 import { LectureNotes } from './LectureNotes';
 import type { BookmarkItem, Category, Lecture, LectureProgressEntry, QuizQuestion } from './types';
 import { isSupabaseConfigured } from './lib/supabase';
@@ -91,6 +92,7 @@ const parseHash = () => {
   if (hash.startsWith('/author/')) return 'author';
   if (hash.startsWith('/lecture/')) return 'lecture';
   if (hash.startsWith('/category/')) return 'category';
+  if (hash.startsWith('/knowledge')) return 'knowledge';
   if (hash.startsWith('/about')) return 'about';
   if (hash.startsWith('/books') || hash.startsWith('/texts') || hash.startsWith('/dictionary') || hash.startsWith('/courses')) return 'resource';
   return 'home';
@@ -143,7 +145,7 @@ function App() {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
 
-  const [route, setRoute] = useState<'home' | 'catalog' | 'library' | 'cycle' | 'author' | 'lecture' | 'category' | 'about' | 'resource'>(() => parseHash());
+  const [route, setRoute] = useState<'home' | 'catalog' | 'library' | 'cycle' | 'author' | 'lecture' | 'category' | 'knowledge' | 'about' | 'resource'>(() => parseHash());
   const [search, setSearch] = useState('');
   const [librarySearch, setLibrarySearch] = useState('');
   const [librarySearchType, setLibrarySearchType] = useState<LibrarySearchType>('all');
@@ -1004,6 +1006,8 @@ function App() {
       );
     }
 
+    if (route === 'knowledge') return <KnowledgeMap onNavigate={navigate} />;
+
     if (route === 'about') return <AboutPage />;
 
     if (route === 'resource') {
@@ -1049,6 +1053,9 @@ function App() {
               <button className="text-sm text-text/80 transition hover:text-text dark:text-darktext/80 dark:hover:text-darktext" onClick={() => navigate('/books')}>
                 Книги
               </button>
+              <button className="text-sm text-text/80 transition hover:text-text dark:text-darktext/80 dark:hover:text-darktext" onClick={() => navigate('/knowledge')}>
+                Карта знаний
+              </button>
               <button className="text-sm text-text/80 transition hover:text-text dark:text-darktext/80 dark:hover:text-darktext" onClick={() => navigate('/about')}>
                 О проекте
               </button>
@@ -1090,11 +1097,12 @@ function App() {
 
         {renderRoute()}
 
-        <nav aria-label="Быстрая навигация" className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-4 gap-1 rounded-2xl border border-black/5 bg-white/90 p-2 shadow-[0_18px_60px_rgba(17,24,32,0.14)] backdrop-blur-xl lg:hidden dark:border-white/10 dark:bg-[#101010]/90">
+        <nav aria-label="Быстрая навигация" className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 gap-1 rounded-2xl border border-black/5 bg-white/90 p-2 shadow-[0_18px_60px_rgba(17,24,32,0.14)] backdrop-blur-xl lg:hidden dark:border-white/10 dark:bg-[#101010]/90">
           {[
             { label: 'Главная', icon: <Sparkles size={16} />, path: '/' },
             { label: 'Лекции', icon: <BookOpenText size={16} />, path: '/catalog' },
             { label: 'Библиотека', icon: <Heart size={16} />, path: '/library' },
+            { label: 'Карта', icon: <Search size={16} />, path: '/knowledge' },
             { label: 'Книги', icon: <BookOpenText size={16} />, path: '/books' }
           ].map((item) => (
             <button key={item.path} onClick={() => navigate(item.path)} className="flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-medium text-muted transition hover:bg-black/5 hover:text-text dark:text-darkmuted dark:hover:bg-white/10 dark:hover:text-darktext">
@@ -1109,7 +1117,7 @@ function App() {
             <div>Исламские лекции и архив знаний</div>
           </div>
           <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs">
-            {[['Книги', '/books'], ['Тексты', '/texts'], ['Словарь', '/dictionary'], ['Курсы', '/courses'], ['О проекте', '/about']].map(([label, path]) => (
+            {[['Книги', '/books'], ['Тексты', '/texts'], ['Словарь', '/dictionary'], ['Курсы', '/courses'], ['Карта знаний', '/knowledge'], ['О проекте', '/about']].map(([label, path]) => (
               <button key={path} onClick={() => navigate(path)} className="text-muted underline-offset-4 transition hover:text-text hover:underline dark:text-darkmuted dark:hover:text-darktext">{label}</button>
             ))}
           </div>

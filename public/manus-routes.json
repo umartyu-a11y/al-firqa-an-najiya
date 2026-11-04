@@ -6,6 +6,7 @@
     { "path": "/#/author/:authorId", "title": "Автор" },
     { "path": "/#/books", "title": "Книги и аудиокурсы" },
     { "path": "/#/courses", "title": "Аудиокурсы" },
+    { "path": "/#/knowledge", "title": "Карта знаний" },
     { "path": "/#/cycle/necessary-questions-for-everyone", "title": "Необходимые вопросы для каждого" },
     { "path": "/#/cycle/tri-osnovy", "title": "Три основы" },
     { "path": "/#/lecture/:id", "title": "Лекция" },
