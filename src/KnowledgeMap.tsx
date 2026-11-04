@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowDown, ArrowUpRight, BookOpenText, FileText, Headphones, Link2, Mic, Search, Tag } from 'lucide-react';
+import { ArrowDown, ArrowUpRight, BookOpenText, FileText, Headphones, Link2, Mic, Search, Star, Tag } from 'lucide-react';
 import { bookData } from './data/books';
 import { cycles, lectureData } from './data/catalog';
 import { lectureNotesById } from './data/lectureNotes';
@@ -81,6 +81,7 @@ const kindColors: Record<NodeKind, string> = {
 
 const searchHistoryStorageKey = 'affn-knowledge-map-search-history:v1';
 const searchHistoryLimit = 8;
+const favoriteNodeStorageKey = 'affn-knowledge-map-favorites:v1';
 
 function readSearchHistory(): SearchHistoryItem[] {
   if (typeof window === 'undefined') return [];
@@ -96,6 +97,18 @@ function readSearchHistory(): SearchHistoryItem[] {
       if (typeof item.query !== 'string' || !isKnownKind || typeof item.taxonomyFilterId !== 'string') return [];
       return [{ query: item.query.slice(0, 200), kindFilter: item.kindFilter as SearchHistoryItem['kindFilter'], taxonomyFilterId: item.taxonomyFilterId }];
     }).slice(0, searchHistoryLimit);
+  } catch {
+    return [];
+  }
+}
+
+function readFavoriteNodeIds(): string[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const saved = window.localStorage.getItem(favoriteNodeStorageKey);
+    const parsed: unknown = saved ? JSON.parse(saved) : [];
+    if (!Array.isArray(parsed)) return [];
+    return Array.from(new Set(parsed.filter((id): id is string => typeof id === 'string')));
   } catch {
     return [];
   }
@@ -253,6 +266,8 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
   const [kindFilter, setKindFilter] = useState<'all' | NodeKind>('all');
   const [taxonomyFilterId, setTaxonomyFilterId] = useState('');
   const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>(readSearchHistory);
+  const [favoriteNodeIds, setFavoriteNodeIds] = useState<string[]>(readFavoriteNodeIds);
+  const [activeTab, setActiveTab] = useState<'map' | 'favorites'>('map');
   const [selectedId, setSelectedId] = useState('book:tri-osnovy-book');
   const [showAllConnections, setShowAllConnections] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
@@ -268,6 +283,12 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
   const searchHistoryTimerRef = useRef<number | null>(null);
   const nodeById = useMemo(() => new Map(graph.nodes.map((node) => [node.id, node])), [graph.nodes]);
   const selected = nodeById.get(selectedId) || graph.nodes[0];
+  const favoriteIdSet = useMemo(() => new Set(favoriteNodeIds), [favoriteNodeIds]);
+  const favoriteNodes = favoriteNodeIds.flatMap((id) => {
+    const node = nodeById.get(id);
+    return node ? [node] : [];
+  });
+  const selectedIsFavorite = Boolean(selected && favoriteIdSet.has(selected.id));
   const voiceActive = voiceStarting || voiceListening;
   const taxonomyFilters = useMemo<TaxonomyFilter[]>(() => {
     const filters = graph.edges.flatMap((edge) => {
@@ -288,6 +309,22 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
       // Search history remains usable in memory if browser storage is unavailable.
     }
   }, [searchHistory]);
+
+  useEffect(() => {
+    setFavoriteNodeIds((current) => {
+      const valid = current.filter((id) => nodeById.has(id));
+      return valid.length === current.length ? current : valid;
+    });
+  }, [nodeById]);
+
+  useEffect(() => {
+    try {
+      if (favoriteNodeIds.length) window.localStorage.setItem(favoriteNodeStorageKey, JSON.stringify(favoriteNodeIds));
+      else window.localStorage.removeItem(favoriteNodeStorageKey);
+    } catch {
+      // Favorites remain available in memory if browser storage is unavailable.
+    }
+  }, [favoriteNodeIds]);
 
   useEffect(() => {
     const normalizedQuery = query.trim();
@@ -517,6 +554,11 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
     setSelectedId(id);
     setShowAllConnections(false);
   };
+  const toggleFavorite = (id: string) => {
+    setFavoriteNodeIds((current) => current.includes(id)
+      ? current.filter((favoriteId) => favoriteId !== id)
+      : [id, ...current]);
+  };
   const restoreSearchHistory = (item: SearchHistoryItem) => {
     setQuery(item.query);
     setKindFilter(item.kindFilter);
@@ -546,6 +588,15 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
         </div>
       </section>
 
+      <div role="group" aria-label="Раздел карты знаний" className="inline-flex flex-wrap gap-1 rounded-full border border-black/5 bg-white/70 p-1 dark:border-white/10 dark:bg-[#101010]/80">
+        <button type="button" onClick={() => setActiveTab('map')} aria-pressed={activeTab === 'map'} className={`min-h-10 rounded-full px-4 py-2 text-sm font-medium transition ${activeTab === 'map' ? 'bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]' : 'text-muted hover:text-text dark:text-darkmuted dark:hover:text-darktext'}`}>Карта</button>
+        <button type="button" onClick={() => setActiveTab('favorites')} aria-pressed={activeTab === 'favorites'} className={`inline-flex min-h-10 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${activeTab === 'favorites' ? 'bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]' : 'text-muted hover:text-text dark:text-darkmuted dark:hover:text-darktext'}`}>
+          <Star size={14} aria-hidden="true" /> Избранное <span className="rounded-full bg-black/10 px-2 py-0.5 text-xs dark:bg-white/10">{favoriteNodes.length}</span>
+        </button>
+      </div>
+
+      {activeTab === 'map' ? (
+        <>
       <section className="panel p-5 sm:p-6" aria-labelledby="knowledge-search-heading">
         <h2 id="knowledge-search-heading" className="font-display text-2xl text-text dark:text-darktext">Найти узел карты</h2>
         <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_13rem_16rem]">
@@ -645,7 +696,12 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
       {selected && (
         <section className="grid items-start gap-5 xl:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.4fr)]" aria-labelledby="knowledge-network-heading">
           <article className="panel p-5 sm:p-6">
-            <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Выбранный узел</div>
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Выбранный узел</div>
+              <button type="button" onClick={() => toggleFavorite(selected.id)} aria-pressed={selectedIsFavorite} aria-label={selectedIsFavorite ? `Убрать из избранного: ${selected.title}` : `Добавить в избранное: ${selected.title}`} title={selectedIsFavorite ? 'Убрать из избранного' : 'Добавить в избранное'} className={`icon-button shrink-0 ${selectedIsFavorite ? 'text-[#B8874A] dark:text-[#E0821E]' : ''}`}>
+                <Star size={17} className={selectedIsFavorite ? 'fill-current' : ''} aria-hidden="true" />
+              </button>
+            </div>
             <div className="mt-4 flex items-start gap-3">
               <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${kindColors[selected.kind]}`}>{iconForKind(selected.kind)}</span>
               <div className="min-w-0">
@@ -695,6 +751,40 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
             )}
             {selected.kind === 'note' && selected.status.includes('Черновик') && <p className="mt-4 rounded-2xl border border-[#B8874A]/20 bg-[#B8874A]/10 p-3 text-xs leading-5 text-[#805322] dark:border-[#E0821E]/20 dark:bg-[#E0821E]/10 dark:text-[#F3B76B]">Материал черновой: ссылки и сведения показаны как записи конспекта и не обозначают независимую редакторскую проверку.</p>}
           </div>
+        </section>
+      )}
+        </>
+      ) : (
+        <section className="panel p-5 sm:p-6" aria-labelledby="knowledge-favorites-heading">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Личная подборка</div>
+              <h2 id="knowledge-favorites-heading" className="mt-1 font-display text-3xl text-text dark:text-darktext">Избранные узлы</h2>
+              <p className="mt-2 text-sm text-muted dark:text-darkmuted">Список сохраняется только в localStorage этого браузера.</p>
+            </div>
+            <span className="rounded-full border border-black/5 px-3 py-2 text-xs text-muted dark:border-white/10 dark:text-darkmuted">{formatRussianCount(favoriteNodes.length, 'узел', 'узла', 'узлов')}</span>
+          </div>
+          {favoriteNodes.length > 0 ? (
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {favoriteNodes.map((node) => (
+                <article key={node.id} className="flex min-w-0 items-center gap-2 rounded-2xl border border-black/5 bg-white/70 p-3 dark:border-white/10 dark:bg-[#141414]">
+                  <button type="button" onClick={() => { focusNode(node.id); setActiveTab('map'); }} className="flex min-h-12 min-w-0 flex-1 items-center gap-3 rounded-xl text-left focus-visible:outline-none">
+                    <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${kindColors[node.kind]}`}>{iconForKind(node.kind)}</span>
+                    <span className="min-w-0"><span className="block truncate text-sm font-medium text-text dark:text-darktext">{node.title}</span><span className="block truncate text-xs text-muted dark:text-darkmuted">{kindLabels[node.kind]} · {node.status}</span></span>
+                  </button>
+                  <button type="button" onClick={() => toggleFavorite(node.id)} aria-label={`Убрать из избранного: ${node.title}`} title="Убрать из избранного" className="icon-button h-9 w-9 shrink-0">
+                    <Star size={16} className="fill-current text-[#B8874A] dark:text-[#E0821E]" aria-hidden="true" />
+                  </button>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-5 rounded-2xl border border-dashed border-black/15 p-6 text-center dark:border-white/15">
+              <Star size={22} className="mx-auto text-muted dark:text-darkmuted" aria-hidden="true" />
+              <p className="mt-3 text-sm text-muted dark:text-darkmuted">Пока нет сохранённых узлов. Откройте карту, выберите узел и нажмите на звёздочку.</p>
+              <button type="button" onClick={() => setActiveTab('map')} className="mt-4 min-h-10 rounded-full border border-black/10 px-4 py-2 text-sm font-medium text-text dark:border-white/15 dark:text-darktext">Открыть карту</button>
+            </div>
+          )}
         </section>
       )}
 
