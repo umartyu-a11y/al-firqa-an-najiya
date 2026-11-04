@@ -18,6 +18,7 @@ type GraphNode = {
 type GraphEdge = { from: string; to: string; label: string };
 type GraphConnection = { edge: GraphEdge; node: GraphNode; direction: 'in' | 'out' };
 type TaxonomyFilter = { id: string; topicId: string; relation: 'категория каталога' | 'тег каталога'; title: string };
+type SearchHistoryItem = { query: string; kindFilter: 'all' | NodeKind; taxonomyFilterId: string };
 type VoiceRecognitionResult = { readonly length: number; readonly isFinal: boolean; readonly [index: number]: { readonly transcript: string } };
 type VoiceRecognitionEvent = { readonly resultIndex: number; readonly results: ArrayLike<VoiceRecognitionResult> };
 type VoiceRecognitionErrorEvent = { readonly error: string };
@@ -77,6 +78,28 @@ const kindColors: Record<NodeKind, string> = {
   evidence: 'bg-[#F1E7E7] text-[#704747] dark:bg-[#302222] dark:text-[#E4C4C4]',
   material: 'bg-[#E6F0EF] text-[#315854] dark:bg-[#1E302E] dark:text-[#C2DFDB]'
 };
+
+const searchHistoryStorageKey = 'affn-knowledge-map-search-history:v1';
+const searchHistoryLimit = 8;
+
+function readSearchHistory(): SearchHistoryItem[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const saved = window.localStorage.getItem(searchHistoryStorageKey);
+    const parsed: unknown = saved ? JSON.parse(saved) : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.flatMap((value): SearchHistoryItem[] => {
+      if (!value || typeof value !== 'object') return [];
+      const item = value as Partial<SearchHistoryItem>;
+      const isKnownKind = item.kindFilter === 'all'
+        || (typeof item.kindFilter === 'string' && Object.prototype.hasOwnProperty.call(kindLabels, item.kindFilter));
+      if (typeof item.query !== 'string' || !isKnownKind || typeof item.taxonomyFilterId !== 'string') return [];
+      return [{ query: item.query.slice(0, 200), kindFilter: item.kindFilter as SearchHistoryItem['kindFilter'], taxonomyFilterId: item.taxonomyFilterId }];
+    }).slice(0, searchHistoryLimit);
+  } catch {
+    return [];
+  }
+}
 
 function buildGraph() {
   const nodes: GraphNode[] = [];
@@ -229,6 +252,7 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
   const [query, setQuery] = useState('');
   const [kindFilter, setKindFilter] = useState<'all' | NodeKind>('all');
   const [taxonomyFilterId, setTaxonomyFilterId] = useState('');
+  const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>(readSearchHistory);
   const [selectedId, setSelectedId] = useState('book:tri-osnovy-book');
   const [showAllConnections, setShowAllConnections] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
@@ -241,6 +265,7 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
   const voiceAudioContextRef = useRef<AudioContext | null>(null);
   const voiceMeterFrameRef = useRef<number | null>(null);
   const voiceRequestIdRef = useRef(0);
+  const searchHistoryTimerRef = useRef<number | null>(null);
   const nodeById = useMemo(() => new Map(graph.nodes.map((node) => [node.id, node])), [graph.nodes]);
   const selected = nodeById.get(selectedId) || graph.nodes[0];
   const voiceActive = voiceStarting || voiceListening;
@@ -254,6 +279,34 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
     return Array.from(new Map(filters.map((filter) => [filter.id, filter])).values())
       .sort((a, b) => a.relation.localeCompare(b.relation, 'ru') || a.title.localeCompare(b.title, 'ru'));
   }, [graph.edges, nodeById]);
+
+  useEffect(() => {
+    try {
+      if (searchHistory.length) window.localStorage.setItem(searchHistoryStorageKey, JSON.stringify(searchHistory));
+      else window.localStorage.removeItem(searchHistoryStorageKey);
+    } catch {
+      // Search history remains usable in memory if browser storage is unavailable.
+    }
+  }, [searchHistory]);
+
+  useEffect(() => {
+    const normalizedQuery = query.trim();
+    if (!normalizedQuery && kindFilter === 'all' && !taxonomyFilterId) return;
+    const timeout = window.setTimeout(() => {
+      searchHistoryTimerRef.current = null;
+      const item: SearchHistoryItem = { query: normalizedQuery.slice(0, 200), kindFilter, taxonomyFilterId };
+      const itemKey = JSON.stringify([item.query, item.kindFilter, item.taxonomyFilterId]);
+      setSearchHistory((current) => {
+        if (current[0] && JSON.stringify([current[0].query, current[0].kindFilter, current[0].taxonomyFilterId]) === itemKey) return current;
+        return [item, ...current.filter((entry) => JSON.stringify([entry.query, entry.kindFilter, entry.taxonomyFilterId]) !== itemKey)].slice(0, searchHistoryLimit);
+      });
+    }, 600);
+    searchHistoryTimerRef.current = timeout;
+    return () => {
+      window.clearTimeout(timeout);
+      if (searchHistoryTimerRef.current === timeout) searchHistoryTimerRef.current = null;
+    };
+  }, [query, kindFilter, taxonomyFilterId]);
 
   useEffect(() => {
     setVoiceSupported(Boolean(getVoiceRecognitionConstructor() && typeof navigator.mediaDevices?.getUserMedia === 'function' && getAudioContextConstructor()));
@@ -464,6 +517,16 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
     setSelectedId(id);
     setShowAllConnections(false);
   };
+  const restoreSearchHistory = (item: SearchHistoryItem) => {
+    setQuery(item.query);
+    setKindFilter(item.kindFilter);
+    setTaxonomyFilterId(taxonomyFilters.some((filter) => filter.id === item.taxonomyFilterId) ? item.taxonomyFilterId : '');
+  };
+  const clearSearchHistory = () => {
+    if (searchHistoryTimerRef.current !== null) window.clearTimeout(searchHistoryTimerRef.current);
+    searchHistoryTimerRef.current = null;
+    setSearchHistory([]);
+  };
 
   return (
     <main className="space-y-6">
@@ -540,6 +603,30 @@ export function KnowledgeMap({ onNavigate }: { onNavigate: (path: string) => voi
         <p className="mt-3 text-xs leading-5 text-muted dark:text-darkmuted" aria-live="polite">
           {voiceMessage || (!voiceSupported ? 'Голосовой поиск с измерением уровня не поддерживается этим браузером; можно искать текстом.' : 'RMS-уровень микрофона анализируется локально. Распознавание речи обрабатывает браузер и его поставщик.')}
         </p>
+        <div className="mt-4 border-t border-black/5 pt-4 dark:border-white/10" role="region" aria-label="История поисков">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-sm font-medium text-text dark:text-darktext">Недавние поиски</h3>
+            {searchHistory.length > 0 && <button type="button" onClick={clearSearchHistory} className="text-xs text-muted underline-offset-2 hover:underline dark:text-darkmuted">Очистить историю</button>}
+          </div>
+          {searchHistory.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {searchHistory.map((item) => {
+                const taxonomy = taxonomyFilters.find((filter) => filter.id === item.taxonomyFilterId);
+                const filterSummary = [
+                  item.kindFilter === 'all' ? 'Все типы' : kindLabels[item.kindFilter],
+                  taxonomy ? `${taxonomy.relation === 'категория каталога' ? 'Категория' : 'Тег'}: ${taxonomy.title}` : item.taxonomyFilterId ? 'Старая категория или тег' : 'Все категории и теги'
+                ].join(' · ');
+                return (
+                  <button key={JSON.stringify([item.query, item.kindFilter, item.taxonomyFilterId])} type="button" onClick={() => restoreSearchHistory(item)} title={`${item.query || 'Поиск без текста'} — ${filterSummary}`} className="max-w-full rounded-xl border border-black/5 bg-[#F7F9FC] px-3 py-2 text-left transition hover:border-[#B8874A]/50 dark:border-white/10 dark:bg-[#161616] dark:hover:border-[#E0821E]/50">
+                    <span className="block max-w-64 truncate text-xs font-medium text-text dark:text-darktext">{item.query || 'Только фильтры'}</span>
+                    <span className="block max-w-64 truncate text-[10px] text-muted dark:text-darkmuted">{filterSummary}</span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : <p className="text-xs text-muted dark:text-darkmuted">Запросы и выбранные фильтры появятся здесь после поиска.</p>}
+          <p className="mt-2 text-[10px] text-muted dark:text-darkmuted">История хранится только в localStorage этого браузера. Её можно очистить в любой момент.</p>
+        </div>
         {(query.trim() || taxonomyFilterId) && (
           <div className="mt-4" role="region" aria-label="Результаты поиска по карте">
             <p className="mb-2 text-sm text-muted dark:text-darkmuted" aria-live="polite">{searchResults.length ? `Показано результатов: ${searchResults.length}${searchResults.length === 12 ? ' (первые 12)' : ''}` : 'Совпадений по заданным условиям нет.'}</p>
