@@ -27,6 +27,7 @@ import { cycles, lectureData, orderedCycleLectures } from './data/catalog';
 import { BooksPage, CoursesPage } from './CollectionPages';
 import { KnowledgeMap } from './KnowledgeMap';
 import { HandwritingPad, HandwritingPreview } from './HandwritingPad';
+import { CourseSourceText } from './CourseSourceText';
 import { LectureNotes } from './LectureNotes';
 import type { BookmarkItem, Category, HandwritingStroke, Lecture, LectureProgressEntry, QuizQuestion } from './types';
 import { isSupabaseConfigured } from './lib/supabase';
@@ -1799,6 +1800,7 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
       </section>
 
       <LectureNotes lectureId={lecture.id} onSeek={onSeek} />
+      <CourseSourceText lecture={lecture} />
 
       <section className="panel p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">

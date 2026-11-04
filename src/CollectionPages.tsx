@@ -15,7 +15,7 @@ export function BooksPage({ onOpenCycle }: { onOpenCycle: (id: string) => void }
       <section className="panel p-7 sm:p-10">
         <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Библиотека книг</div>
         <h1 className="mt-3 max-w-3xl font-display text-5xl leading-none tracking-[-0.04em] text-text dark:text-darktext">Книги и аудиокурсы</h1>
-        <p className="mt-5 max-w-2xl text-base leading-7 text-muted dark:text-darkmuted">Книги открываются по ссылкам на официальные источники. Связанные аудиоуроки собраны в последовательные учебные циклы.</p>
+        <p className="mt-5 max-w-2xl text-base leading-7 text-muted dark:text-darkmuted">В библиотеке доступна разрешённая копия PDF «Три основы» и связанные текстовые материалы. Ссылки на официальные источники сохранены, а аудиоуроки собраны в последовательные учебные циклы.</p>
       </section>
 
       <section className="space-y-4">
@@ -41,7 +41,7 @@ export function BooksPage({ onOpenCycle }: { onOpenCycle: (id: string) => void }
             );
           })}
         </div>
-        <p className="text-xs leading-5 text-muted dark:text-darkmuted">Книга и записи открываются по ссылкам на официальные источники; копии файлов на сайт не загружаются.</p>
+        <p className="text-xs leading-5 text-muted dark:text-darkmuted">PDF «Три основы» и тексты курсов размещены с разрешения правообладателя; исходные страницы указаны рядом с материалами. Аудио воспроизводится онлайн и не включается в офлайн-кэш.</p>
       </section>
 
       <section className="space-y-4">
