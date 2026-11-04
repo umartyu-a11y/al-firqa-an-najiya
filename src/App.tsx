@@ -1249,22 +1249,35 @@ function HomePage() {
       <section className="panel p-7 sm:p-9">
         <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#B8874A]/15 bg-[#B8874A]/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-[#8C5B22] dark:border-[#E0821E]/20 dark:bg-[#E0821E]/10 dark:text-[#F3B76B]">
           <Sparkles size={14} />
-          Книги и учебные циклы
+          Архив лекций и знаний
         </div>
         <h1 className="font-display text-5xl leading-none tracking-[-0.04em] text-text dark:text-darktext sm:text-6xl">
-          Циклы по книгам
+          Исламские лекции и учебные материалы
         </h1>
         <p className="mt-5 max-w-2xl text-lg text-muted dark:text-darkmuted">
-          Выберите книгу или аудиокурс — внутри собраны уроки в последовательном порядке.
+          Найдите отдельную лекцию, слушайте учебные циклы по порядку и открывайте книги с указанием источников.
         </p>
         <div className="mt-7 flex flex-wrap gap-3 text-sm text-muted dark:text-darkmuted">
           <div className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 dark:border-white/10 dark:bg-[#161616]"><BookOpenText size={16} />{bookCycles.length} циклов по книгам</div>
           <div className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 dark:border-white/10 dark:bg-[#161616]"><Headphones size={16} />{audioCycles.length} аудиоциклов</div>
           <div className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 dark:border-white/10 dark:bg-[#161616]"><BookOpenText size={16} />{totalLessons} уроков</div>
         </div>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <button onClick={() => window.location.hash = '#/courses'} className="rounded-full bg-[#111820] px-5 py-3 text-sm font-medium text-white transition hover:-translate-y-0.5 dark:bg-[#F5F5F5] dark:text-[#111820]">Все учебные циклы</button>
-          <button onClick={() => window.location.hash = '#/books'} className="rounded-full border border-black/5 bg-white px-5 py-3 text-sm font-medium text-text transition hover:-translate-y-0.5 dark:border-white/10 dark:bg-[#101010] dark:text-darktext">Все книги</button>
+        <div className="mt-8">
+          <h2 className="font-display text-2xl tracking-[-0.03em] text-text dark:text-darktext">Начните здесь</h2>
+          <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            <a href="#/catalog" className="group rounded-2xl border border-black/5 bg-white p-4 transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B8874A] dark:border-white/10 dark:bg-[#101010]">
+              <div className="flex items-center justify-between gap-3 font-medium text-text dark:text-darktext"><span>Найти лекцию</span><span aria-hidden="true" className="text-accent dark:text-darkaccent">→</span></div>
+              <p className="mt-1 text-sm text-muted dark:text-darkmuted">По названию, шейху или теме</p>
+            </a>
+            <a href="#/courses" className="group rounded-2xl border border-black/5 bg-white p-4 transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B8874A] dark:border-white/10 dark:bg-[#101010]">
+              <div className="flex items-center justify-between gap-3 font-medium text-text dark:text-darktext"><span>Учебные циклы</span><span aria-hidden="true" className="text-accent dark:text-darkaccent">→</span></div>
+              <p className="mt-1 text-sm text-muted dark:text-darkmuted">Полные серии уроков по порядку</p>
+            </a>
+            <a href="#/books" className="group rounded-2xl border border-black/5 bg-white p-4 transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B8874A] dark:border-white/10 dark:bg-[#101010]">
+              <div className="flex items-center justify-between gap-3 font-medium text-text dark:text-darktext"><span>Книги и материалы</span><span aria-hidden="true" className="text-accent dark:text-darkaccent">→</span></div>
+              <p className="mt-1 text-sm text-muted dark:text-darkmuted">Книги, доступные файлы и источники</p>
+            </a>
+          </div>
         </div>
       </section>
 
