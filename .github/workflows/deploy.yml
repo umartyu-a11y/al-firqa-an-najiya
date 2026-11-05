@@ -27,13 +27,16 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Verify Supabase build configuration
+      - name: Check optional Supabase configuration
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: |
-          test -n "$VITE_SUPABASE_URL" || { echo "Missing repository secret VITE_SUPABASE_URL"; exit 1; }
-          test -n "$VITE_SUPABASE_ANON_KEY" || { echo "Missing repository secret VITE_SUPABASE_ANON_KEY"; exit 1; }
+          if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
+            echo "::warning::Supabase is not configured; this deployment will use local-only mode."
+          else
+            echo "Supabase configuration detected."
+          fi
 
       - name: Install dependencies
         run: npm ci

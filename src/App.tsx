@@ -1086,15 +1086,16 @@ function App() {
   };
 
   const currentView = route === 'home' ? 'home' : route;
+  const currentHashPath = window.location.hash.replace(/^#/, '').split('?')[0] || '/';
 
   return (
     <div className="min-h-screen bg-background text-text transition-colors duration-300 dark:bg-darkbg dark:text-darktext">
       <div className="mx-auto max-w-[1440px] px-4 pb-[calc(20rem+env(safe-area-inset-bottom))] pt-5 sm:px-6 lg:px-8 lg:pb-32">
         {!isOnline && <div role="status" className="mb-3 rounded-2xl border border-[#B8874A]/30 bg-[#B8874A]/10 px-4 py-3 text-sm text-text dark:border-[#E0821E]/30 dark:bg-[#E0821E]/10 dark:text-darktext">Офлайн-режим: доступна ранее загруженная оболочка и каталог. Аудио и облачная синхронизация возобновятся после подключения к сети.</div>}
         <header className="sticky top-3 z-40 mb-8">
-          <div className="mx-auto flex max-w-[1280px] items-center justify-between rounded-full border border-black/5 bg-white/80 px-4 py-3 shadow-[0_8px_30px_rgba(17,24,32,0.06)] backdrop-blur-xl dark:border-white/10 dark:bg-[#101010]/85">
-            <button className="flex items-center gap-3" onClick={() => navigate('/')}>
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#111820] p-1.5 dark:bg-[#F5F5F5]">
+          <div className="mx-auto flex max-w-[1280px] items-center justify-between rounded-[28px] border border-black/5 bg-white/80 px-3 py-2.5 shadow-[0_8px_30px_rgba(17,24,32,0.06)] backdrop-blur-xl sm:rounded-full sm:px-4 sm:py-3 dark:border-white/10 dark:bg-[#101010]/85">
+            <button className="flex items-center gap-2 sm:gap-3" onClick={() => navigate('/')}>
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#111820] p-1.5 sm:h-10 sm:w-10 dark:bg-[#F5F5F5]">
                 <img src={`${import.meta.env.BASE_URL}logo-icon.png`} alt="" className="h-full w-full object-contain" />
               </div>
               <div className="text-left">
@@ -1105,7 +1106,7 @@ function App() {
               </div>
             </button>
 
-            <nav className="hidden items-center gap-5 lg:flex">
+            <nav className="hidden items-center gap-3 xl:flex 2xl:gap-4">
               <button className="text-sm text-text/80 transition hover:text-text dark:text-darktext/80 dark:hover:text-darktext" onClick={() => navigate('/catalog')}>
                 Лекции
               </button>
@@ -1130,7 +1131,7 @@ function App() {
             </nav>
 
             <div className="flex items-center gap-2">
-              <div className="hidden items-center gap-2 rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 text-sm text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darkmuted lg:flex">
+              <div className="hidden min-w-0 w-40 items-center gap-2 rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 text-sm text-muted focus-within:ring-2 focus-within:ring-[#B8874A]/60 md:flex lg:w-48 xl:w-56 dark:border-white/10 dark:bg-[#161616] dark:text-darkmuted">
                 <Search size={15} />
                 <input
                   value={search}
@@ -1140,12 +1141,12 @@ function App() {
                     if (currentView !== 'catalog') navigate('/catalog');
                   }}
                   placeholder="Найти лекцию, шейха или тему…"
-                  className="w-48 bg-transparent outline-none placeholder:text-muted dark:placeholder:text-darkmuted"
+                  className="min-w-0 w-full bg-transparent outline-none placeholder:text-muted dark:placeholder:text-darkmuted"
                 />
               </div>
 
               <button
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-black/5 bg-white text-text transition hover:-translate-y-0.5 hover:shadow-sm dark:border-white/10 dark:bg-[#101010] dark:text-darktext"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-black/5 bg-white text-text transition hover:-translate-y-0.5 hover:shadow-sm dark:border-white/10 dark:bg-[#101010] dark:text-darktext"
                 onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
                 aria-label="Переключить тему"
               >
@@ -1153,7 +1154,7 @@ function App() {
               </button>
 
               <button
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-black/5 bg-white text-text transition hover:-translate-y-0.5 hover:shadow-sm dark:border-white/10 dark:bg-[#101010] dark:text-darktext"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-black/5 bg-white text-text transition hover:-translate-y-0.5 hover:shadow-sm dark:border-white/10 dark:bg-[#101010] dark:text-darktext"
                 onClick={() => navigate('/library')}
                 aria-label="Избранное и библиотека"
               >
@@ -1165,7 +1166,7 @@ function App() {
 
         {renderRoute()}
 
-        <nav aria-label="Быстрая навигация" className="fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-40 grid grid-cols-6 gap-1 rounded-2xl border border-black/5 bg-white/90 p-2 shadow-[0_18px_60px_rgba(17,24,32,0.14)] backdrop-blur-xl lg:hidden dark:border-white/10 dark:bg-[#101010]/90">
+        <nav aria-label="Быстрая навигация" className="fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-40 grid grid-cols-6 gap-0.5 rounded-2xl border border-black/5 bg-white/90 p-1.5 shadow-[0_18px_60px_rgba(17,24,32,0.14)] backdrop-blur-xl sm:gap-1 sm:p-2 xl:hidden dark:border-white/10 dark:bg-[#101010]/90">
           {[
             { label: 'Главная', icon: <Sparkles size={16} />, path: '/' },
             { label: 'Лекции', icon: <BookOpenText size={16} />, path: '/catalog' },
@@ -1173,11 +1174,21 @@ function App() {
             { label: 'Карта', icon: <Search size={16} />, path: '/knowledge' },
             { label: 'Книги', icon: <BookOpenText size={16} />, path: '/books' },
             { label: 'Сообщество', icon: <MessageCircle size={16} />, path: '/social' }
-          ].map((item) => (
-            <button key={item.path} onClick={() => navigate(item.path)} className="flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-medium text-muted transition hover:bg-black/5 hover:text-text dark:text-darkmuted dark:hover:bg-white/10 dark:hover:text-darktext">
-              {item.icon}<span>{item.label}</span>
-            </button>
-          ))}
+          ].map((item) => {
+            const isActive = item.path === '/'
+              ? currentHashPath === '/'
+              : currentHashPath === item.path || currentHashPath.startsWith(`${item.path}/`);
+            return (
+              <button
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                aria-current={isActive ? 'page' : undefined}
+                className={`flex min-h-12 min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-0.5 text-center text-[9px] font-medium leading-tight transition sm:text-[10px] ${isActive ? 'bg-[#B8874A]/10 text-[#8C5B22] dark:bg-[#E0821E]/10 dark:text-[#F3B76B]' : 'text-muted hover:bg-black/5 hover:text-text dark:text-darkmuted dark:hover:bg-white/10 dark:hover:text-darktext'}`}
+              >
+                {item.icon}<span>{item.label}</span>
+              </button>
+            );
+          })}
         </nav>
 
         <footer className="mt-24 border-t border-black/5 pt-8 text-sm text-muted dark:border-white/10 dark:text-darkmuted">
@@ -1285,12 +1296,12 @@ function HomePage() {
 
   return (
     <main className="space-y-10">
-      <section className="panel p-7 sm:p-9">
+      <section className="panel p-5 sm:p-9">
         <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#B8874A]/15 bg-[#B8874A]/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-[#8C5B22] dark:border-[#E0821E]/20 dark:bg-[#E0821E]/10 dark:text-[#F3B76B]">
           <Sparkles size={14} />
           Архив лекций и знаний
         </div>
-        <h1 className="font-display text-5xl leading-none tracking-[-0.04em] text-text dark:text-darktext sm:text-6xl">
+        <h1 className="font-display text-4xl leading-tight tracking-[-0.04em] text-text dark:text-darktext sm:text-6xl">
           Исламские лекции и учебные материалы
         </h1>
         <p className="mt-5 max-w-2xl text-lg text-muted dark:text-darkmuted">
@@ -1321,18 +1332,18 @@ function HomePage() {
       </section>
 
       <section>
-        <div className="mb-5 flex items-end justify-between gap-4">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3 sm:gap-4">
           <div>
             <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Книга и связанный аудиокурс</div>
-            <h2 className="mt-1 font-display text-3xl tracking-[-0.04em] text-text dark:text-darktext">Учебные циклы по книгам</h2>
+            <h2 className="mt-1 font-display text-2xl tracking-[-0.04em] text-text dark:text-darktext sm:text-3xl">Учебные циклы по книгам</h2>
           </div>
           <button onClick={() => window.location.hash = '#/books'} className="shrink-0 text-sm font-medium text-accent dark:text-darkaccent">Все книги</button>
         </div>
         {bookCycles.length ? (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {bookCycles.map(({ book, cycle }) => (
-              <article key={book.id} className="panel overflow-hidden p-0">
-                <div className={`flex h-28 items-end justify-between bg-gradient-to-br ${cycle.coverTone} p-5 text-white`}>
+              <article key={book.id} className={`panel overflow-hidden p-0 ${bookCycles.length === 1 ? 'md:col-span-2 md:grid md:grid-cols-[minmax(220px,0.8fr)_minmax(0,1.2fr)] xl:col-span-2' : ''}`}>
+                <div className={`flex h-28 items-end justify-between bg-gradient-to-br ${cycle.coverTone} p-5 text-white ${bookCycles.length === 1 ? 'md:min-h-64' : ''}`}>
                   <BookOpenText size={25} />
                   <span className="text-xs font-medium uppercase tracking-[0.12em]">{book.subtitle}</span>
                 </div>
@@ -1427,29 +1438,30 @@ function CatalogPage({
   highlightQuery: string;
 }) {
   const hasActiveFilters = Boolean(search.trim()) || categoryFilter !== 'Все' || authorFilter !== 'Все' || cycleFilter !== 'Все' || sort !== 'newest';
+  const resetFilters = () => { setSearch(''); setCategoryFilter('Все'); setAuthorFilter('Все'); setCycleFilter('Все'); setSort('newest'); };
 
   return (
     <main className="space-y-6">
-      <section className="panel p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <section className="panel p-4 sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Каталог</div>
-            <h1 className="mt-2 font-display text-4xl leading-none tracking-[-0.04em] text-text dark:text-darktext">Лекции</h1>
+            <h1 className="mt-2 font-display text-3xl leading-tight tracking-[-0.04em] text-text dark:text-darktext sm:text-4xl">Лекции</h1>
           </div>
 
-          <div className="flex items-center gap-2 rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 text-sm text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darkmuted">
+          <div className="flex w-full min-w-0 items-center gap-2 rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 text-sm text-muted focus-within:ring-2 focus-within:ring-[#B8874A]/60 sm:max-w-xl dark:border-white/10 dark:bg-[#161616] dark:text-darkmuted">
             <Search size={16} />
             <input
               value={search}
               aria-label="Поиск по лекциям"
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Найти лекцию, шейха или тему…"
-              className="w-full bg-transparent outline-none placeholder:text-muted dark:placeholder:text-darkmuted md:w-72"
+              className="min-w-0 w-full bg-transparent outline-none placeholder:text-muted dark:placeholder:text-darkmuted"
             />
           </div>
         </div>
 
-        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-4 grid gap-2 sm:mt-5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
           <div className="rounded-2xl border border-black/5 bg-[#F7F9FC] p-3 dark:border-white/10 dark:bg-[#161616]">
             <label htmlFor="catalog-category" className="mb-2 block text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Категория</label>
             <select
@@ -1512,7 +1524,7 @@ function CatalogPage({
         </div>
         {hasActiveFilters && (
           <div className="mt-4 flex justify-end">
-            <button type="button" onClick={() => { setSearch(''); setCategoryFilter('Все'); setAuthorFilter('Все'); setCycleFilter('Все'); setSort('newest'); }} className="rounded-full border border-black/10 px-3 py-2 text-sm text-muted transition hover:bg-black/5 dark:border-white/10 dark:text-darkmuted dark:hover:bg-white/10">
+            <button type="button" onClick={resetFilters} className="min-h-11 rounded-full border border-black/10 px-4 py-2 text-sm text-muted transition hover:bg-black/5 dark:border-white/10 dark:text-darkmuted dark:hover:bg-white/10">
               Сбросить поиск и фильтры
             </button>
           </div>
@@ -1524,7 +1536,7 @@ function CatalogPage({
         <span>Поиск по метаданным и описаниям; аудиотранскрипты пока не индексированы.</span>
       </div>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <section className="grid gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3">
         {lectures.length ? (
           lectures.map((lecture) => (
             <LectureCard
@@ -1541,6 +1553,7 @@ function CatalogPage({
           <div className="panel col-span-full p-8 text-center">
             <div className="font-display text-2xl">Ничего не найдено</div>
             <p className="mt-2 text-sm text-muted dark:text-darkmuted">Попробуйте изменить поисковый запрос или фильтры.</p>
+            {hasActiveFilters && <button type="button" onClick={resetFilters} className="mt-5 min-h-11 rounded-full bg-[#111820] px-5 py-2.5 text-sm font-medium text-white transition hover:-translate-y-0.5 dark:bg-[#F5F5F5] dark:text-[#111820]">Сбросить фильтры</button>}
           </div>
         )}
       </section>
@@ -2074,22 +2087,22 @@ function LectureCard({ lecture, onOpen, isFavorite, onToggleFavorite, progress, 
   highlightQuery?: string;
 }) {
   return (
-    <article className="panel group p-0">
-      <div className="p-4">
+    <article className="panel group p-0 transition duration-200 hover:-translate-y-0.5">
+      <div className="p-4 sm:p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="text-[10px] uppercase tracking-[0.12em] text-muted dark:text-darkmuted"><HighlightedText text={lecture.category} query={highlightQuery || ''} /></div>
-                <h3 className="mt-2 font-display text-2xl leading-tight text-text dark:text-darktext"><button type="button" onClick={onOpen} className="text-left"><HighlightedText text={getLectureTopicTitle(lecture)} query={highlightQuery || ''} /></button></h3>
+                <h3 className="mt-2 break-words font-display text-2xl leading-tight text-text dark:text-darktext"><button type="button" onClick={onOpen} className="text-left"><HighlightedText text={getLectureTopicTitle(lecture)} query={highlightQuery || ''} /></button></h3>
           </div>
 
-          <button type="button" className="rounded-full border border-black/5 bg-white p-2 text-sm dark:border-white/10 dark:bg-[#101010]" onClick={onToggleFavorite} aria-label={isFavorite ? `Убрать из избранного: ${lecture.title}` : `Добавить в избранное: ${lecture.title}`}>
+          <button type="button" className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full border border-black/5 bg-white text-sm dark:border-white/10 dark:bg-[#101010]" onClick={onToggleFavorite} aria-label={isFavorite ? `Убрать из избранного: ${lecture.title}` : `Добавить в избранное: ${lecture.title}`}>
             <Heart size={15} fill={isFavorite ? '#B8874A' : 'none'} className={isFavorite ? 'text-[#B8874A]' : 'text-muted dark:text-darkmuted'} />
           </button>
         </div>
 
-        <div className="mt-4 flex items-center justify-between text-sm text-muted dark:text-darkmuted">
-          <span><HighlightedText text={lecture.author} query={highlightQuery || ''} /></span>
-          <span><HighlightedText text={lecture.cycle} query={highlightQuery || ''} /></span>
+        <div className="mt-4 flex flex-wrap items-start justify-between gap-x-3 gap-y-1 text-sm text-muted dark:text-darkmuted">
+          <span className="min-w-0 break-words"><HighlightedText text={lecture.author} query={highlightQuery || ''} /></span>
+          <span className="min-w-0 break-words"><HighlightedText text={lecture.cycle} query={highlightQuery || ''} /></span>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3 text-xs text-muted dark:text-darkmuted">
@@ -2111,9 +2124,9 @@ function LectureCard({ lecture, onOpen, isFavorite, onToggleFavorite, progress, 
           </div>
         )}
 
-        <div className="mt-4 flex items-center justify-between">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <span className="text-xs text-muted dark:text-darkmuted">{lecture.date}</span>
-          <button type="button" onClick={onOpen} className="inline-flex items-center gap-2 rounded-full bg-[#111820] px-3 py-2 text-sm text-white dark:bg-[#F5F5F5] dark:text-[#111820]">
+          <button type="button" onClick={onOpen} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#111820] px-4 py-2 text-sm text-white dark:bg-[#F5F5F5] dark:text-[#111820]">
             Открыть <ChevronRight size={15} />
           </button>
         </div>
