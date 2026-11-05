@@ -1096,7 +1096,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background text-text transition-colors duration-300 dark:bg-darkbg dark:text-darktext">
-      <div className="mx-auto max-w-[1440px] px-4 pb-32 pt-5 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1440px] px-4 pb-[calc(20rem+env(safe-area-inset-bottom))] pt-5 sm:px-6 lg:px-8 lg:pb-32">
         {!isOnline && <div role="status" className="mb-3 rounded-2xl border border-[#B8874A]/30 bg-[#B8874A]/10 px-4 py-3 text-sm text-text dark:border-[#E0821E]/30 dark:bg-[#E0821E]/10 dark:text-darktext">Офлайн-режим: доступна ранее загруженная оболочка и каталог. Аудио и облачная синхронизация возобновятся после подключения к сети.</div>}
         <header className="sticky top-3 z-40 mb-8">
           <div className="mx-auto flex max-w-[1280px] items-center justify-between rounded-full border border-black/5 bg-white/80 px-4 py-3 shadow-[0_8px_30px_rgba(17,24,32,0.06)] backdrop-blur-xl dark:border-white/10 dark:bg-[#101010]/85">
@@ -1172,7 +1172,7 @@ function App() {
 
         {renderRoute()}
 
-        <nav aria-label="Быстрая навигация" className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-6 gap-1 rounded-2xl border border-black/5 bg-white/90 p-2 shadow-[0_18px_60px_rgba(17,24,32,0.14)] backdrop-blur-xl lg:hidden dark:border-white/10 dark:bg-[#101010]/90">
+        <nav aria-label="Быстрая навигация" className="fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-40 grid grid-cols-6 gap-1 rounded-2xl border border-black/5 bg-white/90 p-2 shadow-[0_18px_60px_rgba(17,24,32,0.14)] backdrop-blur-xl lg:hidden dark:border-white/10 dark:bg-[#101010]/90">
           {[
             { label: 'Главная', icon: <Sparkles size={16} />, path: '/' },
             { label: 'Лекции', icon: <BookOpenText size={16} />, path: '/catalog' },
@@ -2215,7 +2215,7 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, audioStat
 
   if (collapsed) {
     return (
-      <div className="fixed bottom-32 right-3 z-50 md:bottom-3 md:right-5">
+      <div className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] right-3 z-50 lg:bottom-3 lg:right-5">
         <button onClick={() => setCollapsed(false)} aria-label="Показать аудиоплеер" title="Показать аудиоплеер" className="inline-flex min-h-12 items-center gap-2 rounded-full border border-black/5 bg-white/95 px-4 py-3 text-sm font-medium text-text shadow-[0_12px_40px_rgba(17,24,32,0.2)] backdrop-blur-xl transition hover:-translate-y-0.5 dark:border-white/10 dark:bg-[#101010]/95 dark:text-darktext">
           <ChevronUp size={17} aria-hidden="true" />
           Плеер
@@ -2226,7 +2226,7 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, audioStat
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-50 px-3 pb-3 sm:px-5"
+      className="fixed inset-x-0 bottom-[calc(6.5rem+env(safe-area-inset-bottom))] z-50 px-3 pb-3 sm:px-5 lg:bottom-0"
       onTouchStart={(event) => {
         const touch = event.touches[0];
         const target = event.target;
