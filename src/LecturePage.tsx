@@ -46,6 +46,7 @@ export function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLectur
   const [draftPrompt, setDraftPrompt] = useState('');
   const [draftOptions, setDraftOptions] = useState(['', '', '', '']);
   const [draftCorrect, setDraftCorrect] = useState(0);
+  const [sourceText, setSourceText] = useState('');
 
   useEffect(() => {
     setQuizQuestions(readQuizQuestions(lecture.id));
@@ -53,6 +54,21 @@ export function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLectur
     setQuizSubmitted(false);
     setQuizMode('take');
   }, [lecture.id]);
+
+  useEffect(() => {
+    if (lecture.cycleId !== 'sharh-as-sunna') {
+      setSourceText('');
+      return;
+    }
+    setSourceText('');
+    let isCurrent = true;
+    import('./data/sharh-as-sunna-texts').then(({ sharhAsSunnaTexts }) => {
+      if (isCurrent) setSourceText(sharhAsSunnaTexts[Number(lecture.lessonNumber)] || '');
+    }).catch(() => {
+      if (isCurrent) setSourceText('');
+    });
+    return () => { isCurrent = false; };
+  }, [lecture.cycleId, lecture.id, lecture.lessonNumber]);
 
   useEffect(() => {
     localStorage.setItem(`affn-quiz-${lecture.id}`, JSON.stringify(quizQuestions));
@@ -107,6 +123,16 @@ export function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLectur
                 </section>
               );
             })()}
+
+            {sourceText && (
+              <section className="mt-4 max-w-2xl rounded-2xl border border-black/5 bg-[#F7F9FC] p-5 dark:border-white/10 dark:bg-[#171717]" aria-labelledby="lecture-transcript-title">
+                <details>
+                  <summary id="lecture-transcript-title" className="cursor-pointer font-display text-xl text-text dark:text-darktext">Читать текст лекции</summary>
+                  <div className="mt-4 max-h-[36rem] overflow-y-auto whitespace-pre-line pr-2 text-sm leading-7 text-text dark:text-darktext">{sourceText}</div>
+                </details>
+                <a className="mt-3 inline-block text-xs underline underline-offset-4" href={lecture.sourceUrl} target="_blank" rel="noreferrer">Оригинал и источник текста: abuyahya.net</a>
+              </section>
+            )}
 
             <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-muted dark:text-darkmuted">
               <span>{lecture.author}</span>
