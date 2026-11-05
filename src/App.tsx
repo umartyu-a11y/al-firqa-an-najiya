@@ -1378,7 +1378,7 @@ function HomePage() {
                   <p className="mt-2 text-sm text-muted dark:text-darkmuted">{cycle.description}</p>
                   <div className="mt-4 flex items-center justify-between text-sm">
                     <span className="text-text dark:text-darktext">{cycle.totalLessons} уроков</span>
-                    <span className="text-muted dark:text-darkmuted">{formatDuration(cycle.totalDuration)}</span>
+                    <span className="text-muted dark:text-darkmuted">{cycle.totalDuration > 0 ? formatDuration(cycle.totalDuration) : 'Длительность не указана'}</span>
                   </div>
                 </div>
               </button>
@@ -1578,7 +1578,7 @@ function CyclePage({ cycle, lectures, favorites, onToggleFavorite, onOpenLecture
               {cycle.totalLessons} уроков
             </div>
             <div className="rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 dark:border-white/10 dark:bg-[#161616]">
-              {formatDuration(cycle.totalDuration)}
+              {cycle.totalDuration > 0 ? formatDuration(cycle.totalDuration) : 'Длительность не указана'}
             </div>
             <div className="rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 dark:border-white/10 dark:bg-[#161616]">
               Прослушано: {listenedCount}/{cycle.totalLessons}
@@ -1603,7 +1603,7 @@ function CyclePage({ cycle, lectures, favorites, onToggleFavorite, onOpenLecture
                   {lecture.title}
                 </button>
                 <div className="mt-1 text-sm text-muted dark:text-darkmuted">
-                  {lecture.category} · {formatDuration(lecture.duration)}
+                  {lecture.category} · {lecture.duration > 0 ? formatDuration(lecture.duration) : '—'}
                 </div>
               </div>
             </div>
@@ -1748,7 +1748,7 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
               <span>•</span>
               <span>{lecture.cycle}</span>
               <span>•</span>
-              <span>{formatDuration(lecture.duration)}</span>
+              <span>{lecture.duration > 0 ? formatDuration(lecture.duration) : 'Длительность не указана'}</span>
             </div>
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -1780,7 +1780,7 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
 
               <div className="space-y-2">
                 <label htmlFor="lecture-seek" className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Позиция воспроизведения</label>
-                <input id="lecture-seek" type="range" min={0} max={playerState.duration || lecture.duration} value={playerState.currentTime} onChange={(e) => onSeek(Number(e.target.value))} className="w-full accent-[#B8874A] dark:accent-[#E0821E]" />
+                <input id="lecture-seek" type="range" min={0} max={playerState.duration || lecture.duration || 1} value={playerState.currentTime} disabled={!playerState.duration && !lecture.duration} onChange={(e) => onSeek(Number(e.target.value))} className="w-full accent-[#B8874A] dark:accent-[#E0821E] disabled:opacity-50" />
               </div>
             </div>
           </div>
@@ -1793,7 +1793,7 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted dark:text-darkmuted">{playerState.currentTime ? formatDuration(playerState.currentTime) : '00:00'}</span>
             <span className="text-muted dark:text-darkmuted">/</span>
-            <span className="text-sm text-muted dark:text-darkmuted">{formatDuration(playerState.duration || lecture.duration)}</span>
+            <span className="text-sm text-muted dark:text-darkmuted">{playerState.duration || lecture.duration ? formatDuration(playerState.duration || lecture.duration) : '—'}</span>
           </div>
         </div>
 
@@ -1888,7 +1888,7 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
                   <div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Урок {cycleLecture.lessonNumber}</div>
                   <div className="mt-1 text-sm font-medium text-text dark:text-darktext">{cycleLecture.title}</div>
                 </div>
-                <div className="text-sm text-muted dark:text-darkmuted">{formatDuration(cycleLecture.duration)}</div>
+                <div className="text-sm text-muted dark:text-darkmuted">{cycleLecture.duration > 0 ? formatDuration(cycleLecture.duration) : '—'}</div>
               </button>
             ))}
           </div>
@@ -2120,12 +2120,12 @@ function LectureCard({ lecture, onOpen, isFavorite, onToggleFavorite, progress, 
 
         <div className="mt-4 grid grid-cols-2 gap-3 text-xs text-muted dark:text-darkmuted">
           <div className="flex items-center gap-1"><BookOpenText size={13} /> Урок {lecture.lessonNumber}</div>
-          <div className="flex items-center justify-end gap-1"><Clock3 size={13} /> {formatDuration(lecture.duration)}</div>
+          <div className="flex items-center justify-end gap-1"><Clock3 size={13} /> {lecture.duration > 0 ? formatDuration(lecture.duration) : '—'}</div>
         </div>
 
         <p className="mt-4 text-sm text-muted dark:text-darkmuted"><HighlightedText text={lecture.description} query={highlightQuery || ''} /></p>
 
-        {progress > 0 && (
+        {progress > 0 && lecture.duration > 0 && (
           <div className="mt-4">
             <div className="mb-1 flex items-center justify-between text-[11px] uppercase tracking-[0.12em] text-muted dark:text-darkmuted">
               <span>Прогресс</span>

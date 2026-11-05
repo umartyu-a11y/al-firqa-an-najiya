@@ -26,7 +26,7 @@ const parseBookmark = (value: unknown): BookmarkItem | null => {
   const id = value.id.trim().slice(0, 160);
   if (!id) return null;
   const lecture = lectureData.find((item) => item.id === value.lectureId);
-  if (!lecture || !Number.isFinite(value.time) || Number(value.time) < 0 || Number(value.time) > lecture.duration) return null;
+  if (!lecture || !Number.isFinite(value.time) || Number(value.time) < 0 || Number(value.time) > 86400 || (lecture.duration > 0 && Number(value.time) > lecture.duration)) return null;
   if (!validDate(value.createdAt)) return null;
 
   const tags = Array.isArray(value.tags)
@@ -82,8 +82,13 @@ export const parseLocalLibraryBackup = (text: string): LocalLibraryBackup => {
       const lecture = lectureData.find((item) => item.id === id);
       const currentTime = Number(value.currentTime);
       const duration = Number(value.duration);
-      if (!lecture || !Number.isFinite(currentTime) || !Number.isFinite(duration) || currentTime < 0 || duration < 0 || currentTime > lecture.duration + 5) return;
-      progress[id] = { currentTime: Math.min(currentTime, lecture.duration), duration: Math.min(duration, lecture.duration), updatedAt: value.updatedAt };
+      if (!lecture || !Number.isFinite(currentTime) || !Number.isFinite(duration) || currentTime < 0 || duration < 0 || currentTime > 86400 || (lecture.duration > 0 && currentTime > lecture.duration + 5)) return;
+      const durationLimit = lecture.duration > 0 ? lecture.duration : duration;
+      progress[id] = {
+        currentTime: durationLimit > 0 ? Math.min(currentTime, durationLimit) : currentTime,
+        duration: lecture.duration > 0 ? Math.min(duration, lecture.duration) : duration,
+        updatedAt: value.updatedAt
+      };
     });
   }
 

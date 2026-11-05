@@ -82,7 +82,7 @@ function CycleCollectionGrid({ onOpenCycle }: { onOpenCycle: (id: string) => voi
               <p className="mt-2 text-sm leading-6 text-muted dark:text-darkmuted">{cycle.description}</p>
               <div className="mt-4 flex items-center justify-between gap-3 text-sm">
                 <span className="text-text dark:text-darktext">{lessons.length} уроков</span>
-                <span className="text-muted dark:text-darkmuted">{formatDuration(lessons.reduce((sum, lecture) => sum + lecture.duration, 0))}</span>
+                <span className="text-muted dark:text-darkmuted">{lessons.every((lecture) => lecture.duration > 0) ? formatDuration(lessons.reduce((sum, lecture) => sum + lecture.duration, 0)) : 'Длительность уточняется'}</span>
               </div>
               <div className="mt-4 text-sm font-medium text-[#8C5B22] dark:text-[#F3B76B]">Открыть цикл →</div>
             </div>
