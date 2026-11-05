@@ -1033,19 +1033,9 @@ function App() {
           favorites={favorites}
           onToggleFavorite={toggleFavorite}
           onOpenLecture={handleOpenLecture}
-          currentLectureId={currentLectureId}
-          setCurrentLectureId={setCurrentLectureId}
           playerState={playerState}
-          setPlayerState={setPlayerState}
-          audioRef={audioRef}
-          prevLecture={prevLecture}
-          nextLecture={nextLecture}
           onSeek={handleSeek}
           onTogglePlay={handleTogglePlay}
-          handleTimeUpdate={handleTimeUpdate}
-          handleLoadedMetadata={handleLoadedMetadata}
-          handleEnded={handleEnded}
-          getProgress={getAudioProgress}
           bookmarks={bookmarks.filter((item) => item.lectureId === lecture.id)}
           onAddBookmark={addBookmark}
           onRemoveBookmark={removeBookmark}
@@ -1685,24 +1675,14 @@ function AuthorPage({ author, lectures, favorites, onToggleFavorite, onOpenLectu
   );
 }
 
-function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, currentLectureId, setCurrentLectureId, playerState, setPlayerState, audioRef, prevLecture, nextLecture, onSeek, onTogglePlay, handleTimeUpdate, handleLoadedMetadata, handleEnded, getProgress, bookmarks, onAddBookmark, onRemoveBookmark, onUpdateBookmarkNote, onUpdateBookmarkDrawing, onUpdateBookmarkTags, onExportText, onExportPdf, repeatSegment, onSetRepeatPoint, onClearRepeat, repeatLesson, onToggleRepeatLesson }: {
+function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, playerState, onSeek, onTogglePlay, bookmarks, onAddBookmark, onRemoveBookmark, onUpdateBookmarkNote, onUpdateBookmarkDrawing, onUpdateBookmarkTags, onExportText, onExportPdf, repeatSegment, onSetRepeatPoint, onClearRepeat, repeatLesson, onToggleRepeatLesson }: {
   lecture: Lecture;
   favorites: string[];
   onToggleFavorite: (id: string) => void;
   onOpenLecture: (id: string) => void;
-  currentLectureId: string | null;
-  setCurrentLectureId: (id: string) => void;
-  playerState: { isPlaying: boolean; currentTime: number; duration: number; rate: number; sleepMinutes: number };
-  setPlayerState: Dispatch<SetStateAction<{ isPlaying: boolean; currentTime: number; duration: number; rate: number; sleepMinutes: number; volume: number }>>;
-  audioRef: RefObject<HTMLAudioElement>;
-  prevLecture: () => void;
-  nextLecture: () => void;
+  playerState: { isPlaying: boolean; currentTime: number };
   onSeek: (value: number) => void;
   onTogglePlay: () => void;
-  handleTimeUpdate: () => void;
-  handleLoadedMetadata: () => void;
-  handleEnded: () => void;
-  getProgress: (id: string) => number;
   bookmarks: BookmarkItem[];
   onAddBookmark: () => void;
   onRemoveBookmark: (id: string) => void;
@@ -1718,7 +1698,6 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
   onToggleRepeatLesson: () => void;
 }) {
   const cycleLectures = lectureData.filter((item) => item.cycleId === lecture.cycleId);
-  const progress = getProgress(lecture.id);
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>(() => readQuizQuestions(lecture.id));
   const [quizMode, setQuizMode] = useState<'take' | 'create'>('take');
   const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
@@ -1753,7 +1732,7 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
   return (
     <main className="space-y-6">
       <section className="panel p-6">
-        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        <div className="max-w-4xl">
           <div>
             <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">{lecture.category}</div>
             <h1 className="mt-3 font-display text-4xl tracking-[-0.04em] text-text dark:text-darktext">{getLectureTopicTitle(lecture)}</h1>
@@ -1811,64 +1790,12 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-black/5 bg-[#F7F9FC] p-4 dark:border-white/10 dark:bg-[#171717]">
-            <div className="mb-4 flex items-center justify-between text-sm text-muted dark:text-darkmuted">
-              <span>Состояние</span>
-              <span>{progress > 10 ? 'Возобновить' : 'Начать'}</span>
-            </div>
-
-            <div className="space-y-4">
-              <div className="rounded-2xl border border-black/5 bg-white p-3 dark:border-white/10 dark:bg-[#101010]">
-                <div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Позиция</div>
-                <div className="mt-1 font-display text-3xl text-text dark:text-darktext">{formatDuration(playerState.currentTime)}</div>
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="lecture-seek" className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Позиция воспроизведения</label>
-                <input id="lecture-seek" type="range" min={0} max={playerState.duration || lecture.duration || 1} value={playerState.currentTime} disabled={!playerState.duration && !lecture.duration} onChange={(e) => onSeek(Number(e.target.value))} className="w-full accent-[#B8874A] dark:accent-[#E0821E] disabled:opacity-50" />
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
       <section className="panel p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <div className="text-sm uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Плеер</div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted dark:text-darkmuted">{playerState.currentTime ? formatDuration(playerState.currentTime) : '00:00'}</span>
-            <span className="text-muted dark:text-darkmuted">/</span>
-            <span className="text-sm text-muted dark:text-darkmuted">{playerState.duration || lecture.duration ? formatDuration(playerState.duration || lecture.duration) : '—'}</span>
-          </div>
-        </div>
-
-        <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => onSeek(offsetPlaybackTime(playerState.currentTime, playerState.duration || lecture.duration, -10))} aria-label="Перемотать назад на 10 секунд" title="Назад на 10 секунд" className="inline-flex h-10 min-w-14 items-center justify-center rounded-full border border-black/5 bg-[#F7F9FC] px-3 text-xs font-semibold text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext">−10с</button>
-            <button onClick={prevLecture} className="icon-button"><SkipBack size={18} /></button>
-            <button onClick={onTogglePlay} className="icon-button bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]">{playerState.isPlaying ? <Pause size={18} /> : <Play size={18} />}</button>
-            <button onClick={nextLecture} className="icon-button"><SkipForward size={18} /></button>
-            <button type="button" onClick={() => onSeek(offsetPlaybackTime(playerState.currentTime, playerState.duration || lecture.duration, 10))} aria-label="Перемотать вперёд на 10 секунд" title="Вперёд на 10 секунд" className="inline-flex h-10 min-w-14 items-center justify-center rounded-full border border-black/5 bg-[#F7F9FC] px-3 text-xs font-semibold text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext">+10с</button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {[0.5, 0.75, 1, 1.25, 1.5, 2].map((rate) => (
-              <button key={rate} onClick={() => setPlayerState((prev) => ({ ...prev, rate }))} className={`rounded-full px-3 py-1.5 text-sm ${playerState.rate === rate ? 'bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]' : 'bg-[#F7F9FC] text-text dark:bg-[#161616] dark:text-darktext'}`}>
-                {rate}x
-              </button>
-            ))}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            {[15, 30, 45, 60].map((minutes) => (
-              <button key={minutes} aria-label={`Таймер сна ${minutes} минут`} onClick={() => setPlayerState((prev) => ({ ...prev, sleepMinutes: prev.sleepMinutes === minutes ? 0 : minutes }))} className={`rounded-full px-3 py-1.5 text-sm ${playerState.sleepMinutes === minutes ? 'bg-[#B8874A] text-white dark:bg-[#E0821E]' : 'bg-[#F7F9FC] text-text dark:bg-[#161616] dark:text-darktext'}`}>
-                {minutes}м
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-black/5 pt-4 dark:border-white/10">
+        <h2 className="text-sm uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Закладки и повторы</h2>
+        <div className="mt-4 flex flex-wrap items-center gap-2">
           <button onClick={onAddBookmark} className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 text-sm text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext"><Bookmark size={15} /> Закладка на {formatDuration(playerState.currentTime)}</button>
           <button onClick={onSetRepeatPoint} className={`rounded-full px-3 py-2 text-sm ${repeatSegment.start !== null && repeatSegment.end === null ? 'bg-[#B8874A] text-white dark:bg-[#E0821E]' : 'border border-black/5 bg-[#F7F9FC] text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext'}`}>A: {repeatSegment.start === null ? '—' : formatDuration(repeatSegment.start)}</button>
           <button onClick={onSetRepeatPoint} disabled={repeatSegment.start === null} className={`rounded-full px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40 ${repeatSegment.active ? 'bg-[#B8874A] text-white dark:bg-[#E0821E]' : 'border border-black/5 bg-[#F7F9FC] text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext'}`}>B: {repeatSegment.end === null ? '—' : formatDuration(repeatSegment.end)}</button>
