@@ -18,7 +18,7 @@ import {
   toggleSocialReaction
 } from './lib/social';
 import type { SocialComment, SocialModerationQueue, SocialPost, SocialProfile, SocialPublicProfile, SocialReportReason, SocialReportTarget } from './lib/social';
-import { isSupabaseConfigured } from './lib/supabase';
+import { isSupabaseConfigured } from './lib/supabaseConfig';
 
 const reportReasons: Array<{ value: SocialReportReason; label: string }> = [
   { value: 'spam', label: 'Спам или реклама' },

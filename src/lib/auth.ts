@@ -1,22 +1,49 @@
 import type { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
-import { isSupabaseConfigured, supabase } from './supabase';
+import { isSupabaseConfigured } from './supabaseConfig';
 
 export type AuthListener = (event: AuthChangeEvent, session: Session | null) => void;
 
+async function getConfiguredClient() {
+  if (!isSupabaseConfigured) return null;
+  try {
+    const { supabase } = await import('./supabase');
+    return supabase;
+  } catch (error) {
+    console.warn('Supabase auth module could not be loaded.', error);
+    return null;
+  }
+}
+
 export async function getAuthSession() {
-  if (!supabase || !isSupabaseConfigured) return null;
+  const supabase = await getConfiguredClient();
+  if (!supabase) return null;
   const { data } = await supabase.auth.getSession();
   return data.session;
 }
 
 export function subscribeToAuth(listener: AuthListener) {
-  if (!supabase || !isSupabaseConfigured) return () => undefined;
-  const { data } = supabase.auth.onAuthStateChange(listener);
-  return () => data.subscription.unsubscribe();
+  if (!isSupabaseConfigured) return () => undefined;
+
+  let cancelled = false;
+  let unsubscribe: (() => void) | null = null;
+
+  void getConfiguredClient()
+    .then((supabase) => {
+      if (!supabase || cancelled) return;
+      const { data } = supabase.auth.onAuthStateChange(listener);
+      unsubscribe = () => data.subscription.unsubscribe();
+    })
+    .catch((error) => console.warn('Supabase auth could not be loaded.', error));
+
+  return () => {
+    cancelled = true;
+    unsubscribe?.();
+  };
 }
 
 export async function requestPersistentAccess(email: string) {
-  if (!supabase || !isSupabaseConfigured) return { error: 'Supabase не настроен.' };
+  const supabase = await getConfiguredClient();
+  if (!supabase) return { error: 'Supabase не настроен.' };
 
   const normalizedEmail = email.trim().toLowerCase();
   if (!normalizedEmail || !normalizedEmail.includes('@')) return { error: 'Введите корректный email.' };
@@ -39,6 +66,7 @@ export async function requestPersistentAccess(email: string) {
 }
 
 export async function signOutUser() {
-  if (!supabase || !isSupabaseConfigured) return;
+  const supabase = await getConfiguredClient();
+  if (!supabase) return;
   await supabase.auth.signOut();
 }

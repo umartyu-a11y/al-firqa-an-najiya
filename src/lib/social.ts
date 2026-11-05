@@ -1,4 +1,4 @@
-import { isSupabaseConfigured, supabase } from './supabase';
+import { isSupabaseConfigured } from './supabaseConfig';
 
 export type SocialProfileStatus = 'pending' | 'approved' | 'rejected';
 
@@ -57,8 +57,10 @@ export type SocialModerationQueue = {
 export type SocialReportTarget = 'post' | 'comment' | 'profile';
 export type SocialReportReason = 'spam' | 'abuse' | 'unverified_religious_claim' | 'privacy' | 'other';
 
-function getClient() {
-  if (!isSupabaseConfigured || !supabase) throw new Error('SOCIAL_BACKEND_UNAVAILABLE');
+async function getClient() {
+  if (!isSupabaseConfigured) throw new Error('SOCIAL_BACKEND_UNAVAILABLE');
+  const { supabase } = await import('./supabase');
+  if (!supabase) throw new Error('SOCIAL_BACKEND_UNAVAILABLE');
   return supabase;
 }
 
@@ -67,7 +69,7 @@ function ensureSuccess(error: unknown) {
 }
 
 export async function loadPublicSocialFeed(): Promise<SocialPost[]> {
-  const client = getClient();
+  const client = await getClient();
   const { data, error } = await client
     .from('social_public_feed')
     .select('id, body, created_at, author_handle, author_name, reaction_count, comment_count')
@@ -78,7 +80,7 @@ export async function loadPublicSocialFeed(): Promise<SocialPost[]> {
 }
 
 export async function loadPublicSocialProfiles(): Promise<SocialPublicProfile[]> {
-  const client = getClient();
+  const client = await getClient();
   const { data, error } = await client
     .from('social_public_profiles')
     .select('handle, display_name, bio, created_at')
@@ -89,7 +91,7 @@ export async function loadPublicSocialProfiles(): Promise<SocialPublicProfile[]>
 }
 
 export async function loadMySocialProfile(userId: string): Promise<SocialProfile | null> {
-  const client = getClient();
+  const client = await getClient();
   const { data, error } = await client
     .from('social_profiles')
     .select('user_id, handle, display_name, bio, status, created_at, updated_at')
@@ -100,7 +102,7 @@ export async function loadMySocialProfile(userId: string): Promise<SocialProfile
 }
 
 export async function loadMySocialReactions(userId: string): Promise<string[]> {
-  const client = getClient();
+  const client = await getClient();
   const { data, error } = await client
     .from('social_reactions')
     .select('post_id')
@@ -110,7 +112,7 @@ export async function loadMySocialReactions(userId: string): Promise<string[]> {
 }
 
 export async function loadPublicSocialComments(postId: string): Promise<SocialComment[]> {
-  const client = getClient();
+  const client = await getClient();
   const { data, error } = await client
     .from('social_public_comments')
     .select('id, post_id, body, created_at, author_handle, author_name')
@@ -122,7 +124,7 @@ export async function loadPublicSocialComments(postId: string): Promise<SocialCo
 }
 
 export async function submitSocialProfile(input: { handle: string; displayName: string; bio: string }): Promise<SocialProfile> {
-  const client = getClient();
+  const client = await getClient();
   const { data, error } = await client.rpc('social_submit_profile', {
     p_handle: input.handle,
     p_display_name: input.displayName,
@@ -133,21 +135,21 @@ export async function submitSocialProfile(input: { handle: string; displayName: 
 }
 
 export async function submitSocialPost(body: string): Promise<string> {
-  const client = getClient();
+  const client = await getClient();
   const { data, error } = await client.rpc('social_submit_post', { p_body: body });
   ensureSuccess(error);
   return data as string;
 }
 
 export async function submitSocialComment(postId: string, body: string): Promise<string> {
-  const client = getClient();
+  const client = await getClient();
   const { data, error } = await client.rpc('social_submit_comment', { p_post_id: postId, p_body: body });
   ensureSuccess(error);
   return data as string;
 }
 
 export async function toggleSocialReaction(postId: string): Promise<boolean> {
-  const client = getClient();
+  const client = await getClient();
   const { data, error } = await client.rpc('social_toggle_reaction', { p_post_id: postId });
   ensureSuccess(error);
   return Boolean(data);
@@ -159,7 +161,7 @@ export async function submitSocialReport(input: {
   reason: SocialReportReason;
   details: string;
 }): Promise<string> {
-  const client = getClient();
+  const client = await getClient();
   if (input.targetType === 'profile') {
     const { data, error } = await client.rpc('social_submit_profile_report', {
       p_handle: input.targetId,
@@ -180,14 +182,14 @@ export async function submitSocialReport(input: {
 }
 
 export async function isSocialModerator(): Promise<boolean> {
-  const client = getClient();
+  const client = await getClient();
   const { data, error } = await client.rpc('is_social_moderator');
   ensureSuccess(error);
   return Boolean(data);
 }
 
 export async function loadSocialModerationQueue(): Promise<SocialModerationQueue> {
-  const client = getClient();
+  const client = await getClient();
   const [profiles, posts, comments, reports] = await Promise.all([
     client.from('social_profiles').select('user_id, handle, display_name, bio, created_at').eq('status', 'pending').order('created_at').limit(50),
     client.from('social_posts').select('id, author_id, body, created_at').eq('status', 'pending').order('created_at').limit(50),
@@ -208,7 +210,7 @@ export async function moderateSocialItem(
   id: string,
   status: 'approved' | 'hidden' | 'resolved' | 'dismissed'
 ): Promise<void> {
-  const client = getClient();
+  const client = await getClient();
   const persistedStatus = status === 'hidden' ? 'rejected' : status === 'resolved' ? 'reviewed' : status;
   const rpcName = type === 'profile'
     ? 'moderate_social_profile'
