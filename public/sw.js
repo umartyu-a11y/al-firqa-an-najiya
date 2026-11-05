@@ -1,4 +1,4 @@
-const VERSION = 'affn-offline-v2';
+const VERSION = 'affn-offline-v3';
 const STATIC_CACHE = `${VERSION}-static`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 const APP_SHELL = [
