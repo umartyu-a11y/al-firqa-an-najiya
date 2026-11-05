@@ -1744,12 +1744,12 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, play
 
   return (
     <main className="space-y-6">
-      <section className="panel p-6">
+      <section className="panel p-4 sm:p-6">
         <div className="max-w-4xl">
           <div>
             <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">{lecture.category}</div>
-            <h1 className="mt-3 font-display text-4xl tracking-[-0.04em] text-text dark:text-darktext">{getLectureTopicTitle(lecture)}</h1>
-            <p className="mt-4 max-w-2xl text-base text-muted dark:text-darkmuted">{lecture.description}</p>
+            <h1 className="mt-3 break-words font-display text-3xl leading-tight tracking-[-0.04em] text-text dark:text-darktext sm:text-4xl">{getLectureTopicTitle(lecture)}</h1>
+            <p className="mt-4 max-w-2xl text-sm leading-6 text-muted dark:text-darkmuted sm:text-base sm:leading-7">{lecture.description}</p>
 
             {(() => {
               const entry = lectureOutlines[lecture.id];
@@ -1806,23 +1806,23 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, play
         </div>
       </section>
 
-      <section className="panel p-5">
+      <section className="panel p-4 sm:p-5">
         <h2 className="text-sm uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Закладки и повторы</h2>
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          <button onClick={onAddBookmark} className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 text-sm text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext"><Bookmark size={15} /> Закладка на {formatDuration(playerState.currentTime)}</button>
-          <button onClick={onSetRepeatPoint} className={`rounded-full px-3 py-2 text-sm ${repeatSegment.start !== null && repeatSegment.end === null ? 'bg-[#B8874A] text-white dark:bg-[#E0821E]' : 'border border-black/5 bg-[#F7F9FC] text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext'}`}>A: {repeatSegment.start === null ? '—' : formatDuration(repeatSegment.start)}</button>
-          <button onClick={onSetRepeatPoint} disabled={repeatSegment.start === null} className={`rounded-full px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40 ${repeatSegment.active ? 'bg-[#B8874A] text-white dark:bg-[#E0821E]' : 'border border-black/5 bg-[#F7F9FC] text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext'}`}>B: {repeatSegment.end === null ? '—' : formatDuration(repeatSegment.end)}</button>
-          {(repeatSegment.start !== null || repeatSegment.end !== null) && <button onClick={onClearRepeat} className="rounded-full px-3 py-2 text-sm text-muted underline underline-offset-4 dark:text-darkmuted">Сбросить A–B</button>}
-          <button onClick={onToggleRepeatLesson} className={`rounded-full px-3 py-2 text-sm ${repeatLesson ? 'bg-[#B8874A] text-white dark:bg-[#E0821E]' : 'border border-black/5 bg-[#F7F9FC] text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext'}`}>Повтор урока</button>
+          <button onClick={onAddBookmark} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 text-sm text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext"><Bookmark size={15} /> Закладка на {formatDuration(playerState.currentTime)}</button>
+          <button onClick={onSetRepeatPoint} className={`inline-flex min-h-11 items-center rounded-full px-3 py-2 text-sm ${repeatSegment.start !== null && repeatSegment.end === null ? 'bg-[#B8874A] text-white dark:bg-[#E0821E]' : 'border border-black/5 bg-[#F7F9FC] text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext'}`}>A: {repeatSegment.start === null ? '—' : formatDuration(repeatSegment.start)}</button>
+          <button onClick={onSetRepeatPoint} disabled={repeatSegment.start === null} className={`inline-flex min-h-11 items-center rounded-full px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40 ${repeatSegment.active ? 'bg-[#B8874A] text-white dark:bg-[#E0821E]' : 'border border-black/5 bg-[#F7F9FC] text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext'}`}>B: {repeatSegment.end === null ? '—' : formatDuration(repeatSegment.end)}</button>
+          {(repeatSegment.start !== null || repeatSegment.end !== null) && <button onClick={onClearRepeat} className="inline-flex min-h-11 items-center rounded-full px-3 py-2 text-sm text-muted underline underline-offset-4 dark:text-darkmuted">Сбросить A–B</button>}
+          <button onClick={onToggleRepeatLesson} className={`inline-flex min-h-11 items-center rounded-full px-3 py-2 text-sm ${repeatLesson ? 'bg-[#B8874A] text-white dark:bg-[#E0821E]' : 'border border-black/5 bg-[#F7F9FC] text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext'}`}>Повтор урока</button>
         </div>
 
         {bookmarks.length > 0 && (
           <div className="mt-4 rounded-2xl border border-black/5 bg-[#F7F9FC] p-4 dark:border-white/10 dark:bg-[#161616]">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
               <div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Закладки этой лекции</div>
               <div className="flex items-center gap-2">
-                <button onClick={() => onExportText(bookmarks)} className="inline-flex items-center gap-1 rounded-full border border-black/5 px-2.5 py-1.5 text-xs text-muted dark:border-white/10 dark:text-darkmuted"><Download size={13} /> TXT</button>
-                <button onClick={() => onExportPdf(bookmarks)} className="inline-flex items-center gap-1 rounded-full border border-black/5 px-2.5 py-1.5 text-xs text-muted dark:border-white/10 dark:text-darkmuted"><Printer size={13} /> PDF</button>
+                <button onClick={() => onExportText(bookmarks)} className="inline-flex min-h-11 items-center gap-1 rounded-full border border-black/5 px-3 py-2 text-xs text-muted dark:border-white/10 dark:text-darkmuted"><Download size={13} /> TXT</button>
+                <button onClick={() => onExportPdf(bookmarks)} className="inline-flex min-h-11 items-center gap-1 rounded-full border border-black/5 px-3 py-2 text-xs text-muted dark:border-white/10 dark:text-darkmuted"><Printer size={13} /> PDF</button>
               </div>
             </div>
             <div className="space-y-3">
@@ -1830,7 +1830,7 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, play
                 <div key={item.id} className="rounded-2xl border border-black/5 bg-white p-3 dark:border-white/10 dark:bg-[#101010]">
                   <div className="flex items-center justify-between gap-3">
                     <button onClick={() => onSeek(item.time)} className="font-medium text-text underline decoration-[#B8874A]/50 underline-offset-4 dark:text-darktext">{formatDuration(item.time)}</button>
-                    <button onClick={() => onRemoveBookmark(item.id)} aria-label={`Удалить закладку ${formatDuration(item.time)}`} className="text-sm text-muted dark:text-darkmuted">Удалить</button>
+                    <button onClick={() => onRemoveBookmark(item.id)} aria-label={`Удалить закладку ${formatDuration(item.time)}`} className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-black/5 px-3 text-sm text-muted dark:border-white/10 dark:text-darkmuted">Удалить</button>
                   </div>
                   <textarea ref={resizeNoteField} value={item.note || ''} onInput={(event) => resizeNoteField(event.currentTarget)} onChange={(event) => onUpdateBookmarkNote(item.id, event.target.value)} maxLength={500} rows={2} placeholder="Добавить заметку к этому фрагменту…" aria-label={`Заметка к закладке ${formatDuration(item.time)}`} className="mt-2 w-full resize-y rounded-xl border border-black/5 bg-[#F7F9FC] px-3 py-2 text-sm text-text outline-none placeholder:text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darktext dark:placeholder:text-darkmuted" />
                   <HandwritingPad label={`Рисунок к закладке ${formatDuration(item.time)}`} strokes={item.handwriting} onChange={(drawing) => onUpdateBookmarkDrawing(item.id, drawing)} />
@@ -1848,8 +1848,8 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, play
 
       <section className="panel p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div><div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Самопроверка</div><h2 className="mt-2 font-display text-3xl tracking-[-0.04em] text-text dark:text-darktext">Тест по лекции</h2><p className="mt-2 text-sm leading-6 text-muted dark:text-darkmuted">Создайте вопросы по материалу лекции и пройдите их позже без подключения к сети.</p></div>
-          <div className="flex shrink-0 gap-2"><button onClick={() => { setQuizMode('take'); setQuizSubmitted(false); }} className={`rounded-full px-3 py-2 text-xs ${quizMode === 'take' ? 'bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]' : 'border border-black/5 text-muted dark:border-white/10 dark:text-darkmuted'}`}>Пройти</button><button onClick={() => setQuizMode('create')} className={`rounded-full px-3 py-2 text-xs ${quizMode === 'create' ? 'bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]' : 'border border-black/5 text-muted dark:border-white/10 dark:text-darkmuted'}`}>Создать</button></div>
+          <div><div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Самопроверка</div><h2 className="mt-2 font-display text-2xl leading-tight tracking-[-0.04em] text-text dark:text-darktext sm:text-3xl">Тест по лекции</h2><p className="mt-2 text-sm leading-6 text-muted dark:text-darkmuted">Создайте вопросы по материалу лекции и пройдите их позже без подключения к сети.</p></div>
+          <div className="flex shrink-0 gap-2"><button onClick={() => { setQuizMode('take'); setQuizSubmitted(false); }} className={`inline-flex min-h-11 items-center rounded-full px-3 py-2 text-xs ${quizMode === 'take' ? 'bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]' : 'border border-black/5 text-muted dark:border-white/10 dark:text-darkmuted'}`}>Пройти</button><button onClick={() => setQuizMode('create')} className={`inline-flex min-h-11 items-center rounded-full px-3 py-2 text-xs ${quizMode === 'create' ? 'bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]' : 'border border-black/5 text-muted dark:border-white/10 dark:text-darkmuted'}`}>Создать</button></div>
         </div>
 
         {quizMode === 'create' ? (
@@ -1979,20 +1979,21 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
 
   return (
     <main className="space-y-6">
-      <section className="panel p-6">
+      <section className="panel p-4 sm:p-6">
         <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">Личный раздел</div>
-        <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <h1 className="font-display text-4xl tracking-[-0.04em] text-text dark:text-darktext">Панель обучения</h1>
+        <div className="mt-2 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <h1 className="break-words font-display text-3xl leading-tight tracking-[-0.04em] text-text dark:text-darktext sm:text-4xl">Панель обучения</h1>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex w-fit items-center rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-1.5 text-xs text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darkmuted">{dashboard.storage.label}</span>
-            {authSession?.user.email ? <button onClick={onSignOut} className="rounded-full border border-black/5 px-3 py-1.5 text-xs text-muted dark:border-white/10 dark:text-darkmuted">Выйти</button> : <button onClick={onOpenAuth} disabled={!cloudEnabled} className="rounded-full bg-[#111820] px-3 py-1.5 text-xs text-white disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#F5F5F5] dark:text-[#111820]">Сохранить в облако</button>}
+            <span className="inline-flex min-h-11 w-fit items-center rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 text-xs text-muted dark:border-white/10 dark:bg-[#161616] dark:text-darkmuted">{dashboard.storage.label}</span>
+            {!cloudEnabled && <span className="max-w-xs text-xs leading-5 text-muted dark:text-darkmuted">Данные остаются на этом устройстве; облачная синхронизация пока недоступна.</span>}
+            {authSession?.user.email ? <button onClick={onSignOut} className="inline-flex min-h-11 items-center rounded-full border border-black/5 px-3 py-2 text-xs text-muted dark:border-white/10 dark:text-darkmuted">Выйти</button> : <button onClick={onOpenAuth} disabled={!cloudEnabled} title={!cloudEnabled ? "Облачная синхронизация недоступна: Supabase не настроен." : undefined} className="inline-flex min-h-11 items-center rounded-full bg-[#111820] px-4 py-2 text-xs text-white disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#F5F5F5] dark:text-[#111820]">Сохранить в облако</button>}
           </div>
         </div>
       </section>
 
       <LearningDashboard snapshot={dashboard} onOpenLecture={onOpenLecture} onOpenCatalog={onOpenCatalog} onShowFavorites={onShowFavorites} onShowBookmarks={onShowBookmarks} />
 
-      <section className="panel space-y-5 p-5">
+      <section className="panel space-y-5 p-4 sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-sm font-medium text-text dark:text-darktext">Резервная копия на устройстве</h2>
@@ -2000,8 +2001,8 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
             <p className="mt-2 text-xs leading-5 text-muted dark:text-darkmuted">Файл содержит личные заметки в незашифрованном виде — храните его приватно. Максимальный размер импорта: 5 MiB.</p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
-            <button type="button" onClick={onExportBackup} className="rounded-full bg-[#111820] px-4 py-2.5 text-sm text-white dark:bg-[#F5F5F5] dark:text-[#111820]">Скачать JSON</button>
-            <button type="button" onClick={() => backupFileRef.current?.click()} className="rounded-full border border-black/10 px-4 py-2.5 text-sm text-muted transition hover:bg-black/5 dark:border-white/10 dark:text-darkmuted dark:hover:bg-white/10">Восстановить JSON</button>
+            <button type="button" onClick={onExportBackup} className="inline-flex min-h-11 items-center rounded-full bg-[#111820] px-4 py-2.5 text-sm text-white dark:bg-[#F5F5F5] dark:text-[#111820]">Скачать JSON</button>
+            <button type="button" onClick={() => backupFileRef.current?.click()} className="inline-flex min-h-11 items-center rounded-full border border-black/10 px-4 py-2.5 text-sm text-muted transition hover:bg-black/5 dark:border-white/10 dark:text-darkmuted dark:hover:bg-white/10">Восстановить JSON</button>
             <input ref={backupFileRef} type="file" accept=".json,application/json" aria-label="Выбрать файл резервной копии JSON" className="sr-only" onChange={async (event) => { const input = event.currentTarget; const file = input.files?.[0]; input.value = ''; if (file) await onImportBackup(file); }} />
           </div>
         </div>
@@ -2014,15 +2015,15 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
       </section>
 
       <section id="library-bookmarks" className="panel p-5">
-        <div className="flex flex-col gap-3 sm:flex-row"><div className="flex flex-1 items-center gap-2 rounded-2xl border border-black/5 bg-[#F7F9FC] px-4 py-3 dark:border-white/10 dark:bg-[#161616]"><Search size={16} className="text-muted dark:text-darkmuted" /><input value={librarySearch} onChange={(event) => setLibrarySearch(event.target.value)} placeholder="Найти в заметках и закладках…" aria-label="Поиск по сохранённым заметкам и закладкам" className="w-full bg-transparent text-sm text-text outline-none placeholder:text-muted dark:text-darktext dark:placeholder:text-darkmuted" /></div><select value={librarySearchType} onChange={(event) => setLibrarySearchType(event.target.value as LibrarySearchType)} aria-label="Тип сохранённой записи" className="rounded-2xl border border-black/5 bg-[#F7F9FC] px-3 py-3 text-sm text-text outline-none dark:border-white/10 dark:bg-[#161616] dark:text-darktext"><option value="all">Все типы</option><option value="note">Только заметки</option><option value="bookmark">Только закладки</option></select><select value={librarySearchSort} onChange={(event) => setLibrarySearchSort(event.target.value as LibrarySearchSort)} aria-label="Сортировка сохранённых записей" className="rounded-2xl border border-black/5 bg-[#F7F9FC] px-3 py-3 text-sm text-text outline-none dark:border-white/10 dark:bg-[#161616] dark:text-darktext"><option value="newest">Сначала новые</option><option value="oldest">Сначала старые</option></select>{availableTags.length > 0 && <select value={selectedTag} onChange={(event) => setSelectedTag(event.target.value)} aria-label="Фильтр по тегу" className="rounded-2xl border border-black/5 bg-[#F7F9FC] px-3 py-3 text-sm text-text outline-none dark:border-white/10 dark:bg-[#161616] dark:text-darktext"><option value="all">Все теги</option>{availableTags.map((tag) => <option key={tag} value={tag}>#{tag}</option>)}</select>}</div>
-        {(normalizedSearch || librarySearchType !== 'all' || selectedTag !== 'all') && <div className="mt-4 space-y-3"><div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Найдено: {matchingBookmarks.length} · {librarySearchType === 'all' ? 'все типы' : librarySearchType === 'note' ? 'заметки' : 'закладки'}{selectedTag !== 'all' ? ` · #${selectedTag}` : ''}</div>{matchingBookmarks.length ? matchingBookmarks.map(({ item, lecture }) => <button key={item.id} onClick={() => onOpenLecture(lecture.id)} className="block w-full rounded-2xl border border-black/5 bg-[#F7F9FC] p-4 text-left transition hover:border-[#B8874A]/40 dark:border-white/10 dark:bg-[#161616]"><div className="flex items-center justify-between gap-3"><div className="font-medium text-text dark:text-darktext"><HighlightedText text={lecture.title} query={librarySearch} /></div><span className="shrink-0 text-right text-sm text-[#9B6D32] dark:text-[#E0821E]"><span className="block">{formatDuration(item.time)}</span><span className="text-[10px] uppercase tracking-[0.1em] text-muted dark:text-darkmuted">{item.handwriting?.length ? 'Рисунок от руки' : item.note?.trim() ? 'Заметка' : 'Закладка'}</span></span></div><div className="mt-1 text-xs text-muted dark:text-darkmuted"><HighlightedText text={lecture.author} query={librarySearch} /></div>{item.note && <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted dark:text-darkmuted"><HighlightedText text={item.note} query={librarySearch} /></p>}<HandwritingPreview strokes={item.handwriting} />{!!item.tags?.length && <div className="mt-3 flex flex-wrap gap-1.5">{item.tags.map((tag) => <span key={tag} className="rounded-full bg-[#B8874A]/10 px-2 py-1 text-[11px] text-[#8A612E] dark:bg-[#E0821E]/10 dark:text-[#E5A35B]">#{tag}</span>)}</div>}</button>) : <div className="rounded-2xl bg-[#F7F9FC] p-4 dark:bg-[#161616]"><p className="text-sm text-muted dark:text-darkmuted">Сохранённых записей, соответствующих этим условиям, нет. Измените запрос или сбросьте фильтры.</p><button type="button" onClick={() => { setLibrarySearch(''); setLibrarySearchType('all'); setSelectedTag('all'); }} className="mt-3 rounded-full border border-black/10 px-4 py-2 text-sm font-medium text-text hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#B8874A] dark:border-white/10 dark:text-darktext dark:hover:bg-white/10">Сбросить поиск и фильтры</button></div>}</div>}
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_repeat(4,auto)]"><div className="flex min-w-0 items-center gap-2 rounded-2xl border border-black/5 bg-[#F7F9FC] px-4 py-3 focus-within:ring-2 focus-within:ring-[#B8874A]/60 dark:border-white/10 dark:bg-[#161616]"><Search size={16} className="text-muted dark:text-darkmuted" /><input value={librarySearch} onChange={(event) => setLibrarySearch(event.target.value)} placeholder="Найти в заметках и закладках…" aria-label="Поиск по сохранённым заметкам и закладкам" className="min-w-0 w-full bg-transparent text-sm text-text outline-none placeholder:text-muted dark:text-darktext dark:placeholder:text-darkmuted" /></div><select value={librarySearchType} onChange={(event) => setLibrarySearchType(event.target.value as LibrarySearchType)} aria-label="Тип сохранённой записи" className="w-full min-w-0 rounded-2xl border border-black/5 bg-[#F7F9FC] px-3 py-3 text-sm text-text outline-none dark:border-white/10 dark:bg-[#161616] dark:text-darktext"><option value="all">Все типы</option><option value="note">Только заметки</option><option value="bookmark">Только закладки</option></select><select value={librarySearchSort} onChange={(event) => setLibrarySearchSort(event.target.value as LibrarySearchSort)} aria-label="Сортировка сохранённых записей" className="w-full min-w-0 rounded-2xl border border-black/5 bg-[#F7F9FC] px-3 py-3 text-sm text-text outline-none dark:border-white/10 dark:bg-[#161616] dark:text-darktext"><option value="newest">Сначала новые</option><option value="oldest">Сначала старые</option></select>{availableTags.length > 0 && <select value={selectedTag} onChange={(event) => setSelectedTag(event.target.value)} aria-label="Фильтр по тегу" className="w-full min-w-0 rounded-2xl border border-black/5 bg-[#F7F9FC] px-3 py-3 text-sm text-text outline-none dark:border-white/10 dark:bg-[#161616] dark:text-darktext"><option value="all">Все теги</option>{availableTags.map((tag) => <option key={tag} value={tag}>#{tag}</option>)}</select>}</div>
+        {(normalizedSearch || librarySearchType !== 'all' || selectedTag !== 'all') && <div className="mt-4 space-y-3"><div role="status" aria-live="polite" className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Найдено: {matchingBookmarks.length} · {librarySearchType === 'all' ? 'все типы' : librarySearchType === 'note' ? 'заметки' : 'закладки'}{selectedTag !== 'all' ? ` · #${selectedTag}` : ''}</div>{matchingBookmarks.length ? matchingBookmarks.map(({ item, lecture }) => <button key={item.id} onClick={() => onOpenLecture(lecture.id)} className="block w-full rounded-2xl border border-black/5 bg-[#F7F9FC] p-4 text-left transition hover:border-[#B8874A]/40 dark:border-white/10 dark:bg-[#161616]"><div className="flex items-center justify-between gap-3"><div className="font-medium text-text dark:text-darktext"><HighlightedText text={lecture.title} query={librarySearch} /></div><span className="shrink-0 text-right text-sm text-[#9B6D32] dark:text-[#E0821E]"><span className="block">{formatDuration(item.time)}</span><span className="text-[10px] uppercase tracking-[0.1em] text-muted dark:text-darkmuted">{item.handwriting?.length ? 'Рисунок от руки' : item.note?.trim() ? 'Заметка' : 'Закладка'}</span></span></div><div className="mt-1 text-xs text-muted dark:text-darkmuted"><HighlightedText text={lecture.author} query={librarySearch} /></div>{item.note && <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted dark:text-darkmuted"><HighlightedText text={item.note} query={librarySearch} /></p>}<HandwritingPreview strokes={item.handwriting} />{!!item.tags?.length && <div className="mt-3 flex flex-wrap gap-1.5">{item.tags.map((tag) => <span key={tag} className="rounded-full bg-[#B8874A]/10 px-2 py-1 text-[11px] text-[#8A612E] dark:bg-[#E0821E]/10 dark:text-[#E5A35B]">#{tag}</span>)}</div>}</button>) : <div className="rounded-2xl bg-[#F7F9FC] p-4 dark:bg-[#161616]"><p className="text-sm text-muted dark:text-darkmuted">Сохранённых записей, соответствующих этим условиям, нет. Измените запрос или сбросьте фильтры.</p><button type="button" onClick={() => { setLibrarySearch(''); setLibrarySearchType('all'); setSelectedTag('all'); }} className="mt-3 rounded-full border border-black/10 px-4 py-2 text-sm font-medium text-text hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#B8874A] dark:border-white/10 dark:text-darktext dark:hover:bg-white/10">Сбросить поиск и фильтры</button></div>}</div>}
         {bookmarks.length === 0 && !normalizedSearch && librarySearchType === 'all' && selectedTag === 'all' && <div className="mt-4"><LibraryEmptyState message="Здесь появятся ваши заметки и закладки по времени. Откройте лекцию и сохраните нужный фрагмент." onOpenCatalog={onOpenCatalog} /></div>}
       </section>
 
       <section className="space-y-4">
         <div className="mb-3 text-sm uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Продолжить</div>
         {continueLectures.length ? (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {continueLectures.map((lecture) => (
               <LectureCard key={lecture.id} lecture={lecture} onOpen={() => onOpenLecture(lecture.id)} isFavorite={favorites.includes(lecture.id)} onToggleFavorite={() => onToggleFavorite(lecture.id)} progress={getProgress(lecture.id)} />
             ))}
@@ -2035,7 +2036,7 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
       <section id="library-favorites" className="scroll-mt-24 space-y-4">
         <div className="mb-3 text-sm uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Избранное</div>
         {favoriteLectures.length ? (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {favoriteLectures.map((lecture) => (
               <LectureCard key={lecture.id} lecture={lecture} onOpen={() => onOpenLecture(lecture.id)} isFavorite={true} onToggleFavorite={() => onToggleFavorite(lecture.id)} progress={getProgress(lecture.id)} />
             ))}
@@ -2048,7 +2049,7 @@ function LibraryPage({ continueLectures, favoriteLectures, recentLectures, onOpe
       <section className="space-y-4">
         <div className="mb-3 text-sm uppercase tracking-[0.12em] text-muted dark:text-darkmuted">История</div>
         {recentLectures.length ? (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {recentLectures.map((lecture) => (
               <LectureCard key={lecture.id} lecture={lecture} onOpen={() => onOpenLecture(lecture.id)} isFavorite={favorites.includes(lecture.id)} onToggleFavorite={() => onToggleFavorite(lecture.id)} progress={getProgress(lecture.id)} />
             ))}
@@ -2160,7 +2161,7 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, audioStat
 
   if (collapsed) {
     return (
-      <div className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] right-3 z-50 lg:bottom-3 lg:right-5">
+      <div className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] right-3 z-50 xl:bottom-3 xl:right-5">
         <button onClick={() => setCollapsed(false)} aria-label="Показать аудиоплеер" title="Показать аудиоплеер" className="inline-flex min-h-12 items-center gap-2 rounded-full border border-black/5 bg-white/95 px-4 py-3 text-sm font-medium text-text shadow-[0_12px_40px_rgba(17,24,32,0.2)] backdrop-blur-xl transition hover:-translate-y-0.5 dark:border-white/10 dark:bg-[#101010]/95 dark:text-darktext">
           <ChevronUp size={17} aria-hidden="true" />
           Плеер
@@ -2171,7 +2172,7 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, audioStat
 
   return (
     <div
-      className="fixed inset-x-0 bottom-[calc(6.5rem+env(safe-area-inset-bottom))] z-50 px-3 pb-3 sm:px-5 lg:bottom-0"
+      className="fixed inset-x-0 bottom-[calc(6.5rem+env(safe-area-inset-bottom))] z-50 px-3 pb-3 sm:px-5 xl:bottom-0"
       onTouchStart={(event) => {
         const touch = event.touches[0];
         const target = event.target;
@@ -2197,7 +2198,7 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, audioStat
       onTouchCancel={() => { touchStart.current = null; }}
     >
       <div className="mx-auto max-w-[1360px] rounded-[28px] border border-black/5 bg-white/90 p-3 shadow-[0_18px_60px_rgba(17,24,32,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-[#101010]/90">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]">
               <div className="flex h-5 items-end gap-0.5" aria-label={isPlaying ? 'Воспроизведение' : 'Пауза'} role="img">
@@ -2215,7 +2216,7 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, audioStat
             </button>
           </div>
 
-          <div className="flex flex-1 flex-col gap-2 lg:max-w-[640px]">
+          <div className="flex flex-1 flex-col gap-2 xl:max-w-[640px]">
             {audioStatus === 'error' && (
               <div className="flex items-center justify-between gap-3 text-xs text-[#9B3D32] dark:text-[#F3A89F]" role="status" aria-live="polite">
                 <span>{isOnline ? 'Не удалось загрузить запись. Попробуйте ещё раз.' : 'Нет подключения к интернету. Проверьте соединение и повторите попытку.'}</span>
@@ -2229,31 +2230,34 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, audioStat
             <input type="range" aria-label={`Позиция воспроизведения: ${lecture.title}`} min={0} max={duration || 1} value={currentTime} onChange={(e) => onSeek(Number(e.target.value))} className="w-full accent-[#B8874A] dark:accent-[#E0821E]" />
           </div>
 
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            <button type="button" onClick={() => onSeek(offsetPlaybackTime(currentTime, duration, -10))} aria-label="Перемотать назад на 10 секунд" title="Назад на 10 секунд" className="inline-flex h-10 min-w-14 items-center justify-center rounded-full border border-black/5 bg-[#F7F9FC] px-3 text-xs font-semibold text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext">−10с</button>
-            <button onClick={onPrev} aria-label="Предыдущая лекция" className="icon-button"><SkipBack size={16} /></button>
-            <button onClick={onTogglePlay} aria-label={isPlaying ? 'Пауза' : 'Воспроизвести'} className="icon-button bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]">{isPlaying ? <Pause size={16} /> : <Play size={16} />}</button>
-            <button onClick={onNext} aria-label="Следующая лекция" className="icon-button"><SkipForward size={16} /></button>
-            <button type="button" onClick={() => onSeek(offsetPlaybackTime(currentTime, duration, 10))} aria-label="Перемотать вперёд на 10 секунд" title="Вперёд на 10 секунд" className="inline-flex h-10 min-w-14 items-center justify-center rounded-full border border-black/5 bg-[#F7F9FC] px-3 text-xs font-semibold text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext">+10с</button>
+          <div className="flex flex-col gap-2 xl:flex-row xl:flex-wrap xl:items-center xl:justify-end">
+            <div className="flex flex-wrap items-center justify-center gap-2 xl:justify-end">
+              <button type="button" onClick={() => onSeek(offsetPlaybackTime(currentTime, duration, -10))} aria-label="Перемотать назад на 10 секунд" title="Назад на 10 секунд" className="inline-flex min-h-11 min-w-16 items-center justify-center rounded-full border border-black/5 bg-[#F7F9FC] px-3 text-xs font-semibold text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext">−10с</button>
+              <button onClick={onPrev} aria-label="Предыдущая лекция" className="icon-button min-h-11 min-w-11"><SkipBack size={16} /></button>
+              <button onClick={onTogglePlay} aria-label={isPlaying ? 'Пауза' : 'Воспроизвести'} aria-pressed={isPlaying} className="icon-button min-h-11 min-w-11 bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]">{isPlaying ? <Pause size={16} /> : <Play size={16} />}</button>
+              <button onClick={onNext} aria-label="Следующая лекция" className="icon-button min-h-11 min-w-11"><SkipForward size={16} /></button>
+              <button type="button" onClick={() => onSeek(offsetPlaybackTime(currentTime, duration, 10))} aria-label="Перемотать вперёд на 10 секунд" title="Вперёд на 10 секунд" className="inline-flex min-h-11 min-w-16 items-center justify-center rounded-full border border-black/5 bg-[#F7F9FC] px-3 text-xs font-semibold text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext">+10с</button>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-2 xl:justify-end">
+              <label className="flex min-h-11 items-center gap-1 rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 text-xs dark:border-white/10 dark:bg-[#161616]" title="Громкость">
+                <Volume2 size={13} aria-hidden="true" />
+                <input aria-label="Громкость" type="range" min="0" max="1" step="0.05" value={volume} onChange={(e) => setVolume(Number(e.target.value))} className="w-16 accent-[#B8874A] dark:accent-[#E0821E]" />
+              </label>
 
-            <label className="flex items-center gap-1 rounded-full border border-black/5 bg-[#F7F9FC] px-2 py-2 text-xs dark:border-white/10 dark:bg-[#161616]" title="Громкость">
-              <Volume2 size={13} aria-hidden="true" />
-              <input aria-label="Громкость" type="range" min="0" max="1" step="0.05" value={volume} onChange={(e) => setVolume(Number(e.target.value))} className="w-16 accent-[#B8874A] dark:accent-[#E0821E]" />
-            </label>
+              <select aria-label="Скорость воспроизведения" value={rate} onChange={(e) => setRate(Number(e.target.value))} className="min-h-11 rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 text-xs dark:border-white/10 dark:bg-[#161616]">
+                {[0.5, 0.75, 1, 1.25, 1.5, 2].map((value) => (
+                  <option key={value} value={value}>{value}x</option>
+                ))}
+              </select>
 
-            <select aria-label="Скорость воспроизведения" value={rate} onChange={(e) => setRate(Number(e.target.value))} className="rounded-full border border-black/5 bg-[#F7F9FC] px-2 py-2 text-xs dark:border-white/10 dark:bg-[#161616]">
-              {[0.5, 0.75, 1, 1.25, 1.5, 2].map((value) => (
-                <option key={value} value={value}>{value}x</option>
-              ))}
-            </select>
-
-            <select aria-label="Таймер сна" value={sleepMinutes} onChange={(e) => setSleepMinutes(Number(e.target.value))} className="rounded-full border border-black/5 bg-[#F7F9FC] px-2 py-2 text-xs dark:border-white/10 dark:bg-[#161616]">
-              <option value={0}>Без таймера</option>
-              <option value={15}>15 мин</option>
-              <option value={30}>30 мин</option>
-              <option value={45}>45 мин</option>
-              <option value={60}>60 мин</option>
-            </select>
+              <select aria-label="Таймер сна" value={sleepMinutes} onChange={(e) => setSleepMinutes(Number(e.target.value))} className="min-h-11 rounded-full border border-black/5 bg-[#F7F9FC] px-3 py-2 text-xs dark:border-white/10 dark:bg-[#161616]">
+                <option value={0}>Без таймера</option>
+                <option value={15}>15 мин</option>
+                <option value={30}>30 мин</option>
+                <option value={45}>45 мин</option>
+                <option value={60}>60 мин</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
