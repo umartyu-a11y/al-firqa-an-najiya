@@ -1,10 +1,11 @@
 import { lectureData as originalLectureData, cycles as originalCycles } from './lectures';
 import { triOsnovyCycle, triOsnovyLectures } from './tri-osnovy';
 import { knigaEdinobozhiyaCycle, knigaEdinobozhiyaLectures } from './kniga-edinobozhiya';
+import { chetyrePravilaNovyeCycle, chetyrePravilaNovyeLectures } from './chetyre-pravila-novye';
 import type { Lecture } from '../types';
 
-export const lectureData: Lecture[] = [...originalLectureData, ...triOsnovyLectures, ...knigaEdinobozhiyaLectures];
-export const cycles = [...originalCycles, triOsnovyCycle, knigaEdinobozhiyaCycle];
+export const lectureData: Lecture[] = [...originalLectureData, ...triOsnovyLectures, ...knigaEdinobozhiyaLectures, ...chetyrePravilaNovyeLectures];
+export const cycles = [...originalCycles, triOsnovyCycle, knigaEdinobozhiyaCycle, chetyrePravilaNovyeCycle];
 
 export const compareLessonNumbers = (left: number | string, right: number | string) => {
   const leftParts = String(left).split('.').map((part) => Number.parseInt(part, 10) || 0);
