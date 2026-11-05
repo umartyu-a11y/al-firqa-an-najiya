@@ -1,0 +1,4346 @@
+export type LectureOutlineStatus = 'text' | 'plan' | 'ambiguous' | 'missing';
+
+export interface LectureOutlineEntry {
+  outline: string[];
+  status: LectureOutlineStatus;
+  note: string;
+  sourceUrl: string;
+}
+
+export const lectureOutlines: Record<string, LectureOutlineEntry> = {
+  "drive-1rZS09VEmp73vEtIToEhq2DsYfmSp49RH": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "В записи каталога lessonNumber=103.3, но официальный текст помечает вопрос и все три разбора одинаковым номером 103; отдельная граница части 103.3 в тексте не подтверждена, поэтому сопоставление недостаточно.",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1izLjLd5pjdmsAYI1duno7-SqRHqePWrn": {
+    "outline": [
+      "Определение праведных халифов: Абу Бакр ас-Сиддик, Умар ибн аль-Хаттаб, Усман ибн Аффан и Али ибн Абу Талиб."
+    ],
+    "status": "ambiguous",
+    "note": "Официальный текст содержит вопрос №103 и последовательно отдельные разборы Умара, Усмана и Али, но не указывает, какой из них соответствует аудиочасти 103.2; граница этой части текстом не подтверждена.",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1IHhlK9iKT8U6GDcqzxsK2-HNZjmz1dV3": {
+    "outline": [
+      "Кто относится к праведным халифам и каковы их имена",
+      "Разбор правления Умара ибн аль-Хаттаба"
+    ],
+    "status": "plan",
+    "note": "На официальной странице вопрос №103 включает перечень праведных халифов, а далее опубликованы отдельные заголовки разбора по халифам. Связь суффикса 103.1 именно с частью об Умаре прямо не обозначена; тема сопоставлена по порядку заголовков.",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1j0gbmyndAndIp1MqoQmSbGWnemA88HJ-": {
+    "outline": [
+      "Вопрос о том, кого называют праведными халифами.",
+      "Абу Бакр ас-Сиддик.",
+      "Умар ибн аль-Хаттаб.",
+      "Усман ибн Аффан и Али ибн Абу Талиб."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1Hr1ThDVt9p7UEvNO1TNSp1lmfP4gyF2w": {
+    "outline": [
+      "Что относится к исламским праздникам: праздник жертвоприношения и праздник разговения."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1op8t1Th3pSjnxCu68EAYGRe5SJJOQyGj": {
+    "outline": [
+      "Вопрос о лучших дне, ночи и месяце года.",
+      "День Арафа как лучший день.",
+      "Ночь Могущества как лучшая ночь.",
+      "Рамадан как лучший месяц."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1WgpOA4Kv94AwbKG-Wzy4rU2CLepJtsuY": {
+    "outline": [
+      "Пятница как лучший день недели"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1LfvQKIOYv-SZj9rkkJ0TzshXu7nSEk2p": {
+    "outline": [
+      "Вопрос о самых любимых и самых ненавистных для Аллаха местах",
+      "Мечети как наиболее любимые места",
+      "Рынки как наиболее ненавистные места"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1SnDirt4WFGwwCgxh_KXyAzo3qz2OBuRb": {
+    "outline": [
+      "Завершение хадиса о том, что понимание религии — признак блага, желанного Аллахом."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1lHYbtHyrf9QK-majPkyrRWE0afouWT1T": {
+    "outline": [
+      "Что следует сказать человеку, который чихнул и восхвалил Аллаха: пожелать ему милости Аллаха («йархамукя-Ллах»)."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1-VdbtWDQKHdPhE_e-LZO5HCijI05i9j2": {
+    "outline": [
+      "Благодарение Аллаху после еды и питья.",
+      "Произнесение «аль-хамду ли-Ллях» после чихания.",
+      "Благодарность за получаемые благодати и в любом положении."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1eXiaq8dHiNlDZjkrMANq8bhW13rTI_2k": {
+    "outline": [
+      "Моменты, когда следует произносить «бисми-Ллях».",
+      "Перед едой и питьём.",
+      "При входе в отхожее место и мечеть, а также при выходе из мечети.",
+      "Перед тем как снять одежду."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1VT-rjV-6sWOi_MNqfe-Nu5bsXt9REcJ6": {
+    "outline": [
+      "Еда и питьё правой рукой как правило поведения мусульманина."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1EsR2oPDIEYSzfaSpvL2uw4vKuvKCOZPS": {
+    "outline": [
+      "Что считается исламским приветствием",
+      "Формула приветствия с мольбой о мире, милости и благословении Аллаха"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1fckWaV3oj3o3zrajcRaJAbpzMorD5OvN": {
+    "outline": [
+      "Вопрос о словах, произносимых после пробуждения ото сна",
+      "Хвала Аллаху за возвращение к жизни после сна, уподобленного смерти",
+      "Упоминание о том, что к Аллаху предстоит воскресение"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1XtyXWBhQIIn17Vax7w1Tz9maGGjlTg8X": {
+    "outline": [
+      "Дуа перед сном: слова «С именем Твоим, о Аллах, умираю и оживаю»"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1fKJ2x1e5GzAi13mIo0gsFAazfUSz5UqH": {
+    "outline": [
+      "Госпожа мольб о прощении: слова хадиса и их смысл.",
+      "Просьба о прощении, признание милости Аллаха и исповедание греха.",
+      "Обещание Рая тому, кто произнесёт эту мольбу днём и умрёт до вечера.",
+      "Обещание Рая тому, кто произнесёт её ночью и умрёт до утра."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1zoVWq_WVNWGFhz8IGiEJpaURnqWoUJ5f": {
+    "outline": [
+      "Вопрос о завершении хадиса о двух словах",
+      "Лёгкость этих слов для языка",
+      "Их тяжесть на весах и любовь Милостивого",
+      "Формула поминания: «Субхана-Ллахи ва би-хамди-хи, субхана-Ллахи-ль-‘Азым»"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1158ZmbVrgE7SIKRRsLMZIn-oDGmFP1_u": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "Раздел «Вопрос №88» подтверждён: «Что является сокровищем Рая?» — ответ «Нет силы и мощи иначе как с Аллахом». Однако на странице опубликованы только вопрос и краткий ответ, а не текст лекции или тематический план, поэтому составить требуемые 3–7 пунктов по последовательности тем невозможно.",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1yTkUjtjkQxeLgRujuaqGJaOD-q1b7x8f": {
+    "outline": [
+      "Признак доброго исповедания ислама в хадисе Пророка ﷺ",
+      "Оставление того, что человека не касается, как содержание этого признака"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1atH8Yz0Hmm8GmHBW6r9DL5p7BNEqOsyM": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "В выбранной записи lessonNumber=86, но sourceFileName указывает на файл 76. Неоднозначное сопоставление; тему лекции не угадывал.",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-101CMxllyDqZMwmNUnnE38L3o03xWQArZ": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "В выбранной строке lessonNumber указан как 86, но sourceFileName — «87. Необходимые вопросы.mp3»; сопоставление номера урока противоречиво.",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1EmZ68EXbT39eLXgYYywCjofOUSogFxJJ": {
+    "outline": [
+      "Вопрос о том, что представляет наибольшую опасность для человека",
+      "Язык как источник опасности"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1v4oZ03GDuGzYEM9vFeOFE-cpfFXYYHL5": {
+    "outline": [
+      "Продолжение хадиса о трёх признаках лицемера: ложь в речи, нарушение обещания и вероломство при доверии."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-19K3fdWEijUoQqjzhNTCEeUY1j9pjrngm": {
+    "outline": [
+      "Вопрос о намазах, наиболее трудных для лицемеров: утреннем и ночном.",
+      "Продолжение хадиса о трёх признаках лицемера: лжи, нарушении обещания и вероломстве."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1AAI89Epy-4ZRBHOXO1PQTbSnZP3nx_7c": {
+    "outline": [
+      "Постановка вопроса о самой опасной болезни сердца.",
+      "Лицемерие как ответ на вопрос о главной опасности.",
+      "Краткий вывод: опасность лицемерия среди болезней сердца."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1lZQUwslCkwbKflvMw7Wj6UnbyAHl1ldT": {
+    "outline": [
+      "Когда следует прибегать к Аллаху от шайтана.",
+      "Перед чтением Корана и при входе в отхожее место.",
+      "При гневе и появлении наущений.",
+      "Услышав рев осла или лай собак."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1jXNTtjRAC1HFRJS-Aec1ntIaxuHanvxO": {
+    "outline": [
+      "Определение главного врага человека — Иблиса и шайтана.",
+      "Когда следует искать у Аллаха защиты от шайтана.",
+      "Лицемерие и его признаки; утренний и ночной намаз как самые трудные для лицемеров.",
+      "Опасность языка и достоинство оставления того, что человека не касается.",
+      "Поминания Аллаха: любимые слова, сокровище Рая и слова, тяжёлые на весах.",
+      "Мольба о прощении — госпожа всех таких мольб.",
+      "Мольбы и поминания перед сном и после пробуждения."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-19f_PrmXcbbdtHbZME9Gisy2tHarw2k0u": {
+    "outline": [
+      "Хадис о полноте веры: желать брату того же блага, что и себе"
+    ],
+    "status": "plan",
+    "note": "Опубликованы только вопрос №79 и краткий ответ, а не полный текст лекции; отдельная граница аудиочасти по тексту не подтверждается.",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1uSLugtVUwFfTqAWX8iEn8NAah1I-SeR4": {
+    "outline": [
+      "Правдивость как лучшее нравственное качество и ложь как самое скверное."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1cDhLl7-Taqh2heJTumN9MwbiuyU0npZM": {
+    "outline": [
+      "Продолжение суры «аль-Аср»: исключение из общего положения об убытке",
+      "Вера как первое качество спасшихся",
+      "Праведные дела как необходимое условие",
+      "Взаимное наставление истине и терпению"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1PAi3me_IdDstBNXOmWiLtcNzlkcZFVZA": {
+    "outline": [
+      "Вопрос о самой короткой суре Корана.",
+      "Ответ: сура «аль-Каусар».",
+      "На странице далее обозначен отдельный раздел «Разбор».",
+      "Текст страницы не подтверждает, что граница этого разбора совпадает с частью аудиофайла 75.1."
+    ],
+    "status": "text",
+    "note": "Граница части 75.1 отдельно по опубликованному тексту не подтверждается.",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1IfuiyC1Nvfg3jWxjozsiixfXUubQtnlG": {
+    "outline": [
+      "Самая короткая сура Корана — «Аль-Каусар»."
+    ],
+    "status": "text",
+    "note": "На странице после вопроса №75 обозначен раздел «Разбор», но его отдельная граница и содержание в опубликованном тексте не подтверждены.",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1739Yg04wyj1fin1i3hLQBjqe0llF1ZMe": {
+    "outline": [
+      "Определение самой длинной суры благородного Корана.",
+      "Ответ на вопрос: сура «аль-Бакара»."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-18G3lpxmMBNK7phzuIscx3Mahv8b-0Dlv": {
+    "outline": [
+      "Вопрос о самой великой суре Корана.",
+      "Ответ: сура «аль-Фатиха».",
+      "Разбор вопроса о достоинстве этой суры."
+    ],
+    "status": "plan",
+    "note": "На странице после вопроса №73 указан отдельный раздел «Разбор», однако отдельная граница части 73.1 по опубликованному тексту не подтверждена.",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1rBwGf2wXfgQGQcYUW-6ISvX0b3_kAP6z": {
+    "outline": [
+      "Самая великая сура Корана — аль-Фатиха."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1-W42KjcIokwRPlQOG2wO1VH1NX_jxh7d": {
+    "outline": [
+      "Чтение аята аль-Курси после каждого обязательного намаза.",
+      "Хадис о том, что между читающим аят и Раем остаётся только смерть.",
+      "Смысл обещания: аят аль-Курси как причина защиты и надежды на вхождение в Рай."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1Pjl4FfVliCmj1q00s5SwzfOjxF9HLbLR": {
+    "outline": [
+      "Определение самого великого аята Корана: аят аль-Курсий."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1NEDH0lMebFuWRHGhREk6Fn2PlWtdVarz": {
+    "outline": [
+      "Понятие защищающих сур.",
+      "Суры «аль-Фаляк» и «ан-Нас» как защищающие суры."
+    ],
+    "status": "plan",
+    "note": "На официальной странице опубликованы вопрос №70 и краткий ответ; отдельная граница части 70.2 в тексте не подтверждена.",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1as1o2qhVuBPLgMzzbvjTSqXqsDOGVpmp": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "Официальная страница содержит вопрос №70 о защищающих сурах «аль-Фаляк» и «ан-Нас», но не подтверждает отдельную текстовую границу части 70.1; поэтому нельзя надёжно восстановить содержание именно этой части.",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1HMqN_2MB7wibFyk09w9t1v8pmW72mMvT": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "На странице вопрос №70 соответствует записи: «Что такое защищающие суры?» — ответ: суры «аль-Фаляк» и «ан-Нас». Однако разделы «Разбор» для вопроса №70 не содержат опубликованного текста, поэтому фактическую последовательность тем лекции восстановить нельзя.",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1yBDItKVAjhNIMfWGIiPzKTlo49OyoYb3": {
+    "outline": [
+      "Предварительные действия перед чтением из мусхафа",
+      "Совершение омовения перед чтением",
+      "Обращение к Аллаху за защитой от шайтана"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1KVp1lQ47fviwJ0-uLVWXXrvE8mGajplw": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "На официальной странице вопрос №68 сводится к одному краткому вопросу и ответу («Твоя великая Книга?» — «благородный Коран»); опубликованный материал не подтверждает последовательность из 3–7 тем для отдельной лекции.",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1KbICFHf0KUXvvuVQKiEn7MHaeCHFDZVI": {
+    "outline": [
+      "Вопрос о том, кто занимает наиболее почётное положение перед Аллахом.",
+      "Мерило почёта — богобоязненность.",
+      "Посланник Аллаха ﷺ назван наиболее богобоязненным среди людей."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1MgMyVx-cD8oakKAIWuZXoHNU60DMFu4U": {
+    "outline": [
+      "Определение наиболее любимых Аллахом деяний.",
+      "Намаз, совершённый в начале отведённого времени.",
+      "Благочестие к родителям.",
+      "Джихад на пути Аллаха.",
+      "Последовательность перечисленных деяний и их достоинство.",
+      "Основание ответа в переданном вопросе о любимых деяниях.",
+      "Связь поклонения Аллаху с добрым отношением к родителям.",
+      "Значение соблюдения времени молитвы.",
+      "Перечисление трёх деяний как ответа на вопрос №66.",
+      "Пояснение слов «наиболее любимы для Всевышнего Аллаха».",
+      "Сопоставление молитвы, почтительности к родителям и джихада.",
+      "Порядок деяний в ответе на вопрос.",
+      "Извлечение урока из ответа о важнейших делах.",
+      "Формулировка ответа на вопрос №66.",
+      "Рассмотрение благочестия к родителям среди любимых дел.",
+      "Место джихада в названном перечне.",
+      "Подчёркивание молитвы в начале времени.",
+      "Три названных деяния как единая последовательность.",
+      "Разбор значения каждого из трёх деяний.",
+      "Переход к вопросу о почтеннейшем из людей."
+    ],
+    "status": "ambiguous",
+    "note": "На официальной странице под вопросом №66 опубликован только краткий вопрос и ответ, а не полный текст лекции. В соответствии со статусом plan нужен тематический план, однако для номера 66 материал содержит лишь один тезис.",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1l4XEOtRsww8qtsPF6-K3o2fTeR-y6ndy": {
+    "outline": [
+      "Вопрос о мольбе за родителей.",
+      "Просьба к Аллаху простить родителей и самого молящегося.",
+      "Мольба о милости к родителям с упоминанием их заботы в детстве."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1_jgSddLMVY9BGK0lKNbd4ZUJbk7bQn9d": {
+    "outline": [
+      "Вопрос о том, кто имеет наибольшее право на благочестивое отношение.",
+      "Совершение добра по отношению к родителям.",
+      "Ответ на вопрос: родители."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1xuVl7LcwOgnf_542s-6S1ECGQXJa6tKF": {
+    "outline": [
+      "Понятие ихсана: поклонение Аллаху как будто видишь Его",
+      "Осознание того, что Аллах видит человека, даже если тот не видит Его"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1nDUdt3NzxGdKsYzN1zyVkJDr8II3DALd": {
+    "outline": [
+      "Обитель мучения и унижения: Адский огонь",
+      "Семь врат Ада"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1CR7eR9uqHsaBH8p0e0mxpvpnicZftxbL": {
+    "outline": [
+      "Что больше всего приводит человека в Рай: богобоязненность и благонравие."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1FjnR4OhfJX2V4kBiUUu6FoAoUOqf9tYO": {
+    "outline": [
+      "Самое великое наслаждение Рая — лицезрение Аллаха."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1TT4heoieb-uEqDhZAszAIUypzooEVCMU": {
+    "outline": [
+      "Понятие Обители щедрости и почестей",
+      "Отождествление Обители щедрости с Раем",
+      "Число врат Рая — восемь"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1AN51mfo1NV9xRouxNv8qs7ILREMKtQJb": {
+    "outline": [
+      "Вопрос о времени наступления Судного часа.",
+      "Знание о Часе принадлежит только Аллаху.",
+      "Довод из 34-го аята суры «Лукман»: знание о Часе названо среди того, что ведомо Аллаху."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1ATIREaPftRz9ZHuVpF8nK5qyhHtZuQGE": {
+    "outline": [
+      "Последние аяты суры «аль-Бакара» (285–286), которые желательно читать каждую ночь."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1hDuDVjrynZuzmJiULtCbMKbp8RfYEXsQ": {
+    "outline": [
+      "Определение обладателей твердой решимости среди посланников.",
+      "Нух и Ибрахим названы в числе этих посланников.",
+      "Муса, Иса и Мухаммад завершают приведенный перечень.",
+      "Формула благословения в отношении названных посланников."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1qbMl95MjbFn_lRchYbo2eFNUIwA27Bcq": {
+    "outline": [
+      "Писания Аллаха и пророки, которым они были ниспосланы",
+      "Таурат — Мусе; Инджиль — Исе; Забур — Дауду",
+      "Свитки Ибрахима и Мусы — Ибрахиму и Мусе",
+      "Коран — Мухаммаду ﷺ"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1ZjDMsJj57n6E0p-HyhnmqbmMB9FF27uD": {
+    "outline": [
+      "Имя ангела Джибриль",
+      "Имя ангела Микаиль",
+      "Имя ангела Исрафиль"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1nTQrDL4y23aOFoVUcrjC7McDYTD3AqV7": {
+    "outline": [
+      "Определение столпов веры.",
+      "Вера в Аллаха и Его ангелов.",
+      "Вера в ниспосланные Писания и посланников.",
+      "Вера в Последний день.",
+      "Вера в предопределение хорошего и плохого."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-11DyNLZ0-ucfC9YG7M376w_JEWfaGCI9j": {
+    "outline": [
+      "Вопрос о времени наступления Судного часа.",
+      "Знание о Часе принадлежит одному Аллаху.",
+      "Довод из суры «Лукман», аят 34: знание о Часе, ниспослание дождя и знание о том, что в утробах.",
+      "Уточнение: этот материал соответствует вопросу №52 на странице курса.",
+      "Текст ответа указывает, что точное время Часа известно только Аллаху.",
+      "Сопоставление дано по номеру вопроса 52, а не по индексу каталога.",
+      "Содержание ограничено опубликованным вопросом и ответом; тема — наступление Судного часа и довод на это."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1Oq681QIZi7wSm9AHGciTtoa1HXpJOh7V": {
+    "outline": [
+      "Хадж как поклонение Всевышнему Аллаху.",
+      "Устремление к Запретному Дому.",
+      "Совершение специальных обрядов в установленное время."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-16NuMsL2nYGB9fMaDjGxjrA1jBB3j5G39": {
+    "outline": [
+      "Завершение хадиса о посте в Рамадан: вера и надежда на награду как причина прощения прежних грехов."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1Lz3YRPHNStwKXvKOH0-rBaGqlctXv6S6": {
+    "outline": [
+      "Пост как поклонение Аллаху.",
+      "Воздержание от того, что нарушает пост.",
+      "Время поста — от утренней зари до заката; необходимое условие — намерение."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1U8h01Mvzu8t-xGaejNwgLOVmbP2ZyAXd": {
+    "outline": [
+      "Закят как обязательное право, установленное Аллахом.",
+      "Имущество, с которого выплачивается закят.",
+      "Получатели закята и установленное время его выплаты."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1psN5VypaAtE7cvy5l8Z7Q3tRVqA_5Mau": {
+    "outline": [
+      "Сунны рауатиб: дополнительные намазы, связанные с обязательными молитвами."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1q7VDi6v0fl6o6MePxM7ppa9RgMzDaMce": {
+    "outline": [
+      "Завершение хадиса о дополнительных ежедневных намазах сверх обязательных",
+      "Обещанная награда за эти 12 ракатов — дом в Раю"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1dMDJSSpaZkED_30e2gMT1DrxTLE9I99K": {
+    "outline": [
+      "Просьба о защите в конце намаза перед салямом",
+      "Защита от наказания Ада и могилы",
+      "Защита от испытаний жизни и смерти, а также от зла лжемессии Даджаля"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1AumOpOvJ4B28zYFPxlV3vhB6bD6VHC9q": {
+    "outline": [
+      "Определение ас-салят аль-ибрахимия как молитвенного благословения.",
+      "Просьба благословить Мухаммада и его семью, по примеру благословения Ибрахима и его семьи.",
+      "Просьба ниспослать баракат Мухаммаду и его семье, по примеру бараката, ниспосланного Ибрахиму и его семье.",
+      "Завершение формулы прославлением Аллаха как Достохвального и Славного."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1FP7V-Qjxp-86ckdp0GAWffhRAKzadMPS": {
+    "outline": [
+      "Назначение и содержание ат-тахията в намазе",
+      "Обращение с приветствием к Пророку ﷺ и просьба о благословении",
+      "Приветствие верующим и свидетельства о единобожии и посланничестве Мухаммада ﷺ"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1TjJlXlemQZWzma6itCTTN-SF0AeJOvjX": {
+    "outline": [
+      "Молитва между двумя земными поклонами: что следует произнести.",
+      "Просьба о прощении, повторяемая дважды.",
+      "Смысл обращения: просьба к Господу простить молящегося."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1HsW-BGdF0zUC4JsWtGvaYZSgmCmgWkYf": {
+    "outline": [
+      "Произносимая в земном поклоне формула восхваления Аллаха: «Субхана Раббияль-А’ля»."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-18Opv_CABtzzSguwE4NlY6-ET3bPFl7X4": {
+    "outline": [
+      "Обязательное произнесение в поясном поклоне: «Субхана Раббияль Азым».",
+      "Смысл восхваления: Преславен Великий Господь."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1BALAyWOY3alW087qF2Hs5AWT3CmoWusa": {
+    "outline": [
+      "Обязательное чтение из Корана в намазе",
+      "Сура «аль-Фатиха» как обязательное чтение",
+      "Ответ на вопрос о чтении в молитве"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-19eihRDbeEfqGrIw-sxaGcaJqCcKTfu5K": {
+    "outline": [
+      "Вопрос №38: завершение хадиса о словах после правильно совершённого омовения.",
+      "Свидетельство единобожия и отсутствия у Аллаха сотоварища.",
+      "Свидетельство о пророческой миссии Мухаммада и обещание открыть восемь врат рая.",
+      "Возможность войти в рай через любые из открывшихся врат."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1SEF814THbXF1nGuYiJzl7A_G8fZPT0QJ": {
+    "outline": [
+      "Что считается нарушением малого омовения и сколько таких обстоятельств выделяется.",
+      "Выход выделений из двух путей как причина нарушения вуду.",
+      "Сон и потеря сознания.",
+      "Употребление верблюжьего мяса и обстоятельства, обязывающие к полному омовению."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-18ERZZlSQJiVtbJs3tIgR9alU7JXTHdmg": {
+    "outline": [
+      "Вуду как малое омовение и его обязательные предписания.",
+      "Омовение лица с полосканием рта и носа.",
+      "Омовение рук до локтей, обтирание головы и ушей, мытьё стоп до лодыжек.",
+      "Соблюдение порядка и непрерывности при совершении вуду."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1cneRN7Lf82azoRpzPnWYKk02oMDxJ6Ij": {
+    "outline": [
+      "Вопрос о девяти условиях, необходимых для намаза.",
+      "Разумность и достижение возраста различения.",
+      "Наступление времени намаза.",
+      "Устранение скверны и ритуальная чистота.",
+      "Прикрытие аурата, обращение к кибле и намерение."
+    ],
+    "status": "text",
+    "note": "Первое условие в опубликованном списке отображается как обрывок «шт»; восстановить его по тексту нельзя.",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1t5G0NFkx00S1FOG-G4eDvcgbvb64lFV5": {
+    "outline": [
+      "Перечень девяти условий, необходимых для намаза",
+      "Требования к молящемуся: разумность и достижение возраста различения",
+      "Соблюдение времени намаза и устранение скверны",
+      "Ритуальная чистота и прикрытие аурата",
+      "Обращение к кибле и наличие намерения"
+    ],
+    "status": "text",
+    "note": "На официальной странице текст вопроса №35 повторён также в разделе №35.1; отдельная граница аудиочасти по опубликованному тексту не подтверждается. Первый пункт условий отображён с обрывком «шт».",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-19h3ZPMVQCiNcv9seN3wLjQks-wHCDBfX": {
+    "outline": [
+      "Пять обязательных молитв в сутки.",
+      "Количество ракатов в утренней, полуденной и предвечерней молитвах.",
+      "Число ракатов в вечерней и ночной молитвах."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1OKDFL7UCkkNBDxfhys41ttlzzbNgmnXD": {
+    "outline": [
+      "Определение намаза как поклонения, состоящего из установленных слов и действий.",
+      "Начало намаза с такбира и завершение таслимом."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1hEEhq-GQpjoHtFYNPLt_eN6PcN-QqjJo": {
+    "outline": [
+      "Хадис о договоре между мусульманами и другими людьми.",
+      "Намаз как содержание этого договора.",
+      "Предупреждение о неверии тому, кто оставляет намаз."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1Xn_yF1xq4wsMIth6fHHraCzX2_snQi4t": {
+    "outline": [
+      "Вопрос о том, кто является главным врагом человека.",
+      "Ответ: Иблис — шайтан.",
+      "Иблис характеризуется как изгнанный и прогоняемый."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1KHtvfb7-hotCii-m4KiI2j1CLiNKdOki": {
+    "outline": [
+      "Пять столпов ислама: общий перечень и довод из хадиса",
+      "Свидетельства веры о единобожии и посланничестве Мухаммада",
+      "Выстаивание молитвы",
+      "Выплата закята",
+      "Совершение хаджа и пост в Рамадан"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1wjik4-_qY6PpMnFs73vFPy4gvXmrlluL": {
+    "outline": [
+      "Ислам как предание себя Аллаху посредством единобожия",
+      "Повиновение Аллаху и подчинение Ему",
+      "Отречение от многобожия и его приверженцев"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-11PQOScxh1K-jDn1BmHxjQhbQOtzUiuyD": {
+    "outline": [
+      "Вопрос о религиозной принадлежности: ответ — Ислам."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1r5FRtvzlYr_F0rpAUiaJiaNNt_RM60Rz": {
+    "outline": [
+      "Хадис о том, что за одно благословение Пророку Аллах благословляет человека десятикратно."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1n6HAR6wC60vbvbbk1Ahd6VPc8HMXeRLD": {
+    "outline": [
+      "Вопрос о том, что представляет наибольшую опасность для человека",
+      "Ответ: опасность языка"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1IPRWMSvu3-9Pc7GSP4jyTRVWzlWJfIir": {
+    "outline": [
+      "Матери правоверных — жёны Пророка ﷺ."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-19asF5EOZufIAb0eZZH-21qDmt5J5ByvK": {
+    "outline": [
+      "Пребывание Пророка ﷺ в Медине после переселения: десять лет."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1AtjlURA999E1wnJpjfxaWkwExU6Dr6Wt": {
+    "outline": [
+      "Вопрос о словах, которые названы сокровищем Рая.",
+      "Формула поминания: «Нет силы и мощи иначе как с Аллахом».",
+      "Смысл выражения — признание того, что сила и возможность действовать исходят от Аллаха."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1fy1hjdMOK2CgsajxJlipCHkdMJQ0PcRZ": {
+    "outline": [
+      "Начало пророческой миссии Мухаммада ﷺ в Мекке",
+      "Тринадцать лет пребывания в Мекке после начала пророчества",
+      "Переселение из Мекки как завершение этого периода"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1jvB_uoHsHoTzbTPBjiw7Cn_4Rfoj_ToQ": {
+    "outline": [
+      "Возраст Пророка ﷺ, когда Аллах избрал его посланником и пророком: сорок лет"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1MZ0xN5qNdNlWLLdDr46DOK9LFdqlcOK1": {
+    "outline": [
+      "Вопрос о времени и месте рождения Пророка ﷺ",
+      "Рождение в Год Слона",
+      "Мекка как место рождения"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1wlXNjGL3ii3RKH8kK9o4dKdxGLU4WPvQ": {
+    "outline": [
+      "Вопрос о словах, произносимых после пробуждения",
+      "Мольба с благодарностью Аллаху за пробуждение после сна",
+      "Смысл выражения: возвращение к жизни и воскресение к Нему"
+    ],
+    "status": "text",
+    "note": "Текст подтверждает содержание вопроса №92, но отдельная граница аудиочасти по опубликованному тексту не подтверждается.",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1VCSYBEIZm2POTPAA3goxF-fAFqe9vr8-": {
+    "outline": [
+      "Имя Пророка — Мухаммад.",
+      "Имя его отца — Абдуллах.",
+      "Имя его деда — Абдуль-Мутталиб."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1RNHyROFhPodnowMydt4ddHdwf9VEarZJ": {
+    "outline": [
+      "Посланничество Мухаммада ﷺ ко всем людям: благовестие и предостережение",
+      "Подчинение его повелениям и вера во всё, что он сообщил",
+      "Отстранение от запретов и того, от чего он удержал",
+      "Поклонение Аллаху только установленным им способом"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1njBAl6VitdikHA4SuJ6odxkNBzUlPLyO": {
+    "outline": [
+      "Имя Пророка Мухаммада ﷺ"
+    ],
+    "status": "text",
+    "note": "В опубликованном тексте есть вопрос №16 («Кто твой Пророк?») с кратким ответом, но отдельная граница аудиолекции №16 в тексте не обозначена.",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-19iNWj8PvmXZ89jTE6hs9S-_vyk8SZ0Cy": {
+    "outline": [
+      "Вопрос о суре, приравниваемой к четверти Корана.",
+      "Ответ: это сура «аль-Кяфирун».",
+      "Предлагается прочитать эту суру."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1ZW9AHL4KCfDzADOiEDm2AB_-Jy9VgkJd": {
+    "outline": [
+      "Условия принятия деяний: искреннее посвящение Аллаху и соответствие сунне Посланника ﷺ"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-13HzVRmEzktuONGR-rFSvL5wtG5PwFIxj": {
+    "outline": [
+      "Кому известно сокровенное: только Аллаху.",
+      "Довод из суры «ан-Намль» (65-й аят).",
+      "В аяте отрицается знание сокровенного у обитателей небес и земли, кроме Аллаха."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1AgAzGE2UVFMLH109fZLiEj72ZhX8w6Qt": {
+    "outline": [
+      "Хадис о клятве не именем Аллаха",
+      "Предупреждение о последствиях такой клятвы",
+      "Оценка поступка как неверия или многобожия"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1HalKNooOg-CI8fXNcMEvQuDLmdGd7cBs": {
+    "outline": [
+      "Вопрос о лучшем дне недели: пятница."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-10ZW5bay_ymG3_udcuzXGTmR14gf4pvHY": {
+    "outline": [
+      "Лучший день, ночь и месяц в году: день Арафа, ночь Предопределения и Рамадан"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1X0T6PqDrBxR4LmkarDUquOeYSxHxiDAJ": {
+    "outline": [
+      "Исламские праздники: праздник жертвоприношения и праздник разговения."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1xgynT3MHEKF9davQ3ZFErPbtl1JQxnQS": {
+    "outline": [
+      "Слово единобожия как выражение основополагающего исповедания",
+      "Формула «ля иляха илля-Ллах»",
+      "Смысл свидетельства: поклонения достоин только Аллах"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1G1Qr0ITuqbmI0aJbod4UuLO8x3zCtUmg": {
+    "outline": [
+      "Таухид как главная обязанность верующего",
+      "Единобожие в господстве Аллаха",
+      "Единобожие в поклонении Аллаху",
+      "Единобожие в именах и атрибутах Аллаха"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1sjsdRU4Zgcetb8y8Ugy_zq4AcYzOeADV": {
+    "outline": [
+      "Таухид как величайшая обязанность человека"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1UJfgDLwevQzQ6j8FEZz8Fh3uIKB7ZSp4": {
+    "outline": [
+      "Для чего Аллах создал людей и джиннов: поклоняться только Ему",
+      "Довод из аята 56 суры «аз-Зарийат» о цели сотворения"
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1rb9VV8eUpxwo_A-WQ_PJrqDRZxh06BeE": {
+    "outline": [
+      "Продолжение хадиса о довольстве Аллахом как Господом.",
+      "Ислам как религия, которой человек доволен.",
+      "Мухаммад ﷺ как пророк: завершающая часть хадиса."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-17WZg7B-4t7t2o4wydWC-LqluXGeklNtY": {
+    "outline": [
+      "Право Аллаха над Его рабами",
+      "Поклонение Аллаху как исполнение этого права",
+      "Отказ от придания Аллаху сотоварищей"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1gyQL0K87AFxjZ3FxHhwO7WKAcAe9BQMj": {
+    "outline": [
+      "Ответ на вопрос о местопребывании Аллаха: Аллах над небесами."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "drive-1sUTUQKDczcH6t0XmXn3RaZyUaAheiAXi": {
+    "outline": [
+      "Кто является Господом человека: ответ на вопрос — Аллах."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/neobhodimye-voprosy-dlya-kazhdogo/"
+  },
+  "tri-osnovy-01": {
+    "outline": [
+      "Почему изучают таухид и почему начинают именно с «Трёх основ»",
+      "Что подразумевается под тремя основами",
+      "Польза изучения книги",
+      "Содержание книги"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/tri-osnovy/"
+  },
+  "tri-osnovy-02": {
+    "outline": [
+      "Четыре обязательных вопроса: знание, действие, призыв и терпение.",
+      "Сура «аль-Аср» как доказательство необходимости веры, праведных дел, наставления к истине и терпению.",
+      "Пояснение аш-Шафи‘и о достаточности суры «аль-Аср» как довода.",
+      "Знание должно предшествовать словам и поступкам: разъяснение аль-Бухари на примере аята из суры «Мухаммад»."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/tri-osnovy/"
+  },
+  "tri-osnovy-03": {
+    "outline": [
+      "Обязанность знать три основы и следовать им",
+      "Аллах — Творец и Обеспечивающий; Он послал посланника, которому необходимо повиноваться",
+      "Запрет приобщать кого-либо к Аллаху в поклонении",
+      "Верность Аллаху и Его посланнику несовместима с любовью к враждующим с ними"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/tri-osnovy/"
+  },
+  "tri-osnovy-04": {
+    "outline": [
+      "Смысл аль-ханифийи и поклонения Аллаху с искренним посвящением Ему религии",
+      "Цель сотворения людей и джиннов — поклонение Аллаху",
+      "Таухид как величайшее повеление: посвящение поклонения одному Аллаху",
+      "Ширк как величайший запрет: поклонение и мольба кому-либо наряду с Аллахом"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/tri-osnovy/"
+  },
+  "tri-osnovy-05": {
+    "outline": [
+      "Три обязательные основы познания: Господь, религия и пророк Мухаммад ﷺ.",
+      "Первая основа — познание Господа; Аллах взращивает все миры и является единственным достойным поклонения.",
+      "Все сотворённое, кроме Аллаха, относится к мирам, и человек — часть этого творения."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/tri-osnovy/"
+  },
+  "tri-osnovy-06": {
+    "outline": [
+      "Познание Господа через Его знамения и творения: ночь и день, солнце и луна, небеса и земля.",
+      "Доводы из Корана о сотворении мира и подчинённости небесных светил Аллаху.",
+      "Связь господства и поклонения: Творец всего один достоин поклонения.",
+      "Пояснение Ибн Касира: Творец всего сущего — Тот, Кто достоин поклонения."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/tri-osnovy/"
+  },
+  "tri-osnovy-07": {
+    "outline": [
+      "Разные виды поклонения должны посвящаться только Аллаху.",
+      "Довод о запрете обращаться с мольбой к кому-либо наряду с Аллахом.",
+      "Оценка посвящения поклонения кому-либо помимо Аллаха как многобожия и неверия.",
+      "Подтверждение положения аятом о тех, кто взывает к иному божеству без довода."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/tri-osnovy/"
+  },
+  "tri-osnovy-08": {
+    "outline": [
+      "Продолжение разбора видов поклонения, предписанных Аллахом"
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/tri-osnovy/"
+  },
+  "tri-osnovy-09": {
+    "outline": [
+      "Мольба как сердцевина поклонения и обращение к Аллаху с мольбой",
+      "Страх перед Аллахом как вид поклонения",
+      "Надежда на встречу с Господом и условие праведных деяний",
+      "Упование на Аллаха",
+      "Устремление к благому, опасение и смирение перед Аллахом"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/tri-osnovy/"
+  },
+  "tri-osnovy-10": {
+    "outline": [
+      "Остережение перед Аллахом: кораническое указание на аль-хашйа.",
+      "Обращение к Господу и предание себя Ему (аль-инаба).",
+      "Просьба о помощи только у Аллаха: аяты и хадис.",
+      "Прибегание к защите Аллаха, подтверждаемое сурами «Рассвет» и «Люди».",
+      "Мольба о спасении и свидетельство о принятом Аллахом призыве.",
+      "Жертвоприношение как поклонение, посвящаемое Аллаху.",
+      "Обеты и их исполнение как вид поклонения."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/tri-osnovy/"
+  },
+  "tri-osnovy-11": {
+    "outline": [
+      "Определение ислама как предания себя Аллаху через таухид, повиновение и отречение от ширка; три ступени религии",
+      "Пять столпов ислама",
+      "Свидетельство «Ля иляха илля-Ллах»: его смысл, отрицание поклонения кому-либо помимо Аллаха и утверждение единобожия",
+      "Коранические разъяснения свидетельства через призыв Ибрахима и обращение к людям Писания"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/tri-osnovy/"
+  },
+  "tri-osnovy-12": {
+    "outline": [
+      "Свидетельство о том, что Мухаммад — посланник Аллаха",
+      "Четыре обязанности по отношению к посланнику: повиноваться ему, верить его сообщениям, избегать запретного и поклоняться согласно его установлению",
+      "Доказательства обязательности намаза, закята, поста и хаджа",
+      "Начало темы имана: его ответвления и шесть столпов веры"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/tri-osnovy/"
+  },
+  "tri-osnovy-13": {
+    "outline": [
+      "Продолжение перечисления столпов имана: вера в ангелов, Писания, посланников, Последний день и предопределение.",
+      "Коранические доводы на столпы веры и предопределение.",
+      "Переход к ихсану и его единственный столп — поклонение Аллаху с осознанием того, что Он видит человека.",
+      "Подтверждение смысла ихсана аятами о богобоязненности, благих делах и наблюдении Аллаха за поклонением и поступками."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/tri-osnovy/"
+  },
+  "tri-osnovy-14": {
+    "outline": [
+      "Хадис Джибриля как довод из Сунны",
+      "Основы ислама и пять столпов",
+      "Основы имана и вера в предопределение",
+      "Ихсан и поклонение под наблюдением Аллаха",
+      "Вопрос о Часе и его предзнаменования",
+      "Джибриль пришёл научить людей религии"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/tri-osnovy/"
+  },
+  "tri-osnovy-15": {
+    "outline": [
+      "Десятилетний призыв в Мекке и вознесение Пророка ﷺ; предписание пяти молитв",
+      "Хиджра из страны ширка в страну Ислама: обязательность и доводы из Корана и сунны",
+      "Предписания Ислама в Медине и завершение земной жизни Пророка ﷺ",
+      "Сохранение его религии: призыв к таухиду и предостережение от ширка",
+      "Миссия Мухаммада ﷺ ко всему человечеству и доведение религии до совершенства"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/tri-osnovy/"
+  },
+  "tri-osnovy-16": {
+    "outline": [
+      "Призыв пророка ﷺ к единобожию и вознесение, после которого были предписаны пять молитв",
+      "Хиджра из страны ширка в страну Ислама: обязанность, доводы и срок действия",
+      "Предписания Ислама, установленные после переселения в Медину",
+      "Завершение пророческой миссии: всеобщий призыв, совершенство религии и смерть пророка ﷺ"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/tri-osnovy/"
+  },
+  "tri-osnovy-17": {
+    "outline": [
+      "Воскрешение людей после смерти и их возвращение к земле",
+      "Отчёт о деяниях и воздаяние за добро и зло",
+      "Миссия посланников: благая весть и предостережение",
+      "Нух как первый посланник и Мухаммад как последний пророк",
+      "Призыв всех посланников поклоняться одному Аллаху и отвергнуть тагута"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/tri-osnovy/"
+  },
+  "tri-osnovy-18": {
+    "outline": [
+      "Определение тагута: переход установленных границ в поклонении, следовании и подчинении.",
+      "Пять основных видов тагутов.",
+      "Запрет принуждения к религии и необходимость отвергнуть тагута и уверовать в Аллаха.",
+      "Смысл свидетельства единобожия.",
+      "Ислам, намаз и джихад как начало, столп и вершина религии.",
+      "Завершение курса и заключительное благословение пророку ﷺ."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/akida/tri-osnovy/"
+  },
+  "kniga-edinobozhiya-001": {
+    "outline": [
+      "Значение таухида и его роль в жизни верующего",
+      "Жизненный путь, семья, учителя и труды автора книги",
+      "Оценки учёными его знаний и деятельности",
+      "Причины выбора «Китабу ат-Таухид» для изучения",
+      "Особенности построения книги и опора на Коран и Сунну"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-002": {
+    "outline": [
+      "Обзор устройства книги: десять частей и основные тематические разделы.",
+      "Причины отсутствия предисловия в книге и возможное намерение автора следовать примеру имама аль-Бухари."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-003": {
+    "outline": [
+      "Таухид аль-улюхийа: исключительное право Аллаха на поклонение; другое название — таухид аль-‘ибада.",
+      "Понятие поклонения рассматривается со стороны совершающего его и со стороны самого деяния.",
+      "Поклонение определяется как смиренное служение Аллаху через исполнение повелений и оставление запретного с любовью и возвеличиванием.",
+      "К поклонению относятся совершаемые деяния: намаз, хадж, любовь и страх перед Аллахом, зикр и чтение Корана.",
+      "Таухид имён и атрибутов: признание исключительной принадлежности Аллаху имён и качеств, о которых Он сообщил, без искажения, отрицания, уподобления и выяснения образа."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-004": {
+    "outline": [
+      "Глава о необходимости единобожия.",
+      "Цель сотворения людей и джиннов — поклонение Аллаху.",
+      "Призыв посланников поклоняться Аллаху и избегать тагута."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-005": {
+    "outline": [
+      "Аят суры «аль-Исра»: исключительное поклонение Аллаху и доброе отношение к родителям.",
+      "Аят суры «ан-Ниса»: поклонение Аллаху без приобщения сотоварищей.",
+      "Продолжение доказательств обязательности таухида кораническими аятами.",
+      "Связь единобожия с исполнением прав родителей.",
+      "Запрет ширка как основной смысл приведённых наставлений."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-006": {
+    "outline": [
+      "Заповедь не приобщать к Аллаху сотоварищей и проявлять добро к родителям (аят 151 суры «аль-Анам»)."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-007": {
+    "outline": [
+      "Слова Ибн Мас‘уда о завещании Пророка, изложенном в аятах с запретами и наставлениями.",
+      "Завет единобожия: поклоняться Аллаху и не приобщать к Нему сотоварищей.",
+      "Обязанность Аллаха перед теми, кто не приобщает Ему сотоварищей, и предостережение от преждевременного самоуспокоения этой радостной вестью."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-008": {
+    "outline": [
+      "Цели сотворения человека и смысл поклонения как таухида.",
+      "Связь таухида с отказом от тагута и миссией всех посланников.",
+      "Доводы из сур «аль-Ан’ам», «аль-Исра» и «ан-Ниса» о запрете ширка и правах Аллаха.",
+      "Обязанности рабов перед Аллахом и обещание Аллаха тем, кто соблюдает таухид.",
+      "Передача знания и благой вести: польза, уместное сокрытие и опасность самоуспокоенности.",
+      "Свидетельства достоинства Муаза ибн Джабаля и важности таухида."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-009": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "В локальном исходном тексте раздел «Лекция №9» содержит только заголовок главы о достоинстве таухида и один аят; материала недостаточно для оглавления из 3–7 пунктов.",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-010": {
+    "outline": [
+      "Свидетельство о единственности Аллаха и отсутствии у Него сотоварища.",
+      "Признание Мухаммада рабом и посланником Аллаха.",
+      "Убеждение об Исе как рабе Аллаха, Его слове, ниспосланном Марйам, и Духе от Него.",
+      "Вера в истинность Рая и Огня.",
+      "Обещание войти в Рай согласно делам для засвидетельствовавшего эти основы."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-011": {
+    "outline": [
+      "Хадис Итбана: искреннее произнесение слов единобожия как причина избавления от Огня.",
+      "Разговор Мусы с Аллахом о поминании и мольбе посредством слов «Нет божества достойного поклонения, кроме Аллаха».",
+      "Притча о весах: слова единобожия перевешивают семь небес и семь земель."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-012": {
+    "outline": [
+      "Хадис о прощении грехов величиной с Землю при предстании перед Аллахом без ширка.",
+      "Выводы из второй главы: милость Аллаха, награда за таухид и его связь с прощением грехов.",
+      "Условия искреннего свидетельства единобожия и отказ от ширка не только на словах.",
+      "Дополнительные выводы о хадисах второй главы: достоинства таухида, весы деяний и упомянутые в них положения вероубеждения."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-013": {
+    "outline": [
+      "Пример Ибрахима как единобожника и преданного поклонника Аллаха.",
+      "Признаки верующих: отказ от приобщения сотоварищей и трепет перед возвращением к Господу.",
+      "Стремление к благим делам и опережение в них."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-014": {
+    "outline": [
+      "Рассказ Хусайна ибн ‘Абдур-Рахмана о лечении укуса посредством рукъии",
+      "Сообщение о семидесяти тысячах, которые войдут в Рай без отчёта и наказания",
+      "Разногласия сподвижников о том, кто относится к этой группе",
+      "Признаки этих людей: не просят рукъию и прижигания, не верят в дурные приметы и уповают на Господа"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-015": {
+    "outline": [
+      "Признаки людей, которым обещан вход в Рай без расчёта: они не просят о рукъии, избегают прижигания и суеверий, уповают на Аллаха.",
+      "Просьба Уккаши ибн Михсана и ответ Пророка о его месте среди этих людей.",
+      "Отказ другого человека и слова о том, что Уккаша его опередил.",
+      "Выводы автора о воплощении таухида, уповании на Аллаха и достоинствах сподвижников и общины."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-016": {
+    "outline": [
+      "Разъяснение необходимости опасаться ширка.",
+      "Предупреждение о том, что Аллах не прощает приобщение сотоварищей, тогда как иные грехи прощает по Своему желанию.",
+      "Мольба Ибрахима о защите от поклонения идолам — для него самого и его потомков."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-017": {
+    "outline": [
+      "Малый ширк и показуха как предмет особого предостережения",
+      "Предупреждение о последствиях обращения с поклонением к кому-либо помимо Аллаха",
+      "Хадис о входе в Рай или Огонь в зависимости от того, избегал ли человек ширка",
+      "Необходимость просить защиты от ширка и извлекать урок из примера Ибрахима",
+      "Выводы главы: опасность ширка и превосходство того, кто от него уберёгся"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-018": {
+    "outline": [
+      "Глава о призыве к свидетельству единобожия: «Нет божества, достойного поклонения, кроме Аллаха».",
+      "Разъяснение коранического указания на то, что призыв к Аллаху должен совершаться на основе знания.",
+      "Подтверждение пророческого пути призыва и отречение от многобожия.",
+      "Разбор аята из суры «Йусуф» (12:108), приведённого как довод к теме главы."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-019": {
+    "outline": [
+      "Поручение Му‘аза в Йемен: начинать призыв со свидетельства единобожия.",
+      "Последовательное разъяснение обязательности пяти ежедневных молитв и закята для богатых в пользу бедных.",
+      "Предостережение от посягательства на лучшее имущество людей и напоминание о мольбе притеснённого.",
+      "Эпизод Хайбара: вручение знамени ‘Али ибн Абу Талибу и его исцеление.",
+      "Призыв жителей к Исламу и разъяснение их обязанностей перед Аллахом; достоинство наставления человека на прямой путь."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-020": {
+    "outline": [
+      "Призыв к Аллаху: искренность, знание и первоочередность таухида.",
+      "Постепенное обучение: начинать с главного и разъяснять сомнения.",
+      "Правила закята: кому и какое имущество следует отдавать; предостережение о мольбе угнетённого.",
+      "Трудности на пути таухида и знамения пророчества, связанные с обещанием знамени и Али.",
+      "Поведение при джихаде: призыв к исламу до боя и разъяснение обязанностей призываемым.",
+      "Права Аллаха, награда за наставление и допустимость клятвы при вынесении фетвы."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-021": {
+    "outline": [],
+    "status": "missing",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-022": {
+    "outline": [
+      "Смысл таухида и свидетельства о единственности достойного поклонения",
+      "Обращение к тем, кто сам ищет близости к Аллаху, надеется на Его милость и боится Его наказания",
+      "Пример Ибрахима: отречение от поклонения кому-либо, кроме Творца, и утверждение прямого пути от Него"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-023": {
+    "outline": [
+      "Запрет признавать за книжниками и монахами право устанавливать дозволенное и запретное вопреки Аллаху",
+      "Любовь к Аллаху и ложным божествам: различие между многобожниками и верующими",
+      "Условия неприкосновенности жизни и имущества после произнесения свидетельства: отречение от поклонения кому-либо помимо Аллаха",
+      "Следующие главы раскрывают смысл этой главы"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-024": {
+    "outline": [
+      "Выводы автора из шестой главы.",
+      "Разъяснение смысла таухида.",
+      "Разъяснение свидетельства шахады на ясных примерах."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-025": {
+    "outline": [
+      "Запрет ношения кольца, шнурка или амулета с целью отвести беду или предотвратить её: такое действие относится к ширку.",
+      "Коранское указание на то, что никто не способен отвратить вред или удержать милость, если этого пожелает Аллах.",
+      "Рассказ об осуждении Пророком ﷺ кольца, которое человек носил для защиты от слабости, и предостережение о его последствиях."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-026": {
+    "outline": [
+      "Предостережение Пророка ﷺ против ношения амулетов и связывания с ними сердца.",
+      "Ношение амулета как проявление ширка.",
+      "Поступок Хузейфы, снявшего с человека шнурок от лихорадки, и кораническое доказательство.",
+      "Выводы о запрете амулетов, колец и шнурков, включая ракушки от сглаза.",
+      "О последствиях упования на амулет и осуждении этого поступка.",
+      "Использование сподвижниками аятов о ширке для порицания подобных действий.",
+      "Смысл пророческого ду‘а против тех, кто носит амулеты."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-027": {
+    "outline": [
+      "Глава о заклинаниях и амулетах",
+      "Повеление снять с шей верблюдов ожерелья из тетивы",
+      "Сообщение о том, что заклинания, амулеты и привораживание относятся к ширку"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-028": {
+    "outline": [
+      "Амулеты и разногласие учёных о ношении коранических аятов",
+      "Допустимые заклинания и запретные привораживания",
+      "Предания о том, к чему приводит привязывание сердца к амулетам",
+      "Запрет амулетов и ожерелий, а также награда за их снятие"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-029": {
+    "outline": [
+      "Глава 9: обращение за благодатью к деревьям, камням и подобным предметам",
+      "Разбор аятов о Лат, Уззе и Манат"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-030": {
+    "outline": [
+      "Рассказ Абу Вакида аль-Лейси о походе в Хунайн и дереве Зат Анват у многобожников.",
+      "Просьба новых мусульман сделать им подобное дерево для обрядов.",
+      "Ответ Пророка ﷺ: сравнение этой просьбы с просьбой сынов Израилевых и предостережение от следования обычаям прежних народов."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-031": {
+    "outline": [
+      "Толкование аятов суры «ан-Наджм» о Лат, Уззе и Манат.",
+      "Просьба сподвижников о дереве для благодати и их намерение приблизиться к Аллаху.",
+      "Порицание Пророком уподобления прежним народам и обращение к примеру сынов Израилевых.",
+      "Различие большого и малого ширка; слова «Ля иляха илляЛлах» как отрицание подобных просьб.",
+      "Предостережение от обычаев джахилийи и закрытие путей, ведущих к ширку.",
+      "Недостаток знания у недавно принявших ислам и риск сохранения прежних обычаев."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-032": {
+    "outline": [
+      "Глава 10: запрет жертвоприношения не Аллаху",
+      "Доказательство из аятов суры «аль-Ан’ам» о посвящении жертвоприношения одному Аллаху",
+      "Повеление совершать жертвоприношение Господу в суре «аль-Каусар»"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-033": {
+    "outline": [
+      "Жертвоприношение, посвящённое не Аллаху, и предостережение от него.",
+      "История двух путников, которых попросили принести жертву идолу.",
+      "Разный исход для уступившего требованию и отказавшегося совершить жертвоприношение не Аллаху."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-034": {
+    "outline": [
+      "Смысл коранических повелений посвящать молитву и жертвоприношение Аллаху.",
+      "Проклятие за жертвоприношение не Аллаху и за преступления против прав родителей, неприкосновенности человека и права соседа.",
+      "Различие между проклятием конкретного человека и общим осуждением грешников.",
+      "Хадис о жертвоприношении мухи: опасность даже внешне малого проявления ширка и стойкость перед идолопоклонством.",
+      "Значение намерений сердца и близость Рая и Огня."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-035": {
+    "outline": [
+      "Запрет приносить жертву Аллаху в месте, где жертвуют не Ему.",
+      "В качестве довода приводится запрет Пророку совершать намаз в определённой мечети.",
+      "Предпочтение мечети, основанной на богобоязненности, и похвала её прихожанам за стремление к очищению."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-036": {
+    "outline": [
+      "Обет зарезать жертвенного верблюда в Буане и обращение за решением к Пророку ﷺ.",
+      "Проверка, был ли на месте языческий идол или проходили ли там собрания многобожников.",
+      "Повеление исполнить дозволенный обет и запрет обетов о неповиновении Аллаху или о том, чем человек не владеет."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-037": {
+    "outline": [
+      "Разъяснение смысла запрета стоять в мечети Дыйрар и последствий греха для места.",
+      "Уточнение неясного вопроса и роль муфтия в запросе разъяснений.",
+      "Условия допустимости выбора места для обета и запрет мест, связанных с идолами или языческими празднествами.",
+      "Недопустимость обета о грехе или о том, чем человек не владеет.",
+      "Запрет уподобления язычникам в их праздниках, даже непреднамеренно."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-038": {
+    "outline": [
+      "Глава 12: посвящение обета (назр) кому-либо помимо Аллаха как ширк",
+      "Коранические аяты о верности обетам и знании Аллаха о пожертвованиях и обетах",
+      "Хадис о необходимости исполнить обет покорности Аллаху и запрете исполнять обет ослушания",
+      "Выводы главы: обязательность исполнения обета и недопустимость посвящать его не Аллаху"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-039": {
+    "outline": [
+      "Глава 13: обращение за прибеганием (исти‘аза) к кому-либо, кроме Аллаха, как ширк.",
+      "Разъяснение аята 6 суры «аль-Джинн» о людях, искавших покровительства у джиннов.",
+      "Связь содержания аята с запретом посвящать исти‘азу кому-либо помимо Аллаха.",
+      "Указание аята на последствия такого обращения — увеличение страха или беззакония.",
+      "Положение прибегания к созданиям в свете единобожия.",
+      "Урок приводит кораническое свидетельство в обоснование темы главы.",
+      "Границы опубликованного раздела: текст лекции №39 заканчивается приведённым аятом."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-040": {
+    "outline": [
+      "Прибегание к совершенным словам Аллаха как защита от зла сотворённого.",
+      "Выводы из главы о прибегании за защитой к кому-либо, кроме Аллаха, как проявлении ширка.",
+      "Разъяснение аята из суры «аль-Джинн» и достоинства краткой защитной молитвы.",
+      "Мирская польза от действия сама по себе не доказывает, что в нём нет ширка.",
+      "Аргументация хадисом в вопросе несотворённости слов Аллаха.",
+      "Опасность обращения к творениям за защитой и важность обращения к Аллаху.",
+      "Тема границы 40-й лекции: опубликованный текст объединяет хадис и выводы главы без отдельной явной границы аудиочасти."
+    ],
+    "status": "text",
+    "note": "В тексте отдельная граница части аудио для лекции №40 не подтверждена: под заголовком приведены хадис и выводы из главы 13.",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-041": {
+    "outline": [
+      "Запрет обращения с мольбой к кому-либо помимо Аллаха, не способному принести пользу или вред.",
+      "Обращение за избавлением от беды и дарованием блага — во власти Аллаха.",
+      "Довод из суры «Йунус», аяты 106–107, о запрете такого взывания."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-042": {
+    "outline": [
+      "Призыв обращаться за уделом к Аллаху, поклоняться Ему и благодарить Его.",
+      "Предостережение от взывания к тем, кто не способен ответить и отвергнет поклонение им.",
+      "Аллах отвечает на мольбу нуждающегося и устраняет беду: призыв к размышлению о Его единственности."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-043": {
+    "outline": [
+      "Запрет обращаться за помощью в поклонении не к Аллаху",
+      "Разбор аятов о бесполезности мольбы к тем, кто не способен ни помочь, ни навредить",
+      "Почему мольба к кому-либо помимо Аллаха относится к большому ширку",
+      "Связь мольбы с поклонением, и последствия обращения к творениям",
+      "Исключительная надежда на Аллаха в просьбах о пропитании и Рае",
+      "Пример защиты Пророком таухида: просьба о помощи должна быть обращена к Аллаху"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-044": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "В разделе «Лекция №44» опубликован только заголовок «Экзаменационные вопросы»; содержательного текста для составления оглавления нет.",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-045": {
+    "outline": [
+      "Довод из суры «аль-А‘раф»: приобщаемые к Аллаху не творят, сами сотворены и не способны помочь ни поклоняющимся им, ни себе.",
+      "Довод из суры «Фатыр»: ложные божества не владеют даже малой долей, не слышат мольбы и не могут ответить на неё.",
+      "Отвержение в День воскресения поклонения, посвящённого кому-либо помимо Аллаха."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-046": {
+    "outline": [
+      "Хадис о ранении Пророка ﷺ при Ухуде и ниспослании аята о том, что решение принадлежит Аллаху.",
+      "Молитва Пророка ﷺ против нескольких людей во время утреннего намаза и последующее ниспослание того же аята.",
+      "Призыв Пророка ﷺ к ближайшим родственникам и разъяснение, что он не может избавить их от ответственности перед Аллахом.",
+      "Значение этих сообщений для отрицания самостоятельной способности творений приносить пользу или вред и отвечать на мольбы.",
+      "Утверждение исключительного права Аллаха решать исход событий и принимать решения о Своих рабах."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-047": {
+    "outline": [
+      "Толкование аятов о ложных заступниках и обращении к ним помимо Аллаха.",
+      "События при Ухуде и мольба Пророка ﷺ о проклятии противников; последующее ниспослание аятов и их покаяние.",
+      "Мольба кунут во время бедствия и допустимость упоминания конкретных людей в ней.",
+      "Призыв Пророка ﷺ к ближайшим родственникам и разъяснение, что даже родство не заменяет веру и не дает спасения без Аллаха."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-048": {
+    "outline": [
+      "Разбор слов Всевышнего о том, как после прекращения страха ангелы спрашивают, что сказал Господь.",
+      "Толкование 23-го аята суры «Саба».",
+      "Утверждение возвышенности и величия Аллаха в контексте аята."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-049": {
+    "outline": [
+      "Ангелы смиренно воспринимают решение Аллаха на небесах.",
+      "Ангелы спрашивают о сказанном Господом и подтверждают истину Его слов.",
+      "Шайтаны подслушивают откровение и передают услышанное вниз по цепочке.",
+      "Падающая звезда может прервать передачу; колдун или предсказатель смешивает услышанную правду со множеством лжи.",
+      "Единственная правдивая весть заставляет людей доверять остальным словам предсказателя."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-050": {
+    "outline": [
+      "Сотрясение небес при ниспослании откровения и страх перед речью Аллаха.",
+      "Падение обитателей небес ниц и первым поднимающийся Джибриль.",
+      "Передача Джибрилем откровения ангелам и далее туда, куда повелел Аллах."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-051": {
+    "outline": [
+      "Разбор аята из суры «Саба» и опровержение ширка, связанного с обращением к праведникам.",
+      "Причина, по которой обитатели небес испрашивают Аллаха, и ответ Джибриля.",
+      "Содрогание небес при речи Аллаха и поклон небесных обитателей.",
+      "Подслушивание шайтанами откровения и поражение их падающими звёздами.",
+      "Как отдельное истинное слово, перехваченное шайтанами, смешивается с множеством лжи колдунов.",
+      "Подтверждение качеств Аллаха и страх творений перед Ним."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-052": {
+    "outline": [
+      "Глава 17: заступничество",
+      "Предостережение тем, кто страшится предстояния перед Господом без покровителя и заступника",
+      "Аят 51 суры «аль-Ан‘ам» о необходимости помнить о Судном дне"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-053": {
+    "outline": [
+      "Заступничество принадлежит Аллаху",
+      "Заступничество возможно только с дозволения Аллаха",
+      "Даже ангелы не могут заступиться без дозволения Аллаха",
+      "Никто не обладает самостоятельным правом заступничества наряду с Аллахом"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-054": {
+    "outline": [
+      "Коран отвергает упование многобожников на посредников и связывает допустимость заступничества с дозволением Аллаха.",
+      "Заступничество Пророка в Судный день: он ходатайствует лишь после разрешения Господа.",
+      "Кто удостоится заступничества: искренние единобожники, исповедующие единственность Аллаха.",
+      "Заступничество как милость для искренних рабов и почесть для Пророка.",
+      "Различие между отвергаемым заступничеством, связанным с ширком, и дозволенным ходатайством за муваххидов."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-055": {
+    "outline": [
+      "Толкование аятов о заступничестве и его принадлежности Аллаху.",
+      "Различие между отвергаемым и дозволенным заступничеством.",
+      "Великое заступничество Пророка и «восхваляемое место».",
+      "Заступничество совершается только с дозволения Аллаха.",
+      "Кто заслужит ходатайство Пророка и почему оно не касается многобожников.",
+      "Подлинная сущность заступничества."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-056": {
+    "outline": [
+      "Глава 18: наставление на прямой путь и его принадлежность Аллаху.",
+      "Слова Аллаха о том, что Пророк не может наставить на прямой путь того, кого любит.",
+      "Аллах наставляет на прямой путь тех, кого пожелает (сура «Аль-Къасас», 56)."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-057": {
+    "outline": [
+      "Последние минуты жизни Абу Талиба и просьба Пророка ﷺ произнести свидетельство единобожия.",
+      "Уговоры Абу Джахля и ‘Абдуллаха бин Абу Умаййи отказаться от этого свидетельства.",
+      "Отказ Абу Талиба и его последние слова о религии предков.",
+      "Намерение Пророка ﷺ просить прощения за дядю и ниспослание запрета просить прощения за многобожников.",
+      "Аят о том, что наставление на прямой путь принадлежит Аллаху."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-058": {
+    "outline": [
+      "Толкование аятов о невозможности наставить близкого человека и о запрете просить прощения за многобожников.",
+      "Призыв Пророка к умирающему Абу Талибу произнести свидетельство единобожия и понимание его смысла.",
+      "Почему усилия Пророка не привели к принятию Ислама его дядей; опровержение утверждения, что Абу Талиб стал мусульманином.",
+      "Влияние дурного окружения и чрезмерного почитания предков и знатных людей.",
+      "Значение заключительного состояния человека и размышление о сомнениях, мешавших принять призыв.",
+      "Запрет испрашивать прощение за Абу Талиба, несмотря на молитву Пророка."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-059": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "В локальном тексте раздел «Лекция №59» содержит только заголовок «Экзаменационные вопросы» без опубликованного тематического плана или текста, поэтому темы лекции определить нельзя.",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-060": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "В локальном исходнике раздел «Лекция №60» содержит только заголовок «Экзаменационные вопросы»; текста или тематического плана, по которому можно составить оглавление, нет.",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-061": {
+    "outline": [
+      "Причина неверия и оставления религии — чрезмерное возвеличивание праведников.",
+      "Предостережение от чрезмерности в религии на примере запрета возвеличивать пророка подобно тому, как христиане возвеличивают Ису.",
+      "Аяты и хадисы, разъясняющие запрет религиозной чрезмерности и её опасность."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-062": {
+    "outline": [
+      "Толкование Ибн ‘Аббасом аятов о почитании Вадда, Сува‘а, Йагъуса, Йа‘ука и Насра",
+      "Как возвеличивание праведников и создание их изображений со временем привело к поклонению им",
+      "Предостережение Пророка ﷺ от чрезмерного возвеличивания его личности"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-063": {
+    "outline": [
+      "Предостережение Пророка от чрезмерности в религии и её губительных последствий",
+      "Повторённое трижды предупреждение о гибели тех, кто проявляет чрезмерность"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-064": {
+    "outline": [
+      "Почему возвеличивание праведников стало причиной первого многобожия на земле.",
+      "Как изменение религии пророков началось с нововведений и смешения истины с ложью.",
+      "Почему поколения стали неверно понимать намерения ученых и превращать почитание в поклонение.",
+      "Разъяснение 23-го аята суры «Нух».",
+      "Как в сердце человека истина может умаляться, а ложь — усиливаться."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-065": {
+    "outline": [
+      "Нововведение как возможная причина неверия и даже благие намерения не меняют его последствий.",
+      "Возвеличивание праведников и поклонение у могил: вред обрядов и запрет памятников.",
+      "История праведников народа Нуха и искажение ее смысла сторонниками нововведений.",
+      "Заступничество как первоначальная цель почитания праведников.",
+      "Предостережение Пророка от чрезмерного возвеличивания и гибели излишествующих.",
+      "Забывание знания и смерть ученых как причина его исчезновения."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-066": {
+    "outline": [
+      "Запрет совершать поклонение Аллаху у могил праведников и тем более поклоняться им самим",
+      "Предание Умм Салямы о церкви с изображениями и месте поклонения над могилой праведника",
+      "Две опасные смуты: возведение мест поклонения на могилах и изображения"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-067": {
+    "outline": [
+      "Предостережение Пророка ﷺ перед смертью против превращения могил пророков в места поклонения",
+      "Почему Пророка ﷺ не похоронили на открытом месте: опасение, что его могилу превратят в мечеть"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-068": {
+    "outline": [
+      "Запрет превращать могилы пророков в места поклонения: хадис Джундаба о наставлении Пророка в последние дни жизни.",
+      "Запрет совершать намаз на могилах, даже если над ними ничего не построено.",
+      "Разъяснение слов ‘Аиши о возможном превращении могилы Пророка в мечеть и о том, что местом мечети считается всякое место, предназначенное для намаза.",
+      "Предостережение из хадиса Ибн Мас‘уда о людях, которых застанет Час и которые превращают могилы в места поклонения."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-069": {
+    "outline": [
+      "Предупреждение против устройства мест поклонения у могил праведников даже с благими намерениями",
+      "Запрет изображений и скульптур и строгость предостережения от них",
+      "Пророческое наставление об опасности превращения могил в места поклонения, усиленное незадолго до смерти",
+      "Запрет возводить место поклонения у могилы Пророка и предупреждение об обычаях иудеев и христиан",
+      "Сокрытие могилы Пророка и разъяснение смысла превращения могил в места поклонения как пути к многобожию"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-070": {
+    "outline": [
+      "В хутбе перед смертью Пророк опроверг заблуждения двух течений",
+      "Предсмертная болезнь Пророка",
+      "Почётное положение халила Аллаха и отличие этой степени от любви",
+      "Достоинство Абу Бакра как лучшего из сподвижников",
+      "Указание на будущее преемничество Абу Бакра"
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-071": {
+    "outline": [
+      "Чрезмерное почитание могил праведников как путь к поклонению им помимо Аллаха",
+      "Предостережение из хадиса пророка против превращения могил в места поклонения"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-072": {
+    "outline": [
+      "Комментарий Муджахида к упоминанию ал-Лат и аль-Уззы в Коране.",
+      "Предания о том, как ал-Лятт готовил кашу для паломников и как его могила стала местом поклонения.",
+      "Определение идола и поклонения; причина возвеличивания могилы праведника.",
+      "Предостережение против превращения могил в места поклонения, строительства над ними мечетей и зажигания светильников.",
+      "Проклятие посещающих могилы женщин и тех, кто устанавливает на могилах светильники.",
+      "Выводы из 21-й главы: происхождение имени ал-Лятт и причины его почитания арабами.",
+      "Упоминание о сильном гневе Аллаха и мольбе Пророка ﷺ о защите от превращения могил в мечети."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-073": {
+    "outline": [
+      "Глава 22: защита Пророком неприкосновенности таухида и пресечение путей, ведущих к ширку.",
+      "Аяты 128–129 суры «ат-Тауба»: сострадание Посланника к верующим и его упование на Аллаха.",
+      "Достаточность Аллаха и признание Его единственным достойным поклонения и Господом великого Трона.",
+      "Смысл главы: оберегать единобожие, закрывая средства, ведущие к многобожию.",
+      "Послание Пророка как милость и его стремление к благу общины."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-074": {
+    "outline": [
+      "Запрет превращать могилу Пророка в место регулярных собраний и особого поклонения.",
+      "Повеление совершать молитвы за Пророка: они достигают его независимо от места молящегося.",
+      "Предание о запрете частого посещения могилы и призывания Аллаха у неё.",
+      "Разъяснение понятия «‘ид» как повторяющегося места или времени собрания.",
+      "Выводы из главы: молитва дома, запрет намаза у могил и предостережение от чрезмерного возвеличивания могил.",
+      "Положение Пророка в барзахе и представление ему деяний общины через молитвы за него."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-075": {
+    "outline": [
+      "Разбор главы о предсказании, что часть мусульманской общины станет поклоняться идолам.",
+      "Толкование аята 51 суры «ан-Ниса» о вере в джибт и тагут и предпочтении неверующих верующим."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-076": {
+    "outline": [
+      "Аят суры «аль-Маида»: упоминание проклятых и наказанных за поклонение тагуту.",
+      "Указание на гнев Аллаха и превращение в обезьян и свиней как часть приведённого аята.",
+      "Аят суры «аль-Кахф» о решении воздвигнуть мечеть над обитателями пещеры."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-077": {
+    "outline": [
+      "Предсказание о том, что мусульмане будут следовать обычаям прежних народов",
+      "Образ подражания вплоть до повторения их поступков в мелочах",
+      "Уточнение, что речь идёт об иудеях и христианах"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-078": {
+    "outline": [
+      "Предсказание о распространении власти мусульманской общины на восток и запад и о двух сокровищницах.",
+      "Мольба Пророка ﷺ о защите общины от всеобщей гибели и внешнего врага.",
+      "Обещание сохранения общины при условии, что её люди не начнут воевать друг с другом и пленять друг друга.",
+      "Предупреждение о заблуждающих предводителях и междоусобном кровопролитии.",
+      "Предсказания о присоединении части общины к многобожникам, поклонении идолам и появлении лжепророков.",
+      "Обещание, что в общине до наступления Часа останется победоносная группа, придерживающаяся истины."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-079": {
+    "outline": [
+      "Толкование аятов 51 суры «ан-Ниса», 60 суры «аль-Маида» и 21 суры «аль-Кахф».",
+      "Что подразумевает вера в джибта и тагута и как соотносятся внутреннее убеждение и внешнее уподобление.",
+      "Оценка неверующих как якобы более праведных, чем верующие, и приобщение сотоварищей к Аллаху в этой общине.",
+      "Предсказание о поклонении идолам и появлении лжепророков; пример аль-Мухтара.",
+      "Сохранение группы, придерживающейся истины, до наступления Часа.",
+      "Знамения, перечисленные в главе: распространение ислама, сокровищницы, исполнение и отклонение просьб Пророка, смута, заблуждающие имамы и победоносная община."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-080": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "Для лекции №80 в опубликованном тексте указано только «Экзаменационные вопросы»; содержания, позволяющего составить оглавление, нет.",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-081": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "В локальном тексте раздел «Лекция №81» содержит только заголовок «Экзаменационные вопросы», без раскрытых тем; составить подтверждённое оглавление невозможно.",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-082": {
+    "outline": [
+      "Колдовство в аятах суры «аль-Бакара» и суры «ан-Ниса».",
+      "Толкование понятий «джибт» и «тагут» в высказываниях Умара ибн аль-Хаттаба и Джабира.",
+      "Связь колдовства с шайтанами и предсказателями в переданных сообщениях."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-083": {
+    "outline": [
+      "Хадис о семи губительных грехах, включая многобожие и колдовство",
+      "Сообщения сподвижников о наказании колдунов и колдуний",
+      "Выводы из главы: толкование понятий «джибт» и «тагут», статус колдуна и запретные грехи"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-084": {
+    "outline": [
+      "Глава 25: разъяснение гадания по полёту птиц, черчения линий и суеверий как разновидностей джибта.",
+      "Передача слов Пророка ﷺ о ’ияфе, таркъе и суеверии.",
+      "Толкование терминов ’ияфа и таркъ через пояснение Ауфа.",
+      "Объяснение аль-Хасана аль-Басри, что джибт — это отголосок Шайтана.",
+      "Оценка иснада и упоминание передатчиков хадиса наряду с Ахмадом."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-085": {
+    "outline": [
+      "Астрология как вид колдовства и связь между увлечением ею и изучением колдовства",
+      "Завязывание узлов с плевками и отнесение такого действия к колдовству и ширку",
+      "Связь привязанности сердца с тем, на что человек полагается",
+      "Клевета и сплетни как разновидность колдовства",
+      "Красноречие, способное оказывать подобное колдовству воздействие"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-086": {
+    "outline": [
+      "Запрет обращаться к прорицателям и спрашивать их о сокровенном.",
+      "Предостережение от веры предсказателям и последствия такого доверия для веры.",
+      "Разъяснение понятий прорицателя и предсказателя, а также круг лиц, претендующих на знание сокрытого.",
+      "Связь гаданий с астрологией и другими притязаниями на знание судеб.",
+      "Предостережение от нумерологии и гадания по звёздам."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-087": {
+    "outline": [
+      "Хадисы о неверии тех, кто верит предсказателям и прорицателям",
+      "Слова пророка о суевериях, гадании и колдовстве",
+      "Определения прорицателя и предсказателя; обобщение ибн Таймийи о гадателях",
+      "Предостережение от нумерологии и гадания по звёздам"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-088": {
+    "outline": [
+      "Глава 27: снятие колдовства и оценка обращения к колдовству для его устранения.",
+      "Различие между запрещённым снятием колдовства посредством другого колдовства и дозволенным лечением мольбой и законными средствами."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-089": {
+    "outline": [
+      "Глава о суевериях и дурных предзнаменованиях.",
+      "Коранские примеры опровержения дурных предзнаменований.",
+      "Хадис о несостоятельности веры в заразность, приметы, влияние совы, месяца сафар, звёзд и злых духов."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-090": {
+    "outline": [
+      "Отрицание самостоятельного влияния инфекции и дурных примет; предпочтение доброго предзнаменования.",
+      "Разъяснение, что доброе предзнаменование — это доброе слово.",
+      "Что мусульманину сказать и как поступить, если он увидел неприятный знак: обратиться к Аллаху с мольбой о благе и защите от зла."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-091": {
+    "outline": [
+      "Суеверие как разновидность ширка и роль упования на Аллаха в избавлении от него",
+      "Отказ от дела из-за дурной приметы и слова-мольба для искупления этого поступка",
+      "Определение суеверия и его влияние на решения человека",
+      "Опровержение веры в самостоятельное действие дурных примет и иных предзнаменований",
+      "Доброе предзнаменование и его отличие от суеверия"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-092": {
+    "outline": [
+      "Глава 29: о пользе звёзд и пределах астрологических знаний.",
+      "Хадис Катады: звёзды украшают небо, служат для изгнания шайтанов и помогают путникам ориентироваться.",
+      "Запрет приписывать звёздам иные функции и разногласие учёных об изучении положения Луны относительно созвездий."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-093": {
+    "outline": [
+      "Хадис Абу Мусы аль-Аш‘ари о трёх категориях людей, которым закрыт Рай: пьяницах, разрывающих родственные связи и верящих в колдовство.",
+      "Источники передачи хадиса.",
+      "Выводы автора о мудрости сотворения звёзд и воззрениях на их предназначение.",
+      "Разногласие учёных о допустимости изучения положения небесных тел.",
+      "Предостережение верующим в колдовство, даже если они считают его ложью."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-094": {
+    "outline": [
+      "Глава 30: связывание выпадения дождя с расположением звёзд",
+      "Толкование аята о том, что люди считают истину ложью",
+      "Хадис о пережитках джахилийи: гордости происхождением, поношении родословной, примете о звёздах и причитаниях по умершим"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-095": {
+    "outline": [
+      "Хадис о дожде в Худайбийе и различии между благодарностью Аллаху и приписыванием дождя звёздам.",
+      "Сообщение о словах некоторых людей «Оправдала надежду такая-то звезда» и связь хадиса с аятами суры «аль-Уакъи’а».",
+      "Выводы автора из главы: формы веры и неверия, признание благ Аллаха и назидательный вопрос Пророка слушателям.",
+      "Упоминание угрозы плакальщице среди выводов главы."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-096": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "В локальном тексте раздел «Лекция №96» содержит только заголовок «Экзаменационные вопросы» без текста вопросов или тем; фактическую последовательность тем определить нельзя.",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-097": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "В локальном разделе «Лекция №97» есть только заголовок «Экзаменационные вопросы»; опубликованного текста с темами для составления оглавления нет.",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-098": {
+    "outline": [
+      "Любовь многобожников к приобщённым Аллаху равным — сопоставление её с любовью к Аллаху.",
+      "Предостережение от того, чтобы родные, имущество, торговля и жилища были дороже Аллаха, Его посланника и борьбы на Его пути."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-099": {
+    "outline": [
+      "Обязательная любовь к Посланнику ﷺ, превосходящая любовь к детям, родителям и остальным людям.",
+      "Три признака сладости веры: любовь к Аллаху и Его Посланнику, любовь к человеку ради Аллаха и отвращение к возвращению в неверие.",
+      "Разъяснение, что сладость веры не достигается без этих чувств.",
+      "Передача хадисов Анаса и ссылки на их источники у аль-Бухари и Муслима."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-100": {
+    "outline": [
+      "Хадис о любви, неприязни, дружбе и вражде ради Аллаха как признаках веры и причине Его покровительства.",
+      "Оценка достоверности приведённого хадиса и замечания к его передаче.",
+      "Толкование слов о разрыве связей: любовь и привязанность.",
+      "Выводы из главы: приоритет любви к Посланнику и религии, сладость веры и опасность приравнивания любви к чему-либо любви к Аллаху."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-101": {
+    "outline": [
+      "Коранное указание: шайтан запугивает верующих своими сторонниками; верующим следует бояться Аллаха, а не их.",
+      "Признаки истинного оживления мечетей: вера, молитва и закят, соединённые с отсутствием страха перед кем-либо, кроме Аллаха.",
+      "Разъяснение главы 32 о посвящении страха одному Аллаху как обязательному религиозному предписанию."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-102": {
+    "outline": [
+      "Коранский пример людей, уподобляющих испытания от людей наказанию Аллаха",
+      "Предупреждение о слабости убеждённости и поиске людского одобрения ценой недовольства Аллаха",
+      "Противопоставление стремления к довольству Аллаха и стремления угодить людям",
+      "Выводы главы: укрепление убеждённости, посвящение страха Аллаху, награда и наказание за это"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-103": {
+    "outline": [
+      "Глава о повелении уповать на Аллаха как признаке веры.",
+      "Коран запрещает верующим полагаться иначе как на Аллаха.",
+      "Признаки верующих: трепет сердца при поминании Аллаха, укрепление веры при чтении аятов и упование на Господа."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-104": {
+    "outline": [
+      "Коранические свидетельства о том, что Аллаха достаточно уповающим на Него.",
+      "Обязательность упования на Аллаха и его связь с верой.",
+      "Слова «Достаточно нам Аллаха…» как ответ Ибрахима и Пророка Мухаммада в трудной ситуации."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-105": {
+    "outline": [
+      "Предостережение от чувства безопасности перед наказанием и замыслом Аллаха.",
+      "Запрет отчаиваться в милости и помощи Аллаха.",
+      "Разбор хадисов, относящих отчаяние и беспечность к тяжким грехам."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-106": {
+    "outline": [
+      "Терпение перед предопределением Аллаха как часть веры в Него.",
+      "Толкование аята о том, что бедствие происходит с дозволения Аллаха, и смирение верующего перед случившимся.",
+      "Хадис о порицании опорочивания рода и траурного оплакивания умерших как проявлениях неверия."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-107": {
+    "outline": [
+      "Запрет действий, выражающих скорбь по обычаям джахилийи.",
+      "Терпение при испытаниях как часть веры.",
+      "Испытание и наказание в мирской жизни как проявление блага для раба.",
+      "Отсрочка наказания за грех как предупреждение о возможном зле.",
+      "Довольство испытанием, запрет негодования и воздаяние за довольство."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-108": {
+    "outline": [
+      "Глава о показухе (рийа) как разновидности скрытого ширка.",
+      "Аят с призывом совершать благое и не приобщать никого к поклонению Аллаху.",
+      "Хадис о том, что Аллах отвергает деяние, в котором Ему придают сотоварища.",
+      "Предупреждение о скрытом ширке: украшении молитвы ради взгляда окружающих.",
+      "Выводы главы: опасность показухи и причины непринятия такого деяния.",
+      "Опасение Пророка относительно распространения показухи среди сподвижников."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-109": {
+    "outline": [
+      "Праведные дела, совершаемые ради мирских благ, как проявление многобожия",
+      "Аяты суры «Худ» 15–16 о воздаянии в этой жизни и участи в Будущей жизни"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-110": {
+    "outline": [
+      "Предупреждение о превращении мирских благ в предмет поклонения и о привязанности к богатству и вещам.",
+      "Образ «раба динара и дирхема»: довольство при получении желаемого и негодование при лишениях.",
+      "Сопоставление такой привязанности с искренним служением Аллаху на Его пути.",
+      "Качества человека, стойко несущего службу ради Аллаха, независимо от своего положения и признания."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-111": {
+    "outline": [
+      "Глава о возведении в господа тех, кто подчиняется ученым и правителям в изменении дозволенного и запретного Аллахом",
+      "Предостережение Ибн ’Аббаса против предпочтения слов Абу Бакра и Умара словам Посланника Аллаха",
+      "Предупреждение Ахмада ибн Ханбаля об оставлении достоверного хадиса ради мнения ученого и о фитне как ширке и заблуждении"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-112": {
+    "outline": [
+      "Аят о том, как люди возвели книжников и монахов в господа помимо Аллаха.",
+      "Разговор Ади ибн Хатима с Пророком ﷺ: принятие запретов и дозволений религиозных авторитетов как поклонение им.",
+      "Передачи хадиса и обсуждение степени его достоверности.",
+      "Выводы главы: толкование аятов из сур «ан-Нур» и «ат-Тауба», смысл поклонения и искажение религии."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-113": {
+    "outline": [
+      "Три характеристики тех, кто судит не по ниспосланному Аллахом: неверие, беззаконие и нечестие, с опорой на аяты суры «Аль-Маида»."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-114": {
+    "outline": [
+      "Возрождение хариджитских групп как беда мусульманской общины",
+      "Описание хариджитов"
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-115": {
+    "outline": [
+      "Разбор аятов 60–62 суры «ан-Ниса» о тех, кто заявляет о вере, но обращается за судом к тагуту.",
+      "Предостережение от отвращения к призыву обратиться к ниспосланному Аллахом и к Его посланнику.",
+      "Упоминание оправданий лицемеров, утверждающих, что они стремились лишь к добру и примирению."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-116": {
+    "outline": [
+      "Обвинение в нечестии и оправдание тех, кто распространяет его, словами о благих намерениях.",
+      "Запрет сеять нечестие на земле после установления порядка; обращение к Аллаху со страхом и надеждой.",
+      "Предпочтение суда времён джахилийи вместо суда Аллаха и критерий истинной уверенности."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-117": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "В опубликованном тексте раздел «Лекция №117» содержит только заголовок «Экзаменационные вопросы», без текста вопросов или тематического содержания; достаточных оснований для оглавления нет.",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-118": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "Для лекции №118 на официальной странице указан только раздел «Экзаменационные вопросы»; текста лекции или тематического плана, по которому можно составить оглавление, нет.",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-119": {
+    "outline": [
+      "Переход к таухиду аль-асма ва-с-сыфат.",
+      "Почему автор включил этот раздел: необходимость всех трёх видов таухида и ответ на обвинение в одностороннем акценте на таухиде аль-улюхийя.",
+      "Охват всех видов таухида как достоинство книги."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-120": {
+    "outline": [
+      "Два вида отрицания: отвержение и истолкование",
+      "Отвержение букв Корана или Сунны как большое неверие",
+      "Истолкование: наличие или отсутствие основания в арабском языке"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-121": {
+    "outline": [
+      "Глава о тех, кто отрицает некоторые имена и атрибуты Аллаха.",
+      "Аят из суры «ар-Ра‘д»: утверждение веры в Аллаха, упования на Него и обращения к Нему.",
+      "Предостережение Али против рассказа людям о том, что они не способны понять и что может привести к отрицанию Аллаха и Его посланника.",
+      "Ссылка на хадис в «Сахихе» аль-Бухари.",
+      "Указание источника хадиса: аль-Бухари, 1/199."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-122": {
+    "outline": [
+      "Предание Ибн Аббаса о неприятии хадиса, касающегося качеств Аллаха",
+      "Отвержение курайшитами упоминания Милостивого и ниспослание аята из суры «ар-Ра‘д»",
+      "Выводы из главы: отрицание имён и качеств Аллаха как признак неверия",
+      "Предостережение от рассказа о том, чего слушатели не понимают, и последствия такого непонимания"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-123": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "В локальном тексте раздел «Лекция №123» содержит только заголовок «Экзаменационные вопросы», без текста лекции или тематического плана; определить последовательность тем невозможно.",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-124": {
+    "outline": [
+      "Глава 41: познание милости Аллаха и её отрицание.",
+      "Толкования предшественников: приписывание благ другим причинам, заступникам или людям.",
+      "Хадис о верующих и неверующих в отношении благ Аллаха.",
+      "Примеры слов, которыми люди приписывают успех не Аллаху.",
+      "Выводы главы: отрицание блага Аллаха и сочетание в сердце противоположных убеждений.",
+      "Практическое распространение подобных выражений в речи.",
+      "Обобщение: как распознаётся неблагодарное приписывание милости творениям."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-125": {
+    "outline": [
+      "Запрет приравнивать кого-либо к Аллаху и смысл аята 2:22",
+      "Скрытые формы ширка в клятвах и выражениях о причинах происходящего",
+      "Пояснение, что милость и воля принадлежат Аллаху, а не сотворённым причинам"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-126": {
+    "outline": [
+      "Предостережение от клятвы кем-либо помимо Аллаха и оценка такого поступка как ширка.",
+      "Слова Ибн Мас‘уда о сравнении ложной клятвы Аллахом с правдивой клятвой не Аллахом.",
+      "Корректная формулировка условных слов: «если будет угодно Аллаху, а затем такому-то».",
+      "Различие между обращением за защитой к Аллаху и затем к человеку и приписыванием им равного положения.",
+      "Выводы из 42-й главы: малый ширк, клятва не Аллахом и значение союзов «и» и «затем»."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-127": {
+    "outline": [
+      "Запрет клясться отцами и повеление клясться только Аллахом.",
+      "Обязанность удовлетвориться, когда человек поклялся Аллахом.",
+      "Предостережение тому, кто не принимает такую клятву.",
+      "Выводы автора из главы 43."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-128": {
+    "outline": [
+      "Запрет формулы «Если пожелает Аллах и ты» и замена её на выражение, ставящее волю Аллаха прежде воли человека",
+      "Повествование о замечании иудея и наставлении Пророка ﷺ относительно клятвы Господом Каабы"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-129": {
+    "outline": [
+      "Сон Туфейля и его рассказ Пророку о выражении «если пожелает Аллах и Мухаммад».",
+      "Запрет соединять волю Аллаха и творения в такой формуле; указание говорить: «если пожелает Один Аллах».",
+      "Разбор малого многобожия и опасности слов, приравнивающих человека к Аллаху.",
+      "Выводы главы 44: знание иудеев о малом ширке и понимание вопроса, когда он соответствует страстям.",
+      "Праведное сновидение как часть откровения и возможное основание некоторых постановлений."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-130": {
+    "outline": [
+      "Глава 45: порицание ругани времени как оскорбления Аллаха; приводится аят с опровержением представления, будто гибель и жизнь зависят лишь от времени."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-131": {
+    "outline": [
+      "Хадис о том, что Аллах порицает человека за ругание времени, поскольку смена ночи и дня происходит по Его воле.",
+      "Дополнительная передача хадиса с запретом ругать время.",
+      "Выводы из главы: запрет бранить время и разбор смысла выражения «Аллах есть время».",
+      "Почему ругание времени считается оскорблением Аллаха, даже если человек не намеревался оскорбить Его."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-132": {
+    "outline": [
+      "Запрет титула «царь царей» и равнозначных ему выражений.",
+      "Почему такое именование вызывает гнев Аллаха и унижает человека в Судный день.",
+      "Недопустимость подобных титулов даже без намерения возвеличить себя.",
+      "Отказ от этих именований как проявление почтения к Аллаху."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-133": {
+    "outline": [
+      "Глава 47: уважение к именам Аллаха и необходимость изменить имя, противоречащее этому",
+      "История прозвища Абу аль-Хакама и разъяснение Пророка ﷺ",
+      "Выводы главы: уважительное отношение к именам и качествам Аллаха, смена имени и выбор куньи по старшему сыну"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-134": {
+    "outline": [
+      "Глава о запрете насмешек над Аллахом, Его знамениями и Посланником",
+      "Аяты суры «ат-Тауба» о насмешках и объявлении виновных неверующими"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-135": {
+    "outline": [
+      "Насмешки над чтецами Корана во время похода в Табук и реакция Ауфа ибн Малика.",
+      "Оправдание насмешника и ответ Посланника Аллаха ﷺ после ниспослания аята.",
+      "Выводы главы: опасность насмешек над Аллахом, Его знамениями и Посланником; отношение к доносу, благожелательности и оправданиям."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-136": {
+    "outline": [
+      "Толкование аята 50 суры «Фуссылят»: человек приписывает дарованное себе и отрицает наступление Часа.",
+      "Разъяснение высказываний о том, что милость получена благодаря собственным заслугам или знанию.",
+      "Рассказ о трёх испытанных людях: прокажённом, плешивом и слепом, которым ангел даровал исцеление и имущество."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-137": {
+    "outline": [
+      "Продолжение рассказа об испытании трёх исцелённых и разбогатевших людей ангелом в образе путника.",
+      "Отказ первых двух помочь и признать полученные милости; готовность третьего поделиться тем, что даровал Аллах.",
+      "Выводы из 49-й главы: толкование аятов и выражения о собственных заслугах, названных уроков рассказа."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-138": {
+    "outline": [
+      "Глава 50: толкование аятов о приобщении сотоварищей Аллаху в даровании ребёнка.",
+      "Рассказ о требовании Иблиса назвать ребёнка Абд аль-Харисом и обстоятельствах согласия родителей.",
+      "Различие между многобожием в повиновении и многобожием в поклонении.",
+      "Выводы главы: запрет имён с поклонением кому-либо помимо Аллаха и признание благом дарования здорового ребёнка.",
+      "Толкование высказываний ранних толкователей об аятах 189–190 суры «аль-А‘раф»."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-139": {
+    "outline": [
+      "Единогласное мнение о запретности имён, выражающих поклонение кому-либо помимо Аллаха; исключение — имя Абд аль-Мутталиб.",
+      "Толкование сообщения о том, что Адам и Ева приобщили сотоварищей в дарованном им ребёнке.",
+      "Предание Ибн Аббаса о попытках Иблиса добиться наречения ребёнка Абд аль-Харисом и о причинах согласия родителей.",
+      "Связь имени Абд аль-Харис со смыслом «раб Иблиса» и вывод о недопустимости подобного имени."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-140": {
+    "outline": [
+      "Повеление обращаться к Аллаху посредством Его прекрасных имён и предостережение от уклонения в отношении них.",
+      "Толкование Ибн Аббасом уклонения как придания Аллаху сотоварищей; связь имён идолов аль-Лат и аль-Узза с именами Аллаха.",
+      "Разъяснение слов аль-А‘маша о приписывании именам Аллаха того, что им не подобает, и выводы из главы."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-141": {
+    "outline": [
+      "Разбор хадиса Ибн Мас‘уда о словах «мир Аллаху», произносимых во время намаза.",
+      "Запрет обращаться к Аллаху с приветствием «салям аля Аллах» и объяснение, что Аллах Сам является ас-Салям.",
+      "Выводы главы: значение слова «салям», его связь с приветствием и допустимое обращение к Аллаху.",
+      "Как правильно приветствовать Аллаха согласно разъяснению главы.",
+      "Источники хадиса и авторские положения по главе 52."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-142": {
+    "outline": [
+      "Глава 53: запрет условной формулировки в мольбе о прощении и милости.",
+      "Хадисы о необходимости настойчиво просить Аллаха.",
+      "Причины запрета и усиление решимости просящего в мольбе."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-143": {
+    "outline": [
+      "Запрет называть слугу «моим рабом» или «моей рабыней» и обращаться к хозяину словом «господь».",
+      "Предпочтительные формы обращения между хозяином и слугой: «хозяин/господин», «юноша», «девочка» или «мальчик».",
+      "Связь речевого этикета с утверждением единобожия даже в словах."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-144": {
+    "outline": [
+      "Запрет отказывать тому, кто просит о чём-либо именем Аллаха.",
+      "Обязанность предоставить защиту просящему её именем Аллаха.",
+      "Ответ на приглашение и благодарность за оказанное добро.",
+      "Дуа в ответ на добро, если невозможно отблагодарить иначе."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-145": {
+    "outline": [
+      "Глава 56: испрашивать Ликом Аллаха можно только Рай.",
+      "Хадис Джабира ибн Абдуллаха о просьбе Рая Ликом Аллаха; указание на слабость хадиса.",
+      "Выводы: запрет просить ради Лика Аллаха что-либо, кроме высшей цели — Рая; утверждение атрибута Лик (уаджх)."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-146": {
+    "outline": [
+      "Глава 57: предосудительность выражения «если бы».",
+      "Разбор коранических высказываний о сожалениях тех, кто укорял других за гибель в сражении.",
+      "Связь этих аятов с запретом подобного выражения и упование на предопределение Аллаха."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-147": {
+    "outline": [
+      "Наставление стремиться к полезному и просить помощи у Аллаха.",
+      "Запрет сожалеть о случившемся словами «если бы…» и причина этого запрета.",
+      "Слова, которыми следует встречать предопределённое, и недопустимость слабости и бессилия."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-148": {
+    "outline": [
+      "Запрет ругать ветер: хадис Убайя ибн Ка’ба и мольба о добре ветра и защите от его зла.",
+      "Выводы главы: запрет ругани, доброе обращение при неприятном явлении и подчинённость ветра воле Аллаха.",
+      "Ветер может нести добро или зло по повелению Аллаха."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-149": {
+    "outline": [
+      "Толкование слов о подозрениях относительно решений и предопределения Аллаха в аяте 154 суры «Али Имран».",
+      "Слова о злых мыслях об Аллахе и их последствиях из аята 6 суры «аль-Фатх»."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-150": {
+    "outline": [
+      "Толкования дурных мыслей лицемеров и многобожников об Аллахе в связи с победой посланника и судьбой ислама.",
+      "Отрицание мудрости Аллаха, Его предопределения и обещания довершить Свое дело как проявления дурного мнения о Нём.",
+      "Связь этих представлений с неверием и сходство с рассуждениями тех, кто считает события случайными.",
+      "Почему большинство людей ропщет на предопределение, сталкиваясь с жизненными обстоятельствами.",
+      "Как познание имён и качеств Аллаха помогает избавиться от дурных мыслей и прийти к покаянию.",
+      "Выводы из 59-й главы: толкование аятов из сур «Али Имран» и «аль-Фатх» и спасение через познание Аллаха."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-151": {
+    "outline": [
+      "Предопределение как тайна, известная только Всевышнему Аллаху.",
+      "Два значения предопределения: решение Аллаха и само предопределённое событие.",
+      "Связь веры в предопределение с единобожием Господства (Таухид ар-Рубубийя)."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-152": {
+    "outline": [
+      "Группа кадаритов и приводимые ими доводы"
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-153": {
+    "outline": [
+      "Глава 60: отрицание предопределения.",
+      "Высказывание Ибн Умара о том, что вера в предопределение — условие принятия деяний.",
+      "Упоминание хадиса о вере в предопределение, добро и зло.",
+      "Передача хадиса Муслимом."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-154": {
+    "outline": [
+      "Наставление Убады ибн ас-Самита сыну о вере в предопределение",
+      "Повеление Аллаха Перу записать предопределённое до наступления Часа",
+      "Предостережение от смерти без веры в предопределение",
+      "Дополнительные версии хадиса о записи всего сущего и наказании отвергающего предопределение"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-155": {
+    "outline": [
+      "Обязательность веры в предопределение и её правильное понимание.",
+      "Связь веры в предопределение с принятием дел и полнотой веры.",
+      "Запись предопределения и то, что было записано о творениях.",
+      "Предупреждение о последствиях отрицания предопределения.",
+      "Как саляфы обращались к учёным для устранения сомнений и получали ответ со ссылкой на Посланника."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-156": {
+    "outline": [
+      "Запрет создавать изображения, которые уподобляют творение Аллаха.",
+      "Хадисы о суровом наказании для изображающих живых существ.",
+      "Указание на бессилие творца изображения: он не способен вдохнуть в него душу.",
+      "Повеление уничтожать изображения при их обнаружении."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-157": {
+    "outline": [
+      "Угроза наказания тем, кто создаёт изображения, и сопоставление такого творчества с творением Аллаха.",
+      "Предостережение о неспособности создателя изображения вдохнуть в него жизнь в Судный день.",
+      "Повеление уничтожать изображения и сровнять возвышенные могилы с землёй.",
+      "Итоги главы: причина строгости запрета, беспомощность человека перед творением и мучительное наказание за изображения."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-158": {
+    "outline": [
+      "Глава 62: запрет на многочисленные клятвы и повеление оберегать клятвы.",
+      "Предупреждение о том, что клятва может помочь продать товар, но лишает заработок бараката.",
+      "Угроза наказания тем, кто постоянно использует имя Аллаха в торговле.",
+      "Порицание превращения имени Аллаха в средство для покупки и продажи.",
+      "Приведённые хадисы и их передатчики и источники."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-159": {
+    "outline": [
+      "Достоинство поколения Пророка ﷺ и последующих двух поколений.",
+      "Предупреждение о людях, которые будут свидетельствовать без необходимости и предавать оказанное им доверие.",
+      "Нарушение обетов и упоминание многочисленных тучных людей среди последующих поколений."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-160": {
+    "outline": [
+      "Обязательность исполнения обязательства перед Аллахом и соблюдения заключённых договоров и клятв",
+      "Наставление Пророка ﷺ военачальникам: богобоязненность и доброе отношение к мусульманам",
+      "Правила военного похода: не присваивать трофеи до их справедливого раздела и не нарушать договоры",
+      "Запрет надругательства над телами убитых и убийства детей"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-161": {
+    "outline": [
+      "Три последовательных предложения противникам: призыв к исламу, затем к переселению к мухаджирам и разъяснение положения отказавшихся переселиться.",
+      "Условия выплаты джизьи и дальнейших действий при отказе.",
+      "При осаде: различие между обязательствами от имени Аллаха и Его посланника и личными обязательствами; осторожность с обещанием судить по постановлению Аллаха.",
+      "Выводы из 63-й главы: выбор менее опасного решения и различение решения Аллаха и постановления мусульманских учёных."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-162": {
+    "outline": [
+      "Запрет клясться от имени Аллаха, утверждая, что Он не простит грешника",
+      "Хадис о человеке, чьё неосторожное слово обернулось тщетностью его дел",
+      "Разъяснение выводов главы: близость Рая и Огня и опасность одного слова"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-163": {
+    "outline": [
+      "Хадис о просьбе бедуина ниспослать дождь и недопустимости просить Аллаха о ходатайстве перед творениями.",
+      "Пророческое порицание этой формулировки и разъяснение величия Аллаха.",
+      "Выводы главы: различие между просьбой Аллаха о ходатайстве перед Пророком и просьбой к Пророку обратиться с мольбой о дожде.",
+      "Пояснение смысла слов «Субханаллах» и обращение мусульман к Пророку с просьбой о молитве о дожде."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-164": {
+    "outline": [
+      "Предостережение от чрезмерного возвеличивания Пророка и излишества в религии.",
+      "Как отвечать на обращение «наш господин»: абсолютное господство принадлежит Аллаху.",
+      "Пророк ﷺ предостерегает от слов, которыми Шайтан может увлечь к чрезмерности.",
+      "Соблюдение меры в похвале и признание положения Пророка как раба Аллаха и Его посланника."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-165": {
+    "outline": [
+      "Заключительная глава книги: предостережение против недолжного почитания Аллаха.",
+      "Разбор аята из суры «аз-Зумар» о величии Аллаха и сворачивании небес в День воскресения.",
+      "Рассказ Ибн Мас‘уда о словах иудейского учёного о творениях, которые Аллах удержит на пальцах.",
+      "Сопоставление формулировок хадиса в версиях, приведённых Муслимом и аль-Бухари.",
+      "Подтверждение возвеличивания Аллаха без уподобления Ему творениям."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-166": {
+    "outline": [
+      "Хадис о сворачивании небес и земель и власти Аллаха в День воскресения",
+      "Предания о малости небес и земель по сравнению с Курси",
+      "Сравнение Курси с Троном и переданные сведения о расстояниях между небесами, Курси, водой и Троном"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-167": {
+    "outline": [
+      "Хадис аль-‘Аббаса о расстоянии между землёй, небесами и отдельными небесами.",
+      "Море над небесами, расстояние до Трона и утверждение о том, что Аллах над всем сущим.",
+      "Выводы из 67-й главы: величие Курси и Трона, их соотношение с небесами, землёй и водой.",
+      "Указание на высоту Аллаха над Троном и знание Им деяний людей."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-168": {
+    "outline": [],
+    "status": "plan",
+    "note": "В разделе «Лекция №168» опубликован только тематический план «Экзаменационные вопросы», без полного текста.",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-169": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "В локальном разделе «Лекция №169» указано только «Экзаменационные вопросы»; содержательного текста или тематического плана, по которому можно составить пункты оглавления, нет.",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-170": {
+    "outline": [],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-171": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "В локальном тексте под «Лекция №171» указано только «Экзаменационные вопросы»; содержательного текста или тематического плана лекции нет, поэтому составить оглавление по фактическим темам невозможно.",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "kniga-edinobozhiya-172": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "Для лекции №172 в локальном тексте и на официальной странице указано только «Экзаменационные вопросы»; опубликованного текста или тематического плана, позволяющего составить пункты оглавления, нет.",
+    "sourceUrl": "https://abuyahya.net/lekcii/kniga-edinobozhiya/"
+  },
+  "chetyre-pravila-novye-1": {
+    "outline": [
+      "Почему книгу изучают после «Трёх основ» и зачем учёные предваряют труды басмалой.",
+      "Кто такие аулия и какие бывают виды табаррука.",
+      "Упование на Аллаха до получения милости и благодарность после неё.",
+      "Три проявления благодарности и виды терпения.",
+      "Четыре модели поведения при испытаниях и три составляющие человеческого счастья."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/chetyre-pravila-novyj/"
+  },
+  "chetyre-pravila-novye-2": {
+    "outline": [
+      "Особенности книг автора и значение ханифии.",
+      "Важность изучения таухида и его связь с поклонением.",
+      "Ширк как тягчайший грех и его проявления.",
+      "Заступничество: виды и условия его допустимости.",
+      "Просьбы о дуа и различие общего и особого заступничества."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/chetyre-pravila-novyj/"
+  },
+  "chetyre-pravila-novye-3": {
+    "outline": [
+      "Зачем изучать четыре правила как предостережение от ширка",
+      "Признание многобожниками таухида ар-рубубия и почему оно не сделало их мусульманами",
+      "Обращение к божествам ради приближения к Аллаху",
+      "Сравнение ширка прежних и нынешних многобожников",
+      "Важное замечание лектора"
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/chetyre-pravila-novyj/"
+  },
+  "forty-hadiths-nawawi-001": {
+    "outline": [
+      "Вступление к циклу «40 хадисов».",
+      "Советы тем, кто стремится к знанию.",
+      "Сведения об авторе и предисловие к его труду."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-002": {
+    "outline": [
+      "Первый хадис ан-Навауи: поступки оцениваются по намерению.",
+      "Человеку достаётся то, к чему он стремился своим намерением."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-003": {
+    "outline": [
+      "Намерение как основание оценки поступков.",
+      "Соответствие воздаяния намерению человека.",
+      "Переселение ради Аллаха и Его посланника в противопоставлении мирской цели или браку.",
+      "Приведение хадиса в «Сахихах» аль-Бухари и Муслима."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-004": {
+    "outline": [
+      "Выводы из хадиса о намерениях"
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-005": {
+    "outline": [
+      "Начало хадиса о встрече Умара и посланника Аллаха ﷺ.",
+      "Появление незнакомца в белой одежде и с чёрными волосами; описание его поведения и посадки перед пророком.",
+      "Первый вопрос незнакомца: просьба рассказать об исламе."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-006": {
+    "outline": [
+      "Вопрос о сущности Ислама.",
+      "Свидетельства единобожия и посланничества Мухаммада ﷺ.",
+      "Молитва и выплата закята.",
+      "Пост в Рамадан и совершение хаджа при наличии возможности."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-007": {
+    "outline": [
+      "Свидетельство единобожия и посланнической миссии Мухаммада ﷺ как часть ответа о сущности ислама."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-008": {
+    "outline": [
+      "Завершение перечня основ ислама: молитва и закят, пост в Рамадан, хадж при наличии возможности.",
+      "Собеседник подтверждает правдивость ответа Пророка.",
+      "Сподвижники удивляются: незнакомец задаёт вопросы и сам подтверждает ответы."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-009": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "На официальной странице под «Лекция №9» опубликовано только начало фрагмента: вопрос о вере и начало ответа о вере в Аллаха; этого недостаточно для оглавления из 3–7 пунктов.",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-010": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "Раздел «Лекция №10» на официальной странице содержит лишь продолжение текста второго хадиса: упоминание веры в ангелов и Писания. Номера урока и файла совпадают, но опубликованный фрагмент слишком краток для достоверного оглавления из 3–7 пунктов.",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-011": {
+    "outline": [
+      "Вера в посланников как часть ответа о вере в хадисе о Джибриле.",
+      "Лекция №11 представляет собой продолжение перечисления составляющих веры; самостоятельного тематического раздела в опубликованном тексте нет.",
+      "Официальная страница не подтверждает отдельную границу аудиочасти по этому фрагменту.",
+      "Поэтому содержание аудио шире опубликованного фрагмента достоверно восстановить нельзя.",
+      "Остальные вопросы хадиса о вере продолжаются в следующих нумерованных лекциях страницы.",
+      "Точные подтемы и их последовательность внутри аудиочасти источником не раскрыты.",
+      "Для полного оглавления необходим отдельный текст или тематический план именно этой аудиочасти."
+    ],
+    "status": "ambiguous",
+    "note": "Опубликованная страница связывает лекцию №11 лишь с фразой «и в Его посланников» из продолжаемого хадиса о Джибриле; отдельная граница части по тексту не подтверждена. 3–7 тем аудиолекции по этому фрагменту составить без домыслов невозможно.",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-012": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "Страница связывает лекцию №12 с продолжением хадиса «и в Последний день», но не содержит достаточного текста этой лекции для подтверждённого оглавления из 3–7 пунктов.",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-013": {
+    "outline": [
+      "Мучения и наслаждения в могиле."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-014": {
+    "outline": [
+      "Завершение перечисления основ веры в хадисе Джибриля",
+      "Вера в предопределение — как хорошее, так и дурное",
+      "Подтверждение ответа Пророка собеседником: «Ты сказал правду»"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-015": {
+    "outline": [
+      "Вопросы, связанные с верой (иманом).",
+      "Ихсан: поклонение Аллаху с осознанием того, что Он видит человека."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-016": {
+    "outline": [
+      "Вопрос о наступлении Часа и невозможности определить его время.",
+      "Признаки приближения Часа: рабыня родит госпожу; бедные пастухи будут соперничать в высоте жилищ.",
+      "Завершение хадиса о Джибриле: он пришёл научить людей их религии."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-017": {
+    "outline": [
+      "Разбор выводов из второго хадиса о религии.",
+      "Ислам: свидетельство веры и основные виды поклонения.",
+      "Иман и его основы; ихсан и поклонение с осознанием того, что Аллах видит человека."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-018": {
+    "outline": [
+      "Выводы из второго хадиса — продолжение разбора (часть 2)."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-019": {
+    "outline": [
+      "Выводы из второго хадиса — часть 3."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-020": {
+    "outline": [
+      "Третий хадис: ислам основан на пяти столпах",
+      "Свидетельство единобожия и посланнической миссии Мухаммада",
+      "Совершение молитвы",
+      "Выплата закята",
+      "Совершение хаджа и соблюдение поста в Рамадан"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-021": {
+    "outline": [
+      "Формирование человека в утробе: последовательные стадии развития.",
+      "Вдувание духа ангелом и запись удела, срока жизни, поступков и итоговой участи.",
+      "Соотношение совершаемых человеком дел и предопределённого завершения его пути.",
+      "Предостережение: итоговая участь может проявиться в конце жизни иначе, чем ожидалось по прежним поступкам."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-022": {
+    "outline": [
+      "Выводы из четвёртого хадиса"
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-023": {
+    "outline": [
+      "Хадис №5: недействительность неподобающих новшеств в религии.",
+      "Условие принятия дела: оно должно относиться к религии и иметь на неё указание Посланника Аллаха.",
+      "Две формулировки хадиса и ссылки на источники: «Сахих аль-Бухари» и «Сахих Муслим»."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-024": {
+    "outline": [
+      "Вопросы, связанные с бид’а: часть первая."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-025": {
+    "outline": [
+      "Продолжение разбора бид‘а (религиозных нововведений): часть 2."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-026": {
+    "outline": [
+      "Вопросы, связанные с бид‘а (часть 3)."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-027": {
+    "outline": [
+      "Хадис о дозволенном, запретном и сомнительном.",
+      "Осторожность в отношении неясного как способ уберечь религию и честь."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-028": {
+    "outline": [
+      "Граница между дозволенным, запретным и сомнительным",
+      "Осторожность в сомнительном как защита религии и чести",
+      "Образ пастуха у запретной границы: риск приблизиться к запретному",
+      "Состояние сердца как основа благополучия всего тела"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-029": {
+    "outline": [
+      "Выводы из хадиса о дозволенном, запретном и сомнительном.",
+      "Почему следует сторониться сомнительного, оберегая религию и честь.",
+      "Образ заповедного места и значение состояния сердца.",
+      "Как состояние сердца отражается на делах человека."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-030": {
+    "outline": [
+      "Смысл седьмого хадиса: религия основана на искреннем наставлении.",
+      "Вопрос о том, к кому обращено это наставление.",
+      "Искреннее отношение к Аллаху и Его Книге как первые названные адресаты."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-031": {
+    "outline": [
+      "Искренность по отношению к посланнику и мусульманским имамам — первая категория наставления."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-032": {
+    "outline": [
+      "Завершение хадиса об искренности: наставление имамам мусульман и всей общине",
+      "Смысл искреннего отношения к мусульманским руководителям",
+      "Выводы из хадиса о наставлении и искренности"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-033": {
+    "outline": [
+      "Восьмой хадис: свидетельство единобожия и посланничества Мухаммада ﷺ.",
+      "Совершение молитвы и выплата закята как названные в хадисе обязанности.",
+      "Защита жизни и имущества при исполнении этих условий и итоговый расчёт перед Аллахом."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-034": {
+    "outline": [
+      "Условия защиты жизни и имущества после свидетельства веры, совершения молитвы и выплаты закята.",
+      "Оговорка о случаях, когда исламское право дает основание для взыскания.",
+      "Выводы из хадиса о свидетельстве единобожия, молитве и закяте."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-035": {
+    "outline": [
+      "Девятый хадис: следовать запретам и исполнять повеления по мере сил.",
+      "Разбор наставления не создавать затруднений в религии.",
+      "Вопросы, связанные с этой частью хадиса.",
+      "Ограниченность обязанностей возможностями человека.",
+      "Отказ от запрещённого как обязательное предписание.",
+      "Практическое применение повелений пророка ﷺ.",
+      "Границы вопросов к религиозным предписаниям.",
+      "Соотношение послушания и личных возможностей.",
+      "Обсуждение смысла запрета и повеления в хадисе."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-036": {
+    "outline": [
+      "Продолжение хадиса о следовании запретам и выполнении повелений по мере возможностей.",
+      "Вопросы, связанные с этой частью хадиса.",
+      "Предостережение от чрезмерных вопросов и несогласия с пророками.",
+      "Выводы из хадиса."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-037": {
+    "outline": [
+      "Десятый хадис: Аллах благ и принимает только благое.",
+      "Повеление посланникам вкушать дозволенное и совершать праведные дела.",
+      "Обращение к верующим с повелением вкушать благое из дарованного Аллахом.",
+      "Текстовый раздел обрывается на кораническом свидетельстве; продолжение хадиса размещено под следующей лекцией."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-038": {
+    "outline": [
+      "Путник, долго находящийся в дороге, обращается к Аллаху с мольбой.",
+      "Воздетые к небу руки и повторение обращения «О Господь».",
+      "Запретные пища, питьё и одежда; влияние запретного пропитания на принятие мольбы."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-039": {
+    "outline": [
+      "Выводы из хадиса о том, что Аллах принимает только благое.",
+      "Запретное пропитание и его связь с принятием мольбы.",
+      "Повеление верующим и посланникам питаться благим и совершать праведные дела."
+    ],
+    "status": "plan",
+    "note": "На странице для лекции №39 опубликован только тематический пункт «Выводы из этого хадиса», без развёрнутого текста; темы пунктов оглавления передают содержание разбираемого в разделах №37–38 хадиса.",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-040": {
+    "outline": [
+      "11-й хадис: оставлять сомнительное и придерживаться того, в чём нет сомнений",
+      "Передача хадиса аль-Хасаном ибн Али и формулировка пророческого наставления",
+      "Указание на оценки достоверности хадиса у ат-Тирмизи и аль-Альбани"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-041": {
+    "outline": [
+      "Двенадцатый хадис: признак хорошего ислама — оставлять то, что человека не касается.",
+      "Передача хадиса от Абу Хурайры и его смысл о сосредоточении на полезном.",
+      "Текст хадиса и ссылки на его источники: сборники ат-Тирмизи и Ибн Маджа.",
+      "Оценка достоверности хадиса шейхом аль-Альбани."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-042": {
+    "outline": [
+      "13-й хадис: братство по вере и исламу",
+      "Условие полноты веры — желать брату того же, чего желаешь себе",
+      "Передача хадиса Анасом ибн Маликом и его источники в сборниках Бухари и Муслима"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-043": {
+    "outline": [
+      "13-й хадис: желать верующему брату того же, чего желаешь себе",
+      "Примеры следования этому хадису у праведных предшественников",
+      "Практические выводы из хадиса о братстве по вере"
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-044": {
+    "outline": [
+      "14-й хадис: неприкосновенность жизни мусульманина.",
+      "Три исключения из запрета на пролитие крови: прелюбодеяние состоящего в браке, воздаяние за убийство и отпадение от религии с оставлением общины.",
+      "Условия, при которых хадис упоминает эти исключения.",
+      "Пояснение формулировок хадиса и его правовых выводов."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-045": {
+    "outline": [
+      "Выводы из хадиса о неприкосновенности жизни мусульманина."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-046": {
+    "outline": [
+      "Пятнадцатый хадис: благое слово, почтение к соседу и гостеприимство как проявления веры",
+      "Правила и этикет приёма гостя",
+      "Выводы из хадиса"
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-047": {
+    "outline": [
+      "Человек просит Пророка ﷺ дать ему совет.",
+      "Повторный ответ: не гневаться.",
+      "Наставление удерживаться от гнева как путь к Раю."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-048": {
+    "outline": [
+      "17-й хадис: предписание совершать всё наилучшим образом.",
+      "Принцип благого обращения при умерщвлении живого существа.",
+      "Правила жертвенного заклания: наточить нож и не причинять животному мучений."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-049": {
+    "outline": [
+      "Хадис о богобоязненности перед Аллахом в любых обстоятельствах.",
+      "Совершение доброго дела вслед за дурным и его искупительное значение.",
+      "Благонравие как принцип отношений с людьми."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-050": {
+    "outline": [
+      "19-й хадис: поддержка и охрана Аллаха для того, кто хранит память о Нём",
+      "Наставление пророка ﷺ юному Ибн Аббасу",
+      "Хранение памяти об Аллахе и обращение за просьбой и помощью только к Нему"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-051": {
+    "outline": [
+      "Хранение завета с Аллахом и обращение за помощью к Нему",
+      "Польза и вред в пределах предопределённого Аллахом",
+      "Познание Аллаха в благополучии и Его поддержка в беде",
+      "Вера в предопределение: терпение, смена скорби радостью и облегчение после трудностей",
+      "Практические выводы из хадиса о наставлении Ибн Аббасу"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-052": {
+    "outline": [
+      "Двадцатый хадис: стыдливость как часть веры.",
+      "Изречение, дошедшее от прежних пророков: если не чувствуешь стыда, поступай как хочешь.",
+      "Как понимать наставление о стыде и свободе поступка.",
+      "Отношение к сообщениям, переданным от предшествующих общин.",
+      "Выводы из хадиса о стыдливости."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-053": {
+    "outline": [
+      "21-й хадис: прямота (истикама) и вера (иман).",
+      "Просьба Суфьяна бин Абдуллаха дать такое наставление об Исламе, после которого не потребуется спрашивать других.",
+      "Краткий ответ Пророка: уверовать в Аллаха.",
+      "Следование прямому пути после утверждения веры.",
+      "Выводы из хадиса о вере и прямоте.",
+      ""
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-054": {
+    "outline": [
+      "Двадцать второй хадис: условия, при которых человек войдёт в Рай",
+      "Правила, связанные с вхождением в Рай и Ад",
+      "Выводы из хадиса о соблюдении обязательного без дополнительных предписаний"
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-055": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "Страница обозначает лекцию №55 как начало 23-го хадиса и приводит лишь его начальную часть; отдельные темы этой лекции не опубликованы, поэтому составить последовательное оглавление без домыслов нельзя.",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-056": {
+    "outline": [
+      "Слова «Слава Аллаху и хвала Аллаху» и их величие.",
+      "Молитва как свет.",
+      "Милостыня как доказательство.",
+      "Терпение как сияние."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-057": {
+    "outline": [
+      "Продолжение 23-го хадиса: Коран может служить доводом за человека или против него.",
+      "Убеждения ахлю-сунна в отношении Корана.",
+      "Важные положения, связанные с поклонением.",
+      "Разъяснение смысла Корана как довода в пользу или против верующего.",
+      "Практическое значение этих убеждений для поклонения.",
+      "Переход к заключительной части 23-го хадиса о людях, которые утром выходят по своим делам.",
+      "Разбор того, как человек освобождает или губит собственную душу.",
+      "Выводы из хадиса о выборе и ответственности человека.",
+      "Связь поклонения с ответственностью за свои поступки.",
+      "Итоговые положения хадиса о ежедневных делах верующего.",
+      "Закрепление основных тем лекции."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-058": {
+    "outline": [
+      "Начало дня и стремление людей к своим делам.",
+      "Образ продажи собственной души в хадисе.",
+      "Поступки, ведущие к спасению души или к её гибели.",
+      "Выводы из хадиса о личной ответственности за свои дела."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-059": {
+    "outline": [
+      "24-й хадис: запрет несправедливости в хадисе-кудси",
+      "Понятие хадиса-кудси",
+      "Два вида несправедливости",
+      "Запрет притеснения друг друга и просьба о наставлении на прямой путь"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-060": {
+    "outline": [
+      "Просьба к Аллаху о пропитании и одежде.",
+      "Грехи людей и призыв просить прощения.",
+      "Независимость Аллаха от вреда и пользы со стороны творений.",
+      "Благочестие и нечестие людей не изменяют владения Аллаха.",
+      "Всеобщая просьба к Аллаху и безграничность Его даров.",
+      "Подсчёт человеческих дел и воздаяние каждому по ним."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-061": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "В разделе «Лекция №61» опубликована только общая строка «Выводы из этого хадиса», без самих выводов или тематических пунктов; по тексту этой лекции содержание оглавления установить нельзя.",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-062": {
+    "outline": [
+      "25-й хадис: широта милости Аллаха и возможность получать награду не только через денежную милостыню.",
+      "Поминовение Аллаха — прославление, возвеличивание, восхваление и слова единобожия — как виды садака.",
+      "Побуждение к одобряемому и удержание от порицаемого как благие дела.",
+      "Дозволенная близость супругов как садака.",
+      "Сопоставление дозволенного и запретного удовлетворения желания: награда за дозволенное и ответственность за запретное."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-063": {
+    "outline": [
+      "Выводы из хадиса о широте милости Аллаха и возможностях совершать садака"
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-064": {
+    "outline": [
+      "26-й хадис: ежедневная садака за каждый сустав человека.",
+      "Справедливое примирение и помощь другим как виды милостыни.",
+      "Доброе слово и шаги на молитву как вознаграждаемые дела.",
+      "Устранение с дороги того, что вредит людям.",
+      "Пояснение хадиса и его передатчика — Абу Хурайры."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-065": {
+    "outline": [
+      "27-й хадис: благочестие как благонравие",
+      "Греховное, тревожащее душу и вызывающее желание скрыть его от людей",
+      "Выводы из версии хадиса ан-Наууаса бин Сам‘ана"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-066": {
+    "outline": [
+      "Продолжение разбора 27-го хадиса: рассказ Уабисы бин Ма‘бада о встрече с Посланником Аллаха ﷺ.",
+      "Вопрос о благочестии и наставление обратиться к собственному сердцу.",
+      "Благочестие как то, в чём душа и сердце обретают уверенность.",
+      "Греховное как внутреннее сомнение, сохраняющееся даже вопреки одобрению людей.",
+      "Выводы из версии хадиса, переданной от Уабисы."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-067": {
+    "outline": [
+      "28-й хадис о следовании Сунне и предостережении от нововведений",
+      "Смысл увещевания и правила его произнесения",
+      "Присяга: кому и как её дают",
+      "Условия повиновения правителю и случаи обязательности подчинения",
+      "Разбор обязанности слушать правителя в разных обстоятельствах"
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-068": {
+    "outline": [
+      "Приход к власти по свободному выбору",
+      "Захват власти силой и его отличие от избрания",
+      "Виды законного правления",
+      "Обязанность подчинения несправедливому правителю",
+      "Условия выхода против правителя"
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-069": {
+    "outline": [
+      "Хадис о разногласиях и необходимости держаться Сунны Пророка и праведных халифов.",
+      "Предостережение от нововведений и разъяснение, почему новшество считается заблуждением.",
+      "Понятие масляха мурсаля и её отличие от религиозного нововведения.",
+      "Асар Умара о молитве тарауих.",
+      "Разбор довода о «хорошей сунне» в контексте нововведений."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-070": {
+    "outline": [
+      "Наставление и его воздействие на сердце; качества увещевания.",
+      "Просьба дать наставление и главная заповедь — богобоязненность.",
+      "Обязанность слушаться правителя, включая грешного, и подчиняться назначенным им лицам.",
+      "Следование Сунне Пророка и праведных халифов, особенно во время разногласий.",
+      "Предостережение от нововведений и ответ на довод о «хорошей сунне»."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-071": {
+    "outline": [
+      "Все нововведения — заблуждение и зло.",
+      "Разбор мнения о делении нововведений на пять категорий и сомнений в этом вопросе.",
+      "Различие между средством и целью.",
+      "Разнообразие нововведений и различие между оценкой поступка и оценкой совершающего его человека.",
+      "Примеры Хафиза ибн Хаджара и имама ан-Науауи.",
+      "Ответ на довод о «хорошей сунне»."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-072": {
+    "outline": [
+      "29-й хадис: вопрос Муаза ибн Джабаля о деле, ведущем в Рай и отдаляющем от Огня.",
+      "Напоминание тем, кто стремится к знанию.",
+      "Облегчённое Аллахом поклонение Ему одному, молитва, закят, пост Рамадана и хадж.",
+      "Определение темы: врата блага и пути правильного руководства."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-073": {
+    "outline": [
+      "Пять основ религии и поклонение одному Аллаху.",
+      "Пост и милостыня как врата благого и искупление прегрешений.",
+      "Ночная молитва и качества верующих, взывающих со страхом и надеждой.",
+      "Ислам как основа, молитва как опора, джихад как вершина религии.",
+      "Сдерживание языка и ответственность за сказанное.",
+      "Опасность клеветнических речей и их последствия в Судный день."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-074": {
+    "outline": [
+      "Стремление сподвижников к знанию и достоинства Муаза ибн Джабаля.",
+      "Доказательства Рая и Ада и связь человеческих деяний с итоговой участью.",
+      "Сложность соблюдения религии и мольба об облегчении; пять столпов Ислама и важность таухида.",
+      "Наставления пророка ﷺ: пост как щит и милостыня как средство искупления грехов.",
+      "Грехи, тень в Судный день и методы пророческого обучения."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-075": {
+    "outline": [
+      "Дополнительные ночные молитвы как средство искупления грехов; достоинства ночного поклонения.",
+      "Побуждение к молитве с одновременными страхом и надеждой, а также достоинства расходования имущества ради Аллаха.",
+      "Ислам как основа религии, намаз как её опора и джихад как вершина.",
+      "Сдерживание языка: его значение для веры и опасность необдуманных речей.",
+      "Пророческое обучение личным примером, вопросы сподвижников и точность при передаче хадиса."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-076": {
+    "outline": [
+      "30-й хадис о религиозных обязанностях и соблюдении установленных Аллахом границ",
+      "Запрет пренебрегать обязанностями и нарушать запреты",
+      "Различие между фар da и уаджибом"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-077": {
+    "outline": [
+      "Завершение 30-го хадиса об оставленных без упоминания вещах и милости Аллаха",
+      "Обязательность следовать религиозным предписаниям и установленным границам",
+      "Запрет преступать запреты и самовольно разыскивать то, о чём не сказано",
+      "Правовой статус умолчанных вещей и возможность выводить из этого дозволенность",
+      "Милость Аллаха в шариате и отрицание приписываемой Ему забывчивости",
+      "Красноречие Пророка ﷺ и вопросы применения хадиса к нововведениям и частным примерам"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-078": {
+    "outline": [
+      "31-й хадис: смысл отречения от мирского и его плоды",
+      "Просьба о деле, которое принесёт любовь Аллаха и людей",
+      "Зухд: воздержанность от мирского и от принадлежащего людям"
+    ],
+    "status": "plan",
+    "note": "В опубликованном разделе №78 есть заголовок, текст хадиса и вопрос о зухде, но полного текста лекции нет; выводы из хадиса размещены далее под №79.",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-079": {
+    "outline": [
+      "Возвышенность стремлений сподвижников",
+      "Утверждение любви как атрибута Аллаха и допустимость стремиться к любви людей",
+      "Понятие зухда и его достоинство",
+      "Зухд как путь к любви Аллаха; отличие от уара‘",
+      "Воздержанность от имущества и благ, принадлежащих другим людям"
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-080": {
+    "outline": [
+      "32-й хадис: положение об отсутствии вреда и взаимного причинения вреда в исламе.",
+      "Разбор терминов «дарар» и «дыраар» с экскурсом в хадисоведение и арабский язык.",
+      "Примеры применения принципа на ситуациях развода.",
+      "Примеры применения принципа в вопросах наследства."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-081": {
+    "outline": [
+      "Основы разрешения судебных споров в исламе.",
+      "Недостаточность одних притязаний для получения чужого имущества или посягательства на жизнь.",
+      "Обязанность истца представить доказательство.",
+      "Клятва ответчика, отрицающего предъявленное требование.",
+      "Хадис 33 как основание этих правил."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-082": {
+    "outline": [
+      "Содержание 34-го хадиса об изменении порицаемого и ступенях этого исправления.",
+      "Понятие порицаемого и различие между запретом порицаемого, призывом к одобряемому и наставлением.",
+      "Время и условия исправления порицаемого, включая полномочия исправлять его действием.",
+      "Разграничение слитного и отделённого порицаемого.",
+      "Как относиться к разногласиям и иджтихаду при оценке порицаемого.",
+      "Правило об отсутствии порицания в вопросах разногласия и иджтихада."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-083": {
+    "outline": [
+      "Учет пользы и возможного вреда при исправлении порицаемого.",
+      "Исправление порицаемого сердцем.",
+      "Наставление правителям и допустимые способы такого исправления.",
+      "Ошибочные способы воздействия на правителей и их последствия."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-084": {
+    "outline": [
+      "Обязанность исправлять порицаемое и требования к уверенности в том, что поступок действительно является мункаром.",
+      "Пределы исправления при наличии разногласий между учёными и оценка пользы и вреда.",
+      "Исправление рукой как действие и случаи, когда остаётся исправление языком или сердцем.",
+      "Деяния сердца и связь деяний и намерения с иманом.",
+      "Вопрос о том, кому адресовано повеление исправлять порицаемое рукой; слова шейха Усаймина о совершенности и действительности имана."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-085": {
+    "outline": [
+      "Тема 35-го хадиса: исламское братство и права мусульманина.",
+      "Запрет зависти и искусственного взвинчивания цены.",
+      "Отказ от взаимной ненависти.",
+      "Запрет отворачиваться друг от друга."
+    ],
+    "status": "ambiguous",
+    "note": "В блоке лекции №85 опубликовано только начало хадиса; продолжение начинается в блоке №86, а развернутый тематический план дан позднее. Поэтому последовательность тем всей лекции по опубликованному тексту установить нельзя.",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-086": {
+    "outline": [
+      "Запрет вмешиваться в торговлю другого мусульманина.",
+      "Обязанность братского отношения и запрет притеснять, обманывать или оставлять без помощи.",
+      "Богобоязненность как качество сердца и недопустимость презрения к мусульманину.",
+      "Неприкосновенность жизни, имущества и чести мусульманина."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-087": {
+    "outline": [
+      "Запрет зависти, вражды, отворачивания друг от друга и недобросовестной торговли.",
+      "Религиозное братство: обязанность поддерживать мусульманина и относиться к нему без презрения.",
+      "Запрет несправедливости и обязанность беречь жизнь, имущество и честь мусульманина.",
+      "Правдивость, богобоязненность сердца и несостоятельность оправдания одним лишь чистым сердцем.",
+      "Обучение нравственным нормам собственным примером."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-088": {
+    "outline": [
+      "Хадис о помощи верующим и избавлении от тягот.",
+      "Облегчение положения должника и обещанная за это награда.",
+      "Прикрытие мусульманина и помощь брату.",
+      "Связь воздаяния с поступками человека.",
+      "Вера в Судный день и предстоящие там тяготы."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-089": {
+    "outline": [
+      "Помощь братьям и справедливость Аллаха к творениям.",
+      "Путь к знаниям: условия требования знания, искренность намерения и необходимость не откладывать обучение.",
+      "Собрания для изучения Книги Аллаха, их достоинство и ниспосылаемая на них милость.",
+      "Ангелы и знание Аллаха о делах людей.",
+      "Праведные дела важнее происхождения: знатный род не заменяет благих поступков.",
+      "Воздаяние Аллаха соответствует деяниям человека.",
+      "Все выводы относятся к продолжению разбора 36-го хадиса о благе."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-090": {
+    "outline": [
+      "Передача слов Всевышнего Аллаха через пророка ﷺ",
+      "Запись добрых и дурных дел и значение намерения",
+      "Многократное воздаяние за совершённое доброе дело"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-091": {
+    "outline": [
+      "Передача пророком ﷺ слов своего Господа и запись благих и дурных поступков.",
+      "Вопрос об оправдании грешника и упоминание действий Аллаха.",
+      "Забота Аллаха о творениях и красноречие разъяснения после общего упоминания.",
+      "Щедрость Аллаха и многократное воздаяние за добро; от чего зависит увеличение награды.",
+      "Намерение совершить грех, от которого человек отказался, записывается как доброе дело."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-092": {
+    "outline": [
+      "38-й хадис о средствах приближения к Аллаху и обретения Его любви",
+      "Предупреждение о вражде с приближёнными к Аллаху",
+      "Обязательные предписания и дополнительные благие дела как ступени приближения",
+      "Любовь Аллаха к усердствующему рабу и направление его слуха, зрения и движений к благому"
+    ],
+    "status": "text",
+    "note": "Раздел «Лекция №92» обрывается внутри хадиса; его продолжение опубликовано под «Лекция №93». Отдельная граница аудиочасти текстом не подтверждается.",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-093": {
+    "outline": [
+      "Завершение хадиса о приближении к Аллаху: ответ на мольбу и защита верующего",
+      "Дополнительная версия хадиса о смерти верующего",
+      "Вражда с угодниками Аллаха и подтверждение их особого положения",
+      "Любовь Аллаха к рабу и её проявление в направлении его органов к благому",
+      "Обязательные и дополнительные поклонения как средства приближения к Аллаху; ответ на мольбу и караматы угодников"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-094": {
+    "outline": [
+      "Хадис о прощении ошибок, забывчивости и действий под принуждением",
+      "Милость Аллаха и отсутствие ответственности за такие поступки, если не нарушены права другого человека",
+      "Различие между правами Аллаха и правами людей в контексте хадиса",
+      "Примеры применения этих положений (часть 1)"
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-095": {
+    "outline": [
+      "Примеры применения прощения за ошибку, забывчивость и принуждение.",
+      "Различие между совершением запрещённого и оставлением обязательного в контексте хадиса."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-096": {
+    "outline": [
+      "Наставление Ибн Умару о жизни в этом мире как у путника",
+      "Зухд и отказ от чрезмерной привязанности к мирскому",
+      "Образ Пророка ﷺ как прекрасного учителя",
+      "Жесты и действия, помогающие привлечь внимание ученика",
+      "Использование здоровья и жизни для благих дел до болезни и смерти",
+      "Внимание к молодёжи и достоинства Ибн Умара"
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-097": {
+    "outline": [
+      "41-й хадис: вера требует следовать тому, с чем пришёл Посланник Аллаха ﷺ.",
+      "Акида ахлю-с-сунна в вопросе имана и различие между исламом и иманом.",
+      "Почему разум, привычки и обычаи не должны подменять руководство пророка ﷺ.",
+      "Необходимость сначала изучать довод из Корана и Сунны; наклонности могут быть похвальными или порицаемыми.",
+      "Шариат как мерило во всех вопросах и возрастание или уменьшение имана."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-098": {
+    "outline": [],
+    "status": "ambiguous",
+    "note": "В опубликованном блоке «Лекция №98» указано только «Продолжение»; тематический план или текст с последовательностью тем отсутствует.",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-099": {
+    "outline": [
+      "42-й хадис о широте прощения Аллаха.",
+      "Прощение сохраняется, пока человек обращается к Аллаху и надеется на Него.",
+      "Искренняя просьба о прощении, даже после множества грехов.",
+      "Таухид как условие встречи с Аллахом и получения прощения.",
+      "Всеобъемлющее прощение Аллаха за грехи при отсутствии многобожия."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "forty-hadiths-nawawi-100": {
+    "outline": [
+      "Достоинство рода человеческого и значение обращения «о сын Адама».",
+      "Мольба к Аллаху как причина прощения и роль надежды в обращении к Нему.",
+      "Атрибуты Аллаха, утверждаемые и отрицаемые в хадисе.",
+      "Прощение грехов через покаяние при жизни и его условия.",
+      "Прощение того, кто предстанет перед Аллахом без многобожия, и превосходство таухида.",
+      "Подтверждение встречи с Аллахом."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/40-hadisov/"
+  },
+  "alfiya-ibn-malika-01": {
+    "outline": [
+      "Вступление комментатора — шейха Ибн Усеймина, к разбору поэмы «Альфия ибн Малик»."
+    ],
+    "status": "plan",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/alfiya-ibn-malika/"
+  },
+  "alfiya-ibn-malika-02": {
+    "outline": [
+      "Авторское вступление: Мухаммад ибн Малик называет себя.",
+      "Восхваление Аллаха как Господа и Владыки.",
+      "Благословение избранному Пророку ﷺ и его семье, отмеченной благородством."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/alfiya-ibn-malika/"
+  },
+  "alfiya-ibn-malika-03": {
+    "outline": [
+      "Автор просит помощи Аллаха в составлении «Альфии» и заявляет, что в ней собраны основные цели грамматики.",
+      "Поэма приближает сложное изложение нахва краткой формой и обещает развернуто представить материал.",
+      "Автор выражает надежду на довольство без порицания и сравнивает свою поэму с «Альфией» Ибн Му‘ти.",
+      "Отмечается первенство Ибн Му‘ти и его заслуга, за которую автор воздает ему похвалу."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/alfiya-ibn-malika/"
+  },
+  "alfiya-ibn-malika-04": {
+    "outline": [
+      "Завершение вступительного обращения ибн Малика с просьбой об обильных дарах Аллаха для него и комментатора в будущей жизни.",
+      "Определение речи как осмысленного высказывания; пример — استقم.",
+      "Различие между словами-частями речи: существительным, глаголом и частицей.",
+      "Связь терминов: слово как единичная форма, более широкое значение высказывания и возможность употребления слова в значении речи."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/alfiya-ibn-malika/"
+  },
+  "alfiya-ibn-malika-05": {
+    "outline": [
+      "Признаки имени: джар, танвин, обращение, артикль «аль» и связь с именной частью.",
+      "Как распознать глагол по буквам и формам, приведённым в стихе.",
+      "Частицы, не относящиеся к имени и глаголу: примеры «халь», «фи», «лям».",
+      "Признак глагола настоящего времени — следование за частицей «лям»."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/alfiya-ibn-malika/"
+  },
+  "alfiya-ibn-malika-06": {
+    "outline": [
+      "Признак глагола прошедшего времени — присоединение «та».",
+      "Как распознать повелительный глагол по признаку «нун» и выраженному приказу.",
+      "Повелительные формы без места для «нун»: употребление слов «صه» и «حيّهل» как имён."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/alfiya-ibn-malika/"
+  },
+  "alfiya-ibn-malika-07": {
+    "outline": [
+      "Сходство неизменяемых имён с частицами по форме: пример جئتنا.",
+      "Сходство по значению на примерах متى и هنا.",
+      "Уподобление частице через замещение глагола без грамматического воздействия.",
+      "Изначальная зависимость как ещё одна причина неизменяемости имени."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/alfiya-ibn-malika/"
+  },
+  "alfiya-ibn-malika-08": {
+    "outline": [
+      "Изменяемые имена: отсутствие сходства с частицами как условие изменения окончаний.",
+      "Повелительные и прошедшие глаголы как неизменяемые формы.",
+      "Изменяемость глагола настоящего времени и исключения при непосредственной нуне усиления или нуне женского рода."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/alfiya-ibn-malika/"
+  },
+  "alfiya-ibn-malika-09": {
+    "outline": [
+      "Частицы как неизменяемые слова и огласовки, на которых строится их неизменяемость",
+      "Примеры частиц с фатхой, кясрой, даммой и сукуном",
+      "Именительный и винительный падежи как состояния имени и глагола",
+      "Родительный падеж у имени и джазм у глагола"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/alfiya-ibn-malika/"
+  },
+  "alfiya-ibn-malika-10": {
+    "outline": [
+      "Основные окончания падежей и глагольного джазма: дамма, фатха, касра и сукун",
+      "Замещение обычных окончаний буквами в именительном, винительном и родительном падежах",
+      "Имена, склоняемые буквами: ذو и الفم, а также أب، أخ، حم и هنّ; предпочтительный вариант склонения последнего"
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/alfiya-ibn-malika/"
+  },
+  "alfiya-ibn-malika-11": {
+    "outline": [
+      "Редкие случаи склонения особых имён и распространённость формы каср по сравнению с наксом.",
+      "Условия правильного склонения этих имён: присоединение в идафе и отсутствие присоединения к я.",
+      "Пример конструкции «أخو أبيك» для пояснения условий склонения."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/alfiya-ibn-malika/"
+  },
+  "alfiya-ibn-malika-12": {
+    "outline": [
+      "Образование и падежное склонение двойственного числа через алиф и йа.",
+      "Склонение слов «киля» и «килта» при присоединении к местоимению.",
+      "Употребление форм «иснан» и «иснатан» по образцу двойственного числа.",
+      "Окончания правильного мужского множественного числа: вав в именительном и йа в родительном и винительном падежах."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/alfiya-ibn-malika/"
+  },
+  "alfiya-ibn-malika-13": {
+    "outline": [
+      "Сходство правильного множественного числа с другими формами и присоединение слов عشرون и ему подобных.",
+      "Другие присоединяемые формы: أولو, عالمون и علّيّون.",
+      "Отклоняющиеся употребления أرضون и سنون.",
+      "Употребление этой модели в словах типа حين и разногласие о регулярности такого употребления."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/alfiya-ibn-malika/"
+  },
+  "alfiya-ibn-malika-14": {
+    "outline": [
+      "Огласовка «нун» в правильном множественном числе мужского рода и присоединяемых к нему формах.",
+      "Противопоставление: в окончании двойственного числа и его аналогов употребляется касра.",
+      "Окончание множественного числа с «алиф» и «та»: касра в родительном и винительном падежах."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/alfiya-ibn-malika/"
+  },
+  "alfiya-ibn-malika-15": {
+    "outline": [
+      "Особое склонение формы «أولات» и слов, употребляемых как названия, на примере أذرعات.",
+      "Родительный падеж у несклоняемых слов: фатха сохраняется, если слово не связано с определением и не следует за ال.",
+      "Условия, при которых несклоняемые существительные получают касру вместо фатхи.",
+      "Как окончание меняется при присоединении артикля ال или в конструкции принадлежности.",
+      "Разбор примеров с названиями и словами на ال в разных падежных позициях."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/alfiya-ibn-malika/"
+  },
+  "alfiya-ibn-malika-16": {
+    "outline": [
+      "Признак именительного падежа у глаголов пяти форм — сохранение нуна.",
+      "Примеры глаголов на формах يفعلان, تدعين и تسألون.",
+      "Удаление нуна как признак сослагательного и усечённого наклонений.",
+      "Иллюстрации удаления нуна на примерах تكوني и ترومي.",
+      "Пример употребления конструкции с لم и لـ в стихе Альфии.",
+      "Перевод и разбор строки о сохранении и удалении нуна.",
+      "Краткий комментарий к приведённым глагольным формам."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/alfiya-ibn-malika/"
+  },
+  "alfiya-ibn-malika-17": {
+    "outline": [
+      "Понятия неопределённого имени и имени, определённого артиклем أل.",
+      "Разграничение неопределённых и определённых имён.",
+      "Примеры определённых имён: местоимение, указательное слово, имя собственное, имя с притяжательным местоимением, слово с артиклем и относительное имя."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/alfiya-ibn-malika/"
+  },
+  "alfiya-ibn-malika-18": {
+    "outline": [
+      "Местоимения как указатели на присутствующее и отсутствующее; примеры личных форм.",
+      "Слитные местоимения: ограничения на их начальную позицию и употребление после إلا; примеры присоединения к словам.",
+      "Неизменяемость местоимений и совпадение форм родительного и винительного падежей.",
+      "Местоимение نا в именительном, винительном и родительном падежах.",
+      "Формы ألف, واو и نون в составе глаголов и их употребление для третьего лица и других лиц."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/alfiya-ibn-malika/"
+  },
+  "alfiya-ibn-malika-19": {
+    "outline": [
+      "Скрытые местоимения в именительном падеже и примеры их употребления.",
+      "Раздельные местоимения именительного падежа: формы первого, второго и третьего лица.",
+      "Раздельные местоимения винительного падежа и их производные.",
+      "Выбор между слитным и раздельным местоимением, когда доступна слитная форма.",
+      "Разногласие в формах с местоимением هاء: варианты соединения и предпочтения автора разбора."
+    ],
+    "status": "text",
+    "note": "",
+    "sourceUrl": "https://abuyahya.net/lekcii/alfiya-ibn-malika/"
+  }
+};

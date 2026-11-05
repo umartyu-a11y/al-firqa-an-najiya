@@ -25,6 +25,7 @@ import {
 import { bookData } from './data/books';
 import { cycleArchives } from './data/cycle-archives';
 import { cycles, lectureData, orderedCycleLectures } from './data/catalog';
+import { lectureOutlines } from './data/lecture-outlines';
 import { BooksPage, CoursesPage } from './CollectionPages';
 import { KnowledgeMap } from './KnowledgeMap';
 import { HandwritingPad, HandwritingPreview } from './HandwritingPad';
@@ -1742,6 +1743,35 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
             <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">{lecture.category}</div>
             <h1 className="mt-3 font-display text-4xl tracking-[-0.04em] text-text dark:text-darktext">{lecture.title}</h1>
             <p className="mt-4 max-w-2xl text-base text-muted dark:text-darkmuted">{lecture.description}</p>
+
+            {(() => {
+              const entry = lectureOutlines[lecture.id];
+              if (!entry) return null;
+              const statusLabel = entry.status === 'text'
+                ? 'Оглавление по тексту источника'
+                : entry.status === 'plan'
+                  ? 'План по материалу источника'
+                  : entry.status === 'ambiguous'
+                    ? 'Сопоставление требует проверки'
+                    : 'Оглавление не подтверждено источником';
+              return (
+                <section className="mt-6 max-w-2xl rounded-2xl border border-black/5 bg-[#F7F9FC] p-5 dark:border-white/10 dark:bg-[#171717]" aria-labelledby="lecture-outline-title">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <h2 id="lecture-outline-title" className="font-display text-xl text-text dark:text-darktext">Оглавление</h2>
+                    <span className="text-xs text-muted dark:text-darkmuted">{statusLabel}</span>
+                  </div>
+                  {entry.outline.length > 0 ? (
+                    <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-text dark:text-darktext">
+                      {entry.outline.map((item, index) => <li key={`${lecture.id}-outline-${index}`}>{item}</li>)}
+                    </ol>
+                  ) : (
+                    <p className="mt-3 text-sm leading-6 text-muted dark:text-darkmuted">В доступном материале нет подтверждённого оглавления для этой аудиозаписи.</p>
+                  )}
+                  {entry.note && <p className="mt-3 text-xs leading-5 text-muted dark:text-darkmuted">Примечание: {entry.note}</p>}
+                  {entry.sourceUrl && <a className="mt-3 inline-block text-xs underline underline-offset-4" href={entry.sourceUrl} target="_blank" rel="noreferrer">Проверить текст источника</a>}
+                </section>
+              );
+            })()}
 
             <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-muted dark:text-darkmuted">
               <span>{lecture.author}</span>
