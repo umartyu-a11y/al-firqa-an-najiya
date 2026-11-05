@@ -109,6 +109,7 @@ const parseHash = () => {
 };
 
 const getLectureById = (id: string) => lectureData.find((lecture) => lecture.id === id);
+const getLectureTopicTitle = (lecture: Lecture) => lectureOutlines[lecture.id]?.outline[0] || lecture.title;
 
 const readAudioProgressSnapshot = (): Record<string, LectureProgressEntry> => {
   try {
@@ -1601,8 +1602,19 @@ function CyclePage({ cycle, lectures, favorites, onToggleFavorite, onOpenLecture
               <div>
                 <div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Урок {lecture.lessonNumber}</div>
                 <button onClick={() => onOpenLecture(lecture.id)} className="mt-1 text-left font-medium text-text dark:text-darktext">
-                  {lecture.title}
+                  {getLectureTopicTitle(lecture)}
                 </button>
+                {lectureOutlines[lecture.id]?.outline.length ? (
+                  <details className="mt-2 text-sm text-muted dark:text-darkmuted">
+                    <summary className="w-fit cursor-pointer underline underline-offset-4">Оглавление · {lectureOutlines[lecture.id].outline.length} пунктов</summary>
+                    <ol className="mt-2 list-decimal space-y-1 pl-5 leading-5">
+                      {lectureOutlines[lecture.id].outline.map((item, outlineIndex) => <li key={`${lecture.id}-cycle-outline-${outlineIndex}`}>{item}</li>)}
+                    </ol>
+                    {lectureOutlines[lecture.id].note && <p className="mt-2 text-xs leading-5">Примечание к источнику: {lectureOutlines[lecture.id].note}</p>}
+                  </details>
+                ) : (
+                  <div className="mt-1 text-xs text-muted dark:text-darkmuted">Тема не подтверждена доступным текстом источника</div>
+                )}
                 <div className="mt-1 text-sm text-muted dark:text-darkmuted">
                   {lecture.category} · {lecture.duration > 0 ? formatDuration(lecture.duration) : '—'}
                 </div>
@@ -1741,7 +1753,7 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
         <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
           <div>
             <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">{lecture.category}</div>
-            <h1 className="mt-3 font-display text-4xl tracking-[-0.04em] text-text dark:text-darktext">{lecture.title}</h1>
+            <h1 className="mt-3 font-display text-4xl tracking-[-0.04em] text-text dark:text-darktext">{getLectureTopicTitle(lecture)}</h1>
             <p className="mt-4 max-w-2xl text-base text-muted dark:text-darkmuted">{lecture.description}</p>
 
             {(() => {
@@ -2135,7 +2147,7 @@ function LectureCard({ lecture, onOpen, isFavorite, onToggleFavorite, progress, 
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="text-[10px] uppercase tracking-[0.12em] text-muted dark:text-darkmuted"><HighlightedText text={lecture.category} query={highlightQuery || ''} /></div>
-            <h3 className="mt-2 font-display text-2xl leading-tight text-text dark:text-darktext"><button type="button" onClick={onOpen} className="text-left"><HighlightedText text={lecture.title} query={highlightQuery || ''} /></button></h3>
+                <h3 className="mt-2 font-display text-2xl leading-tight text-text dark:text-darktext"><button type="button" onClick={onOpen} className="text-left"><HighlightedText text={getLectureTopicTitle(lecture)} query={highlightQuery || ''} /></button></h3>
           </div>
 
           <button type="button" className="rounded-full border border-black/5 bg-white p-2 text-sm dark:border-white/10 dark:bg-[#101010]" onClick={onToggleFavorite} aria-label={isFavorite ? `Убрать из избранного: ${lecture.title}` : `Добавить в избранное: ${lecture.title}`}>
