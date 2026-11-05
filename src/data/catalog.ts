@@ -3,10 +3,11 @@ import { triOsnovyCycle, triOsnovyLectures } from './tri-osnovy';
 import { knigaEdinobozhiyaCycle, knigaEdinobozhiyaLectures } from './kniga-edinobozhiya';
 import { chetyrePravilaNovyeCycle, chetyrePravilaNovyeLectures } from './chetyre-pravila-novye';
 import { fortyHadithCycle, fortyHadithLectures } from './forty-hadiths';
+import { alfiyaIbnMalikaCycle, alfiyaIbnMalikaLectures } from './alfiya-ibn-malika';
 import type { Lecture } from '../types';
 
-export const lectureData: Lecture[] = [...originalLectureData, ...triOsnovyLectures, ...knigaEdinobozhiyaLectures, ...chetyrePravilaNovyeLectures, ...fortyHadithLectures];
-export const cycles = [...originalCycles, triOsnovyCycle, knigaEdinobozhiyaCycle, chetyrePravilaNovyeCycle, fortyHadithCycle];
+export const lectureData: Lecture[] = [...originalLectureData, ...triOsnovyLectures, ...knigaEdinobozhiyaLectures, ...chetyrePravilaNovyeLectures, ...fortyHadithLectures, ...alfiyaIbnMalikaLectures];
+export const cycles = [...originalCycles, triOsnovyCycle, knigaEdinobozhiyaCycle, chetyrePravilaNovyeCycle, fortyHadithCycle, alfiyaIbnMalikaCycle];
 
 export const compareLessonNumbers = (left: number | string, right: number | string) => {
   const leftParts = String(left).split('.').map((part) => Number.parseInt(part, 10) || 0);
