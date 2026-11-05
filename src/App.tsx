@@ -92,6 +92,9 @@ const formatDuration = (seconds: number) => {
   return `${m}:${String(s).padStart(2, '0')}`;
 };
 
+const offsetPlaybackTime = (currentTime: number, duration: number, offset: number) =>
+  Math.max(0, Math.min(duration > 0 ? duration : Number.POSITIVE_INFINITY, currentTime + offset));
+
 const parseHash = () => {
   const hash = window.location.hash.replace(/^#/, '');
   if (!hash || hash === '/') return 'home';
@@ -1841,9 +1844,11 @@ function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, curr
 
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
           <div className="flex items-center gap-2">
+            <button type="button" onClick={() => onSeek(offsetPlaybackTime(playerState.currentTime, playerState.duration || lecture.duration, -10))} aria-label="Перемотать назад на 10 секунд" title="Назад на 10 секунд" className="inline-flex h-10 min-w-14 items-center justify-center rounded-full border border-black/5 bg-[#F7F9FC] px-3 text-xs font-semibold text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext">−10с</button>
             <button onClick={prevLecture} className="icon-button"><SkipBack size={18} /></button>
             <button onClick={onTogglePlay} className="icon-button bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]">{playerState.isPlaying ? <Pause size={18} /> : <Play size={18} />}</button>
             <button onClick={nextLecture} className="icon-button"><SkipForward size={18} /></button>
+            <button type="button" onClick={() => onSeek(offsetPlaybackTime(playerState.currentTime, playerState.duration || lecture.duration, 10))} aria-label="Перемотать вперёд на 10 секунд" title="Вперёд на 10 секунд" className="inline-flex h-10 min-w-14 items-center justify-center rounded-full border border-black/5 bg-[#F7F9FC] px-3 text-xs font-semibold text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext">+10с</button>
           </div>
 
           <div className="flex items-center gap-2">
@@ -2285,9 +2290,11 @@ function MiniPlayer({ lecture, isPlaying, currentTime, duration, rate, audioStat
           </div>
 
           <div className="flex flex-wrap items-center justify-end gap-2">
+            <button type="button" onClick={() => onSeek(offsetPlaybackTime(currentTime, duration, -10))} aria-label="Перемотать назад на 10 секунд" title="Назад на 10 секунд" className="inline-flex h-10 min-w-14 items-center justify-center rounded-full border border-black/5 bg-[#F7F9FC] px-3 text-xs font-semibold text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext">−10с</button>
             <button onClick={onPrev} aria-label="Предыдущая лекция" className="icon-button"><SkipBack size={16} /></button>
             <button onClick={onTogglePlay} aria-label={isPlaying ? 'Пауза' : 'Воспроизвести'} className="icon-button bg-[#111820] text-white dark:bg-[#F5F5F5] dark:text-[#111820]">{isPlaying ? <Pause size={16} /> : <Play size={16} />}</button>
             <button onClick={onNext} aria-label="Следующая лекция" className="icon-button"><SkipForward size={16} /></button>
+            <button type="button" onClick={() => onSeek(offsetPlaybackTime(currentTime, duration, 10))} aria-label="Перемотать вперёд на 10 секунд" title="Вперёд на 10 секунд" className="inline-flex h-10 min-w-14 items-center justify-center rounded-full border border-black/5 bg-[#F7F9FC] px-3 text-xs font-semibold text-text dark:border-white/10 dark:bg-[#161616] dark:text-darktext">+10с</button>
 
             <label className="flex items-center gap-1 rounded-full border border-black/5 bg-[#F7F9FC] px-2 py-2 text-xs dark:border-white/10 dark:bg-[#161616]" title="Громкость">
               <Volume2 size={13} aria-hidden="true" />
