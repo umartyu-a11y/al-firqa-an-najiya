@@ -1,0 +1,1 @@
+import{c as e}from"./supabase-f4bNl52y.js";import{k as s}from"./index-LoCUJhNo.js";const n=void 0,t=void 0,a=s?e(n,t,{auth:{persistSession:!0,autoRefreshToken:!0,detectSessionInUrl:!0}}):null;export{s as isSupabaseConfigured,a as supabase};
