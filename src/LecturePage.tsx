@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Bookmark, Download, Printer } from 'lucide-react';
 import { CourseSourceText } from './CourseSourceText';
 import { HandwritingPad } from './HandwritingPad';
@@ -8,6 +8,52 @@ import { lectureOutlines } from './data/lecture-outlines';
 import { abuyahyaAdditionalOutlines } from './data/abuyahya-extra-outlines';
 import { formatDuration, getLectureTopicTitle, readQuizQuestions } from './lib/lecturePresentation';
 import type { BookmarkItem, HandwritingStroke, Lecture, QuizQuestion } from './types';
+
+function AudioTranscriptSection({ sourceUrl }: { sourceUrl?: string }) {
+  const [transcript, setTranscript] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'loaded' | 'error'>('idle');
+  const controllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => () => controllerRef.current?.abort(), []);
+
+  const loadTranscript = async () => {
+    if (status === 'loading' || status === 'loaded') return;
+    const controller = new AbortController();
+    controllerRef.current?.abort();
+    controllerRef.current = controller;
+    setStatus('loading');
+    try {
+      const response = await fetch(`${import.meta.env.BASE_URL}transcripts/problema-zla.txt`, { signal: controller.signal });
+      if (!response.ok) throw new Error('Transcript request failed');
+      const text = await response.text();
+      if (!text.trim()) throw new Error('Transcript is empty');
+      if (!controller.signal.aborted) {
+        setTranscript(text);
+        setStatus('loaded');
+      }
+    } catch {
+      if (!controller.signal.aborted) setStatus('error');
+    }
+  };
+
+  return (
+    <section className="mt-4 max-w-2xl rounded-2xl border border-black/5 bg-[#F7F9FC] p-5 dark:border-white/10 dark:bg-[#171717]" aria-labelledby="audio-transcript-title">
+      <details onToggle={(event) => { if (event.currentTarget.open && status === 'idle') void loadTranscript(); }}>
+        <summary id="audio-transcript-title" className="cursor-pointer font-display text-xl text-text dark:text-darktext">Полная расшифровка аудиозаписи</summary>
+        {status === 'loading' && <p className="mt-4 text-sm text-muted dark:text-darkmuted">Загружаем расшифровку…</p>}
+        {status === 'error' && (
+          <div className="mt-4 text-sm text-muted dark:text-darkmuted">
+            <p>Не удалось загрузить текст расшифровки.</p>
+            <button type="button" onClick={() => void loadTranscript()} className="mt-2 underline underline-offset-4">Повторить загрузку</button>
+          </div>
+        )}
+        {status === 'loaded' && <div className="mt-4 max-h-[36rem] overflow-y-auto whitespace-pre-line pr-2 text-sm leading-7 text-text dark:text-darktext">{transcript}</div>}
+      </details>
+      <p className="mt-3 text-xs leading-5 text-muted dark:text-darkmuted">Автоматическая расшифровка аудио; возможны ошибки распознавания имён и религиозных терминов.</p>
+      {sourceUrl && <a className="mt-3 inline-block text-xs underline underline-offset-4" href={sourceUrl} target="_blank" rel="noreferrer">Источник аудиозаписи: abuyahya.net</a>}
+    </section>
+  );
+}
 
 const resizeNoteField = (element: HTMLTextAreaElement | null) => {
   if (!element) return;
@@ -132,8 +178,10 @@ export function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLectur
                   <div className="mt-4 max-h-[36rem] overflow-y-auto whitespace-pre-line pr-2 text-sm leading-7 text-text dark:text-darktext">{sourceText}</div>
                 </details>
                 <a className="mt-3 inline-block text-xs underline underline-offset-4" href={lecture.sourceUrl} target="_blank" rel="noreferrer">Оригинал и источник текста: abuyahya.net</a>
-              </section>
-            )}
+                </section>
+              )}
+
+            {lecture.id === 'problema-zla-01' && <AudioTranscriptSection sourceUrl={lecture.sourceUrl} />}
 
             <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-muted dark:text-darkmuted">
               <span>{lecture.author}</span>
