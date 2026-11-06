@@ -5,6 +5,7 @@ import { HandwritingPad } from './HandwritingPad';
 import { LectureNotes } from './LectureNotes';
 import { lectureData } from './data/catalog';
 import { lectureOutlines } from './data/lecture-outlines';
+import { abuyahyaAdditionalOutlines } from './data/abuyahya-extra-outlines';
 import { formatDuration, getLectureTopicTitle, readQuizQuestions } from './lib/lecturePresentation';
 import type { BookmarkItem, HandwritingStroke, Lecture, QuizQuestion } from './types';
 
@@ -96,7 +97,7 @@ export function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLectur
             <p className="mt-4 max-w-2xl text-sm leading-6 text-muted dark:text-darkmuted sm:text-base sm:leading-7">{lecture.description}</p>
 
             {(() => {
-              const entry = lectureOutlines[lecture.id];
+              const entry = lectureOutlines[lecture.id] ?? abuyahyaAdditionalOutlines[lecture.id];
               if (!entry) return null;
               const statusLabel = entry.status === 'text'
                 ? 'Оглавление по тексту источника'
