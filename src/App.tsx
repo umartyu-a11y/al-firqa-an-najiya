@@ -1135,7 +1135,7 @@ function App() {
   return (
     <div className="min-h-screen bg-background text-text transition-colors duration-300 dark:bg-darkbg dark:text-darktext">
       <div className="mx-auto max-w-[1440px] px-4 pb-[calc(20rem+env(safe-area-inset-bottom))] pt-5 sm:px-6 lg:px-8 lg:pb-32">
-        {!isOnline && <div role="status" className="mb-3 rounded-2xl border border-[#B8874A]/30 bg-[#B8874A]/10 px-4 py-3 text-sm text-text dark:border-[#E0821E]/30 dark:bg-[#E0821E]/10 dark:text-darktext">Офлайн-режим: доступна ранее загруженная оболочка и каталог. Аудио и облачная синхронизация возобновятся после подключения к сети.</div>}
+        {!isOnline && <div role="status" aria-live="polite" className="mb-3 rounded-2xl border border-[#B8874A]/30 bg-[#B8874A]/10 px-4 py-3 text-sm text-text dark:border-[#E0821E]/30 dark:bg-[#E0821E]/10 dark:text-darktext">Офлайн-режим: каталог, планы, локальные тексты и книга доступны из кэша. Аудио с внешнего сервера, сообщество и облачная синхронизация требуют подключения.</div>}
         <header className="sticky top-3 z-40 mb-8">
           <div className="mx-auto flex max-w-[1280px] items-center justify-between rounded-[28px] border border-black/5 bg-white/80 px-3 py-2.5 shadow-[0_8px_30px_rgba(17,24,32,0.06)] backdrop-blur-xl sm:rounded-full sm:px-4 sm:py-3 dark:border-white/10 dark:bg-[#101010]/85">
             <button className="flex items-center gap-2 sm:gap-3" onClick={() => navigate('/')}>
