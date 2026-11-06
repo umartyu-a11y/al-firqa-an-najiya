@@ -1,4 +1,4 @@
-import{c as re,r as o,j as e,_ as w,a as H,g as ae,f as g,D as se}from"./index-BKOST8CM.js";import{HandwritingPad as de}from"./HandwritingPad-DB5YIC04.js";import{l as le}from"./lectureNotes-CiF8u8y3.js";import{lectureOutlines as q}from"./lecture-outlines-D3LLFJyb.js";import{B as ie}from"./bookmark-CdrJ6ubz.js";/**
+import{c as re,r as o,j as e,_ as w,a as H,g as ae,f as g,D as se}from"./index-BKdh2qJc.js";import{HandwritingPad as de}from"./HandwritingPad-rvUyaXpf.js";import{l as le}from"./lectureNotes-CiF8u8y3.js";import{lectureOutlines as q}from"./lecture-outlines-D3LLFJyb.js";import{B as ie}from"./bookmark-DljVUUfC.js";/**
  * @license lucide-react v0.453.0 - ISC
  *
  * This source code is licensed under the ISC license.

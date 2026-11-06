@@ -1,21 +1,39 @@
-const VERSION = 'affn-offline-v3';
+const VERSION = 'affn-offline-v5';
 const STATIC_CACHE = `${VERSION}-static`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
+const SCOPE_URL = new URL('./', self.location.href);
+const SCOPE_PATH = SCOPE_URL.pathname;
+const MAX_RUNTIME_CACHE_BYTES = 10 * 1024 * 1024;
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './precache-manifest.json',
   './favicon.svg',
   './logo-icon.png',
-  './logo-full.png'
+  './logo-full.png',
+  './logo-mark.png',
+  './transcripts/problema-zla.txt'
 ];
+const CACHEABLE_FILE = /\.(?:css|js|mjs|json|webmanifest|svg|png|webp|jpe?g|gif|pdf|txt|woff2?)$/i;
+const MEDIA_FILE = /\.(?:mp3|m4a|wav|ogg|flac|mp4|webm|mov)$/i;
+
+const offlinePage = async (request) => await caches.match(request)
+  || await caches.match(new URL('./', SCOPE_URL))
+  || await caches.match(new URL('./index.html', SCOPE_URL));
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(STATIC_CACHE)
-      .then((cache) => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(STATIC_CACHE);
+    await cache.addAll(APP_SHELL);
+
+    const manifestResponse = await fetch(new URL('./precache-manifest.json', SCOPE_URL), { cache: 'no-store' });
+    if (!manifestResponse.ok) throw new Error('Не удалось загрузить список ресурсов для офлайн-кэша.');
+    const manifest = await manifestResponse.json();
+    const assets = Array.isArray(manifest.assets) ? manifest.assets : [];
+    await cache.addAll([...new Set([...APP_SHELL, ...assets])]);
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener('activate', (event) => {
@@ -34,37 +52,56 @@ self.addEventListener('message', (event) => {
   if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
+const cacheIfSmall = async (cacheName, request, response) => {
+  if (!response || response.status !== 200 || response.type === 'opaque') return;
+  const contentLength = Number(response.headers.get('content-length') || 0);
+  if (contentLength > MAX_RUNTIME_CACHE_BYTES) return;
+  try {
+    const cache = await caches.open(cacheName);
+    await cache.put(request, response.clone());
+  } catch {
+    // При нехватке места сохраняем сетевой ответ и не прерываем работу сайта.
+  }
+};
+
 self.addEventListener('fetch', (event) => {
   const request = event.request;
-  if (request.method !== 'GET') return;
+  if (request.method !== 'GET' || request.headers.has('range')) return;
 
   const url = new URL(request.url);
-  if (url.origin !== self.location.origin) return;
-
-  // Keep audio and third-party resources out of the offline cache. The
-  // catalog text and application shell are bundled into same-origin assets.
-  if (request.destination === 'audio' || url.pathname.includes('/api/')) return;
+  if (url.origin !== self.location.origin || !url.pathname.startsWith(SCOPE_PATH)) return;
+  if (url.pathname.includes('/api/') || request.destination === 'audio' || MEDIA_FILE.test(url.pathname)) return;
 
   if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(new Request(request, { cache: 'no-cache' }))
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, copy));
+    event.respondWith((async () => {
+      try {
+        const response = await fetch(new Request(request, { cache: 'no-cache' }));
+        if (response.ok) {
+          await cacheIfSmall(RUNTIME_CACHE, request, response);
           return response;
-        })
-        .catch(() => caches.match(request).then((cached) => cached || caches.match('./index.html')))
-    );
+        }
+        return await offlinePage(request) || response;
+      } catch {
+        return await offlinePage(request);
+      }
+    })());
     return;
   }
 
-  if (url.pathname.includes('/assets/') || url.pathname.endsWith('/manifest.webmanifest') || url.pathname.endsWith('/favicon.svg')) {
-    event.respondWith(
-      caches.match(request).then((cached) => cached || fetch(request).then((response) => {
-        const copy = response.clone();
-        caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, copy));
-        return response;
-      }))
-    );
-  }
+  if (!CACHEABLE_FILE.test(url.pathname)) return;
+  event.respondWith((async () => {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+
+    try {
+      const response = await fetch(request);
+      if (!response.ok) return await caches.match(request) || response;
+      await cacheIfSmall(RUNTIME_CACHE, request, response);
+      return response;
+    } catch (error) {
+      const cached = await caches.match(request);
+      if (cached) return cached;
+      throw error;
+    }
+  })());
 });
