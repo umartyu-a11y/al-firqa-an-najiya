@@ -25,8 +25,8 @@ import {
 import { bookData } from './data/books';
 import { cycleArchives } from './data/cycle-archives';
 import { compareLessonNumbers, cycles, lectureData } from './data/catalog';
-import { formatDuration, getLectureTopicTitle, readQuizQuestions } from './lib/lecturePresentation';
-import { lectureOutlines } from './data/lecture-outlines';
+import { formatDuration, getLectureTopicTitle, readQuizQuestions, setLectureOutlineLookup } from './lib/lecturePresentation';
+import type { LectureOutlineEntry } from './data/lecture-outlines';
 import type { LearningDashboardSnapshot } from './lib/learningDashboard';
 import { buildLearningDashboardSnapshot } from './lib/learningDashboard';
 import type { BookmarkItem, Category, HandwritingStroke, Lecture, LectureProgressEntry, QuizQuestion } from './types';
@@ -214,6 +214,7 @@ function App() {
     }
   });
   const [additionalLectureData, setAdditionalLectureData] = useState<Lecture[] | null>(null);
+  const [lectureOutlineData, setLectureOutlineData] = useState<Record<string, LectureOutlineEntry> | null>(null);
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>(() => {
     try {
       const stored: unknown = JSON.parse(localStorage.getItem(storageKeys.bookmarks) || '[]');
@@ -263,6 +264,7 @@ function App() {
     || favorites.some((id) => isAdditionalLectureId(id))
     || history.some((id) => isAdditionalLectureId(id))
     || bookmarks.some((item) => isAdditionalLectureId(item.lectureId));
+  const shouldLoadLectureOutlines = route === 'catalog' || route === 'library' || route === 'author' || route === 'category';
 
   useEffect(() => {
     if (!shouldLoadAdditionalLectures || additionalLectureData !== null) return;
@@ -276,6 +278,18 @@ function App() {
     });
     return () => { isCurrent = false; };
   }, [shouldLoadAdditionalLectures, additionalLectureData]);
+
+  useEffect(() => {
+    if (!shouldLoadLectureOutlines || lectureOutlineData !== null) return;
+    let isCurrent = true;
+    import('./data/lecture-outlines').then(({ lectureOutlines }) => {
+      setLectureOutlineLookup(lectureOutlines);
+      if (isCurrent) setLectureOutlineData(lectureOutlines);
+    }).catch(() => {
+      if (isCurrent) setLectureOutlineData({});
+    });
+    return () => { isCurrent = false; };
+  }, [shouldLoadLectureOutlines, lectureOutlineData]);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -1436,6 +1450,18 @@ function CyclePage({ cycle, lectures, favorites, onToggleFavorite, onOpenLecture
   onOpenLecture: (id: string) => void;
   getProgress: (id: string) => number;
 }) {
+  const [outlines, setOutlines] = useState<Record<string, LectureOutlineEntry>>({});
+  useEffect(() => {
+    setOutlines({});
+    if (isAdditionalCycleId(cycle.id)) return;
+    let isCurrent = true;
+    import('./data/lecture-outlines').then(({ lectureOutlines }) => {
+      if (isCurrent) setOutlines(lectureOutlines);
+    }).catch(() => {
+      if (isCurrent) setOutlines({});
+    });
+    return () => { isCurrent = false; };
+  }, [cycle.id]);
   const listenedCount = lectures.filter((lecture) => getProgress(lecture.id) > 10).length;
   const book = bookData.find((item) => item.cycleId === cycle.id);
   const archive = cycleArchives[cycle.id];
@@ -1475,15 +1501,15 @@ function CyclePage({ cycle, lectures, favorites, onToggleFavorite, onOpenLecture
               <div>
                 <div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Урок {lecture.lessonNumber}</div>
                 <button onClick={() => onOpenLecture(lecture.id)} className="mt-1 text-left font-medium text-text dark:text-darktext">
-                  {getLectureTopicTitle(lecture)}
+                  {getLectureTopicTitle(lecture, outlines[lecture.id])}
                 </button>
-                {lectureOutlines[lecture.id]?.outline.length ? (
+                {outlines[lecture.id]?.outline.length ? (
                   <details className="mt-2 text-sm text-muted dark:text-darkmuted">
-                    <summary className="w-fit cursor-pointer underline underline-offset-4">Оглавление · {lectureOutlines[lecture.id].outline.length} пунктов</summary>
+                    <summary className="w-fit cursor-pointer underline underline-offset-4">Оглавление · {outlines[lecture.id].outline.length} пунктов</summary>
                     <ol className="mt-2 list-decimal space-y-1 pl-5 leading-5">
-                      {lectureOutlines[lecture.id].outline.map((item, outlineIndex) => <li key={`${lecture.id}-cycle-outline-${outlineIndex}`}>{item}</li>)}
+                      {outlines[lecture.id].outline.map((item, outlineIndex) => <li key={`${lecture.id}-cycle-outline-${outlineIndex}`}>{item}</li>)}
                     </ol>
-                    {lectureOutlines[lecture.id].note && <p className="mt-2 text-xs leading-5">Примечание к источнику: {lectureOutlines[lecture.id].note}</p>}
+                    {outlines[lecture.id].note && <p className="mt-2 text-xs leading-5">Примечание к источнику: {outlines[lecture.id].note}</p>}
                   </details>
                 ) : (
                   <div className="mt-1 text-xs text-muted dark:text-darkmuted">Тема не подтверждена доступным текстом источника</div>

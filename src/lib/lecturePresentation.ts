@@ -1,5 +1,10 @@
-import { lectureOutlines } from '../data/lecture-outlines';
 import type { Lecture, QuizQuestion } from '../types';
+
+let lectureOutlineLookup: Record<string, { outline: string[] }> = {};
+
+export const setLectureOutlineLookup = (outlines: Record<string, { outline: string[] }>) => {
+  lectureOutlineLookup = outlines;
+};
 
 export const readQuizQuestions = (lectureId: string): QuizQuestion[] => {
   try {
@@ -18,4 +23,4 @@ export const formatDuration = (seconds: number) => {
   return `${m}:${String(s).padStart(2, '0')}`;
 };
 
-export const getLectureTopicTitle = (lecture: Lecture) => lectureOutlines[lecture.id]?.outline[0] || lecture.title;
+export const getLectureTopicTitle = (lecture: Lecture, outline?: { outline: string[] }) => outline?.outline[0] || lectureOutlineLookup[lecture.id]?.outline[0] || lecture.title;

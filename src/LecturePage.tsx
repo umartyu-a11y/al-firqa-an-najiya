@@ -165,7 +165,7 @@ export function LecturePage({ lecture, cycleLectures, favorites, onToggleFavorit
         <div className="max-w-4xl">
           <div>
             <div className="text-xs uppercase tracking-[0.14em] text-muted dark:text-darkmuted">{lecture.category}</div>
-            <h1 className="mt-3 break-words font-display text-3xl leading-tight tracking-[-0.04em] text-text dark:text-darktext sm:text-4xl">{getLectureTopicTitle(lecture)}</h1>
+            <h1 className="mt-3 break-words font-display text-3xl leading-tight tracking-[-0.04em] text-text dark:text-darktext sm:text-4xl">{getLectureTopicTitle(lecture, lectureOutlines[lecture.id])}</h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-muted dark:text-darkmuted sm:text-base sm:leading-7">{lecture.description}</p>
 
             {(() => {
