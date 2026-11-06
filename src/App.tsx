@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { bookData } from './data/books';
 import { cycleArchives } from './data/cycle-archives';
-import { cycles, lectureData, orderedCycleLectures } from './data/catalog';
+import { compareLessonNumbers, cycles, lectureData } from './data/catalog';
 import { formatDuration, getLectureTopicTitle, readQuizQuestions } from './lib/lecturePresentation';
 import { lectureOutlines } from './data/lecture-outlines';
 import type { LearningDashboardSnapshot } from './lib/learningDashboard';
@@ -75,6 +75,8 @@ const categories: Category[] = [
   'Коран и тафсир',
   'Нравственность',
   'Основы знания',
+  'Сира',
+  'Манхадж',
   'Разное'
 ];
 
@@ -97,7 +99,16 @@ const parseHash = () => {
   return 'home';
 };
 
-const getLectureById = (id: string) => lectureData.find((lecture) => lecture.id === id);
+const additionalCycleIds = [
+  'zhizneopisanie-proroka-muhammada',
+  'hadis-vysshij-sonm',
+  'hadis-abu-bakra',
+  'metodologiya-myshleniya-o-realnosti'
+] as const;
+const isAdditionalCycleId = (id: string) => additionalCycleIds.some((cycleId) => cycleId === id);
+const isAdditionalLectureId = (id: string) => additionalCycleIds.some((cycleId) => id.startsWith(`${cycleId}-`));
+let additionalLecturesById: Record<string, Lecture> = {};
+const getLectureById = (id: string) => additionalLecturesById[id] ?? lectureData.find((lecture) => lecture.id === id);
 
 const readAudioProgressSnapshot = (): Record<string, LectureProgressEntry> => {
   try {
@@ -195,13 +206,14 @@ function App() {
     try {
       const routeMatch = window.location.hash.match(/^#\/lecture\/(.+)$/);
       const routeLectureId = routeMatch ? decodeURIComponent(routeMatch[1]) : null;
-      if (routeLectureId && getLectureById(routeLectureId)) return routeLectureId;
+      if (routeLectureId && (getLectureById(routeLectureId) || isAdditionalLectureId(routeLectureId))) return routeLectureId;
       const saved = localStorage.getItem('affn-current-lecture');
       return saved || null;
     } catch {
       return null;
     }
   });
+  const [additionalLectureData, setAdditionalLectureData] = useState<Lecture[] | null>(null);
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>(() => {
     try {
       const stored: unknown = JSON.parse(localStorage.getItem(storageKeys.bookmarks) || '[]');
@@ -242,6 +254,28 @@ function App() {
   const restoringPosition = useRef(false);
   const handlingTrackEnd = useRef(false);
   const pendingUserLectureNavigation = useRef<string | null>(null);
+  const cycleIdFromHash = window.location.hash.match(/^#\/cycle\/([^?]+)/)?.[1] || '';
+  const lectureIdFromHash = window.location.hash.match(/^#\/lecture\/([^?]+)/)?.[1] || '';
+  const shouldLoadAdditionalLectures = route === 'catalog' || route === 'library' || route === 'author' || route === 'category'
+    || (route === 'cycle' && isAdditionalCycleId(cycleIdFromHash))
+    || (route === 'lecture' && isAdditionalLectureId(lectureIdFromHash))
+    || isAdditionalLectureId(currentLectureId || '')
+    || favorites.some((id) => isAdditionalLectureId(id))
+    || history.some((id) => isAdditionalLectureId(id))
+    || bookmarks.some((item) => isAdditionalLectureId(item.lectureId));
+
+  useEffect(() => {
+    if (!shouldLoadAdditionalLectures || additionalLectureData !== null) return;
+    let isCurrent = true;
+    import('./data/abuyahya-next-additions').then(({ abuyahyaNextLectures }) => {
+      if (!isCurrent) return;
+      additionalLecturesById = Object.fromEntries(abuyahyaNextLectures.map((lecture) => [lecture.id, lecture]));
+      setAdditionalLectureData(abuyahyaNextLectures);
+    }).catch(() => {
+      if (isCurrent) setAdditionalLectureData([]);
+    });
+    return () => { isCurrent = false; };
+  }, [shouldLoadAdditionalLectures, additionalLectureData]);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -264,7 +298,7 @@ function App() {
         } catch {
           lectureId = null;
         }
-        if (lectureId && getLectureById(lectureId)) {
+        if (lectureId && (getLectureById(lectureId) || isAdditionalLectureId(lectureId))) {
           if (pendingUserLectureNavigation.current === lectureId) {
             pendingUserLectureNavigation.current = null;
           } else if (lectureId !== currentLectureId) {
@@ -415,11 +449,18 @@ function App() {
     return () => window.clearInterval(timer);
   }, [playerState.sleepMinutes, playerState.isPlaying]);
 
+  const allLectureData = useMemo(
+    () => additionalLectureData ? [...lectureData, ...additionalLectureData] : lectureData,
+    [additionalLectureData]
+  );
   const lectureMap = useMemo(() => {
     const result: Record<string, Lecture> = {};
-    lectureData.forEach((lecture) => (result[lecture.id] = lecture));
+    allLectureData.forEach((lecture) => (result[lecture.id] = lecture));
     return result;
-  }, []);
+  }, [allLectureData]);
+  const getOrderedCycleLectures = (cycleId: string) => allLectureData
+    .filter((lecture) => lecture.cycleId === cycleId)
+    .sort((left, right) => compareLessonNumbers(left.lessonNumber, right.lessonNumber));
 
   const toggleFavorite = (lectureId: string) => {
     setFavorites((prev) => (prev.includes(lectureId) ? prev.filter((id) => id !== lectureId) : [...prev, lectureId]));
@@ -433,12 +474,12 @@ function App() {
     window.location.hash = path;
   };
 
-  const uniqueAuthors = ['Все', ...new Set(lectureData.map((lecture) => lecture.author))];
-  const uniqueCycles = ['Все', ...new Set(lectureData.map((lecture) => lecture.cycle))];
+  const uniqueAuthors = ['Все', ...new Set(allLectureData.map((lecture) => lecture.author))];
+  const uniqueCycles = ['Все', ...new Set(allLectureData.map((lecture) => lecture.cycle))];
 
   const visibleLectures = useMemo(() => {
     const query = search.trim().toLowerCase();
-    let list = [...lectureData];
+    let list = [...allLectureData];
 
     if (categoryFilter !== 'Все') {
       list = list.filter((lecture) => lecture.category === categoryFilter);
@@ -485,7 +526,7 @@ function App() {
     });
 
     return list;
-  }, [search, sort, categoryFilter, authorFilter, cycleFilter]);
+  }, [search, sort, categoryFilter, authorFilter, cycleFilter, allLectureData]);
 
   const currentLecture = currentLectureId ? lectureMap[currentLectureId] : null;
 
@@ -519,7 +560,7 @@ function App() {
     setAudioStatus('loading');
     audio.src = lecture.audioUrl;
     audio.load();
-  }, [currentLectureId]);
+  }, [currentLectureId, lectureMap]);
 
   useEffect(() => {
     if (!audioRef.current) return;
@@ -653,7 +694,7 @@ function App() {
     if (repeatSegment.active) {
       clearRepeat();
     }
-    const playlist = currentLecture ? orderedCycleLectures(currentLecture.cycleId) : lectureData;
+    const playlist = currentLecture ? getOrderedCycleLectures(currentLecture.cycleId) : allLectureData;
     const currentIndex = playlist.findIndex((lecture) => lecture.id === currentLectureId);
     const next = playlist[currentIndex + 1];
     if (!next) {
@@ -668,7 +709,7 @@ function App() {
 
   const prevLecture = () => {
     if (!currentLectureId) return;
-    const playlist = currentLecture ? orderedCycleLectures(currentLecture.cycleId) : lectureData;
+    const playlist = currentLecture ? getOrderedCycleLectures(currentLecture.cycleId) : allLectureData;
     const index = playlist.findIndex((lecture) => lecture.id === currentLectureId);
     const prev = playlist[index - 1] || playlist[playlist.length - 1];
     setCurrentLectureId(prev.id);
@@ -678,7 +719,7 @@ function App() {
 
   const nextLecture = () => {
     if (!currentLectureId) return;
-    const playlist = currentLecture ? orderedCycleLectures(currentLecture.cycleId) : lectureData;
+    const playlist = currentLecture ? getOrderedCycleLectures(currentLecture.cycleId) : allLectureData;
     const index = playlist.findIndex((lecture) => lecture.id === currentLectureId);
     const next = playlist[index + 1] || playlist[0];
     setCurrentLectureId(next.id);
@@ -799,7 +840,7 @@ function App() {
     }
 
     const quizzes: Record<string, QuizQuestion[]> = {};
-    lectureData.forEach((lecture) => {
+    allLectureData.forEach((lecture) => {
       try {
         const raw = localStorage.getItem(`affn-quiz-${lecture.id}`);
         if (!raw) return;
@@ -879,11 +920,11 @@ function App() {
     }
   };
 
-  const favoriteLectures = lectureData.filter((lecture) => favorites.includes(lecture.id));
-  const continueLectures = lectureData.filter((lecture) => getAudioProgress(lecture.id) > 15);
+  const favoriteLectures = allLectureData.filter((lecture) => favorites.includes(lecture.id));
+  const continueLectures = allLectureData.filter((lecture) => getAudioProgress(lecture.id) > 15);
   const recentLectures = history.map((id) => getLectureById(id)).filter(Boolean) as Lecture[];
   const dashboardSnapshot = buildLearningDashboardSnapshot({
-    lectures: lectureData,
+    lectures: allLectureData,
     cycles,
     favorites,
     history,
@@ -896,6 +937,9 @@ function App() {
   });
 
   const renderRoute = () => {
+    if (shouldLoadAdditionalLectures && additionalLectureData === null && route !== 'home') {
+      return <div className="panel p-8 text-center text-sm text-muted dark:text-darkmuted" role="status">Загружаем материалы архива…</div>;
+    }
     if (route === 'library') {
       return (
         <LibraryPage
@@ -964,7 +1008,7 @@ function App() {
 
     if (route === 'cycle') {
       const cycleId = window.location.hash.replace(/^#\/cycle\//, '');
-      const cycleLectures = orderedCycleLectures(cycleId);
+      const cycleLectures = getOrderedCycleLectures(cycleId);
       const cycle = cycles.find((item) => item.id === cycleId);
 
       if (!cycle || !cycleLectures.length) {
@@ -985,8 +1029,10 @@ function App() {
 
     if (route === 'author') {
       const authorId = window.location.hash.replace(/^#\/author\//, '');
-      const authorLectures = lectureData.filter((lecture) => lecture.authorId === authorId);
-      const author = authorMap[authorId as keyof typeof authorMap];
+      const authorLectures = allLectureData.filter((lecture) => lecture.authorId === authorId);
+      const author = authorMap[authorId as keyof typeof authorMap] ?? (authorLectures[0]
+        ? { id: authorId, name: authorLectures[0].author, bio: 'Биографическая справка не добавлена.' }
+        : undefined);
       if (!author) {
         return <EmptyState title="Автор не найден" actionLabel="К списку лекций" onAction={() => navigate('/catalog')} />;
       }
@@ -1013,6 +1059,7 @@ function App() {
       return (
         <LecturePage
           lecture={lecture}
+          cycleLectures={getOrderedCycleLectures(lecture.cycleId)}
           favorites={favorites}
           onToggleFavorite={toggleFavorite}
           onOpenLecture={handleOpenLecture}
@@ -1038,7 +1085,7 @@ function App() {
 
     if (route === 'category') {
       const category = decodeURIComponent(window.location.hash.replace(/^#\/category\//, ''));
-      const filtered = lectureData.filter((lecture) => lecture.category === category);
+      const filtered = allLectureData.filter((lecture) => lecture.category === category);
 
       return (
         <CategoryPage
@@ -1972,7 +2019,7 @@ function AboutPage() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
-        <div className="panel p-5"><div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Архив</div><div className="mt-3 font-display text-3xl text-text dark:text-darktext">{lectureData.length}</div><p className="mt-2 text-sm text-muted dark:text-darkmuted">опубликованных аудиозаписей</p></div>
+        <div className="panel p-5"><div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Архив</div><div className="mt-3 font-display text-3xl text-text dark:text-darktext">{cycles.reduce((total, cycle) => total + cycle.totalLessons, 0)}</div><p className="mt-2 text-sm text-muted dark:text-darkmuted">опубликованных аудиозаписей</p></div>
         <div className="panel p-5"><div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Циклы</div><div className="mt-3 font-display text-3xl text-text dark:text-darktext">{cycles.length}</div><p className="mt-2 text-sm text-muted dark:text-darkmuted">учебных цикла в каталоге</p></div>
         <div className="panel p-5"><div className="text-xs uppercase tracking-[0.12em] text-muted dark:text-darkmuted">Фокус</div><div className="mt-3 font-display text-3xl text-text dark:text-darktext">Да</div><p className="mt-2 text-sm text-muted dark:text-darkmuted">без фиктивных материалов</p></div>
       </section>

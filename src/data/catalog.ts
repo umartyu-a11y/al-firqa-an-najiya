@@ -6,10 +6,11 @@ import { fortyHadithCycle, fortyHadithLectures } from './forty-hadiths';
 import { alfiyaIbnMalikaCycle, alfiyaIbnMalikaLectures } from './alfiya-ibn-malika';
 import { sharhAsSunnaCycle, sharhAsSunnaLectures } from './sharh-as-sunna';
 import { abuyahyaAdditionalCycles, abuyahyaAdditionalLectures } from './abuyahya-additions';
+import { abuyahyaNextCycles } from './abuyahya-next-cycles';
 import type { Lecture } from '../types';
 
 export const lectureData: Lecture[] = [...originalLectureData, ...triOsnovyLectures, ...knigaEdinobozhiyaLectures, ...chetyrePravilaNovyeLectures, ...fortyHadithLectures, ...alfiyaIbnMalikaLectures, ...sharhAsSunnaLectures, ...abuyahyaAdditionalLectures];
-export const cycles = [...originalCycles, triOsnovyCycle, knigaEdinobozhiyaCycle, chetyrePravilaNovyeCycle, fortyHadithCycle, alfiyaIbnMalikaCycle, sharhAsSunnaCycle, ...abuyahyaAdditionalCycles];
+export const cycles = [...originalCycles, triOsnovyCycle, knigaEdinobozhiyaCycle, chetyrePravilaNovyeCycle, fortyHadithCycle, alfiyaIbnMalikaCycle, sharhAsSunnaCycle, ...abuyahyaAdditionalCycles, ...abuyahyaNextCycles];
 
 export const compareLessonNumbers = (left: number | string, right: number | string) => {
   const leftParts = String(left).split('.').map((part) => Number.parseInt(part, 10) || 0);

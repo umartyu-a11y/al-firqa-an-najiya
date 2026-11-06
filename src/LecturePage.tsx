@@ -3,8 +3,7 @@ import { Bookmark, Download, Printer } from 'lucide-react';
 import { CourseSourceText } from './CourseSourceText';
 import { HandwritingPad } from './HandwritingPad';
 import { LectureNotes } from './LectureNotes';
-import { lectureData } from './data/catalog';
-import { lectureOutlines } from './data/lecture-outlines';
+import { lectureOutlines, type LectureOutlineEntry } from './data/lecture-outlines';
 import { abuyahyaAdditionalOutlines } from './data/abuyahya-extra-outlines';
 import { formatDuration, getLectureTopicTitle, readQuizQuestions } from './lib/lecturePresentation';
 import type { BookmarkItem, HandwritingStroke, Lecture, QuizQuestion } from './types';
@@ -63,8 +62,9 @@ const resizeNoteField = (element: HTMLTextAreaElement | null) => {
   element.style.overflowY = element.scrollHeight > maxHeight ? 'auto' : 'hidden';
 };
 
-export function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLecture, playerState, onSeek, onTogglePlay, bookmarks, onAddBookmark, onRemoveBookmark, onUpdateBookmarkNote, onUpdateBookmarkDrawing, onUpdateBookmarkTags, onExportText, onExportPdf, repeatSegment, onSetRepeatPoint, onClearRepeat, repeatLesson, onToggleRepeatLesson }: {
+export function LecturePage({ lecture, cycleLectures, favorites, onToggleFavorite, onOpenLecture, playerState, onSeek, onTogglePlay, bookmarks, onAddBookmark, onRemoveBookmark, onUpdateBookmarkNote, onUpdateBookmarkDrawing, onUpdateBookmarkTags, onExportText, onExportPdf, repeatSegment, onSetRepeatPoint, onClearRepeat, repeatLesson, onToggleRepeatLesson }: {
   lecture: Lecture;
+  cycleLectures: Lecture[];
   favorites: string[];
   onToggleFavorite: (id: string) => void;
   onOpenLecture: (id: string) => void;
@@ -85,7 +85,6 @@ export function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLectur
   repeatLesson: boolean;
   onToggleRepeatLesson: () => void;
 }) {
-  const cycleLectures = lectureData.filter((item) => item.cycleId === lecture.cycleId);
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>(() => readQuizQuestions(lecture.id));
   const [quizMode, setQuizMode] = useState<'take' | 'create'>('take');
   const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
@@ -94,6 +93,7 @@ export function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLectur
   const [draftOptions, setDraftOptions] = useState(['', '', '', '']);
   const [draftCorrect, setDraftCorrect] = useState(0);
   const [sourceText, setSourceText] = useState('');
+  const [additionalOutline, setAdditionalOutline] = useState<{ lectureId: string; entry: LectureOutlineEntry } | null>(null);
 
   useEffect(() => {
     setQuizQuestions(readQuizQuestions(lecture.id));
@@ -103,19 +103,45 @@ export function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLectur
   }, [lecture.id]);
 
   useEffect(() => {
-    if (lecture.cycleId !== 'sharh-as-sunna') {
-      setSourceText('');
-      return;
-    }
     setSourceText('');
+    let textPromise: Promise<string> | null = null;
+    if (lecture.cycleId === 'sharh-as-sunna') {
+      textPromise = import('./data/sharh-as-sunna-texts').then(({ sharhAsSunnaTexts }) => sharhAsSunnaTexts[Number(lecture.lessonNumber)] || '');
+    } else if (lecture.cycleId === 'metodologiya-myshleniya-o-realnosti' && Number(lecture.lessonNumber) === 1) {
+      textPromise = import('./data/abuyahya-next-texts').then(({ abuyahyaNextTexts }) => abuyahyaNextTexts[lecture.id] || '');
+    }
+    if (!textPromise) return;
     let isCurrent = true;
-    import('./data/sharh-as-sunna-texts').then(({ sharhAsSunnaTexts }) => {
-      if (isCurrent) setSourceText(sharhAsSunnaTexts[Number(lecture.lessonNumber)] || '');
+    textPromise.then((text) => {
+      if (isCurrent) setSourceText(text);
     }).catch(() => {
       if (isCurrent) setSourceText('');
     });
     return () => { isCurrent = false; };
   }, [lecture.cycleId, lecture.id, lecture.lessonNumber]);
+
+  useEffect(() => {
+    const additionalCyclePrefixes = [
+      'zhizneopisanie-proroka-muhammada-',
+      'hadis-vysshij-sonm-',
+      'hadis-abu-bakra-',
+      'metodologiya-myshleniya-o-realnosti-'
+    ];
+    if (!additionalCyclePrefixes.some((prefix) => lecture.id.startsWith(prefix))) {
+      setAdditionalOutline(null);
+      return;
+    }
+    let isCurrent = true;
+    import('./data/abuyahya-next-outlines').then(({ abuyahyaNextOutlines }) => {
+      if (isCurrent) {
+        const entry = abuyahyaNextOutlines[lecture.id];
+        setAdditionalOutline(entry ? { lectureId: lecture.id, entry } : null);
+      }
+    }).catch(() => {
+      if (isCurrent) setAdditionalOutline(null);
+    });
+    return () => { isCurrent = false; };
+  }, [lecture.id]);
 
   useEffect(() => {
     localStorage.setItem(`affn-quiz-${lecture.id}`, JSON.stringify(quizQuestions));
@@ -143,7 +169,7 @@ export function LecturePage({ lecture, favorites, onToggleFavorite, onOpenLectur
             <p className="mt-4 max-w-2xl text-sm leading-6 text-muted dark:text-darkmuted sm:text-base sm:leading-7">{lecture.description}</p>
 
             {(() => {
-              const entry = lectureOutlines[lecture.id] ?? abuyahyaAdditionalOutlines[lecture.id];
+              const entry = lectureOutlines[lecture.id] ?? abuyahyaAdditionalOutlines[lecture.id] ?? (additionalOutline?.lectureId === lecture.id ? additionalOutline.entry : undefined);
               if (!entry) return null;
               const statusLabel = entry.status === 'text'
                 ? 'Оглавление по тексту источника'

@@ -6,6 +6,8 @@ export type Category =
   | 'Коран и тафсир'
   | 'Нравственность'
   | 'Основы знания'
+  | 'Сира'
+  | 'Манхадж'
   | 'Разное';
 
 export interface Lecture {
